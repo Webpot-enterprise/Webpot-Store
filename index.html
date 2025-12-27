@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Webpot - Web Development Services</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav>
+            <div class="logo">
+                <img src="logo.png" alt="Webpot Logo" class="logo-img">
+                <span>Webpot</span>
+            </div>
+            <button class="menu-toggle" id="menuToggle" onclick="toggleMenu()">☰</button>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="#home" onclick="closeMenu()">Home</a></li>
+                <li><a href="#about" onclick="closeMenu()">About</a></li>
+                <li><a href="#services" onclick="closeMenu()">Services</a></li>
+                <li><a href="#contact" onclick="closeMenu()">Contact</a></li>
+                <li><a href="auth.html" onclick="closeMenu()">Login</a></li>
+            </ul>
+            <div class="user-profile" id="userProfile">
+                <img id="profilePic" alt="Profile" class="profile-pic" style="display:none;">
+                <span id="userNameDisplay" class="user-name"></span>
+                <button class="logout-btn" id="logoutBtn" onclick="logoutUser()" style="display:none;">Logout</button>
+            </div>
+            <button class="cta-btn" onclick="openOrderModal()">Get Started</button>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <h1>Professional Web Development Services</h1>
+            <p>Bring your ideas to life with advanced web solutions. We build fast, modern, and scalable websites for businesses of all sizes.</p>
+            <div class="hero-buttons">
+                <button class="btn-primary" onclick="document.getElementById('services').scrollIntoView({behavior: 'smooth'})">View Services</button>
+                <button class="btn-secondary" onclick="openOrderModal()">Request a Website</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+     <section id="about" class="about">
+        <div class="about-content">
+            <h2>About Webpot</h2>
+            <p>We are a team of passionate web developers dedicated to creating exceptional digital experiences. With years of experience in the industry, we've helped multiple businesses establish and grow their online presence.</p>
+            <p>Our commitment is simple: deliver high-quality, fast, and reliable web solutions that exceed your expectations. We believe in transparent communication, timely delivery, and ongoing support for all our clients.</p>
+
+            <h3 style="color: var(--neon-blue); margin-top: 2rem; margin-bottom: 1rem;">Our Workflow</h3>
+            <div class="workflow">
+                <div class="workflow-step">
+                    <h4>01. Discovery</h4>
+                    <p>We understand your needs and goals</p>
+                </div>
+                <div class="workflow-step">
+                    <h4>02. Design</h4>
+                    <p>Create stunning visual designs</p>
+                </div>
+                <div class="workflow-step">
+                    <h4>03. Development</h4>
+                    <p>Build robust and scalable solutions</p>
+                </div>
+                <div class="workflow-step">
+                    <h4>04. Testing</h4>
+                    <p>Ensure quality and performance</p>
+                </div>
+                <div class="workflow-step">
+                    <h4>05. Deployment</h4>
+                    <p>Launch your website live</p>
+                </div>
+                <div class="workflow-step">
+                    <h4>06. Support</h4>
+                    <p>Continuous maintenance and updates</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="services">
+        <h2 class="section-title">Our Services</h2>
+        <div class="services-grid">
+            <!-- Starter -->
+            <div class="service-card">
+                <h3>Starter</h3>
+                <p>Perfect for small businesses and individuals</p>
+                <div class="price">2,999 /-</div>
+                <ul class="features">
+                    <li>Upto 5 pages</li>
+                    <li>Responsive Design (Desktop mode only)</li>
+                    <li>Basic SEO</li>
+                    <li>Normal Support (12 hr)</li>
+                    <li>Delivery: 7 days</li>
+                </ul>
+                <button class="btn-primary" onclick="selectService('Starter', 2999)">Choose Plan</button>
+            </div>
+
+            <!-- Basic -->
+            <div class="service-card">
+                <h3>Basic</h3>
+                <p>Best For growing Businesses</p>
+                <div class="price">5,999 /-</div>
+                <ul class="features">
+                    <li>Upto 7 pages</li>
+                    <li>Modern Responsive Design</li>
+                    <li>Advanced SEO</li>
+                    <li>Innovative Form Integration</li>
+                    <li>Priority Support (18 hr/day)</li>
+                    <li>Delivery: 10 days</li>
+                </ul>
+                <button class="btn-primary" onclick="selectService('Basic', 5999)">Choose Plan</button>
+            </div>
+
+            <!-- Premium -->
+            <div class="service-card">
+                <h3>Premium</h3>
+                <p>For Enterprise and Large Businesses</p>
+                <div class="price">9,999 /-</div>
+                <ul class="features">
+                    <li>Pages per user requirement</li>
+                    <li>Custom Design And animations</li>
+                    <li>Full SEO Optimization</li>
+                    <li>E-Commerce / Blog integration</li>
+                    <li>Dedicated Support (24/7)</li>
+                    <li>Delivery: 15 days</li>
+                </ul>
+                <button class="btn-primary" onclick="selectService('Premium', 9999)">Choose Plan</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact">
+        <h2 class="section-title">Get In Touch</h2>
+        <div class="contact-form">
+            <form id="contactForm" onsubmit="submitForm(event)">
+                <div class="form-group">
+                    <label for="name">Your Name</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone" name="phone">
+                </div>
+                <div class="form-group">
+                    <label for="message">Message</label>
+                    <textarea id="message" name="message" required></textarea>
+                </div>
+                <button type="submit" class="btn-primary" style="width: 100%;">Send Message</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <div class="footer-logo">
+                    <img src="logo.png" alt="Webpot Logo" class="footer-logo-img">
+                    <h3>Webpot</h3>
+                </div>
+                <p>Professional web development solutions.</p>
+            </div>
+
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#services">Services</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h4>Legal</h4>
+                <ul>
+                    <li><a href="privacy.html">Privacy Policy</a></li>
+                    <li><a href="terms.html">Terms of Service</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h4>Contact</h4>
+                <ul>
+                    <li><a href="mailto:engagewebpot@gmail.com">📧 engagewebpot@gmail.com</a></li>
+                    <li><a href="tel:+919408191506">📞 +91 9408191506</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; 2025 Webpot. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Order Modal -->
+    <div id="orderModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeOrderModal()">&times;</span>
+            <h2 style="color: var(--neon-blue); margin-bottom: 1.5rem;">Order a Website</h2>
+            <form id="orderForm" onsubmit="submitOrder(event)">
+                <div class="form-group">
+                    <label for="service">Select Service</label>
+                    <select id="service" name="service" required class="service-select">
+                        <option value="">🗂️ Choose a service...</option>
+                        <option value="Starter - 2999 Rs.">🚀 Starter - 2,999 /-</option>
+                        <option value="Basic - 5999 Rs.">📈 Basic - 5,999 /-</option>
+                        <option value="Premium - 9999 Rs.">👑 Premium - 9,999 /-</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="oname">Your Name</label>
+                    <input type="text" id="oname" name="oname" required>
+                </div>
+                <div class="form-group">
+                    <label for="oemail">Email Address</label>
+                    <input type="email" id="oemail" name="oemail" required>
+                </div>
+                <div class="form-group">
+                    <label for="ophone">Phone Number</label>
+                    <input type="tel" id="ophone" name="ophone">
+                </div>
+                <div class="form-group">
+                    <label for="birthdate">📅 Date of Birth</label>
+                    <input type="date" id="birthdate" name="birthdate" class="date-input">
+                </div>
+                <div class="form-group">
+                    <label for="details">Project Details</label>
+                    <textarea id="details" name="details" placeholder="Tell us about your project, timeline, and specific requirements..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="deadline">Desired Deadline</label>
+                    <input type="date" id="deadline" name="deadline">
+                </div>
+                <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;">Submit Order</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Success Message -->
+    <div id="successMessage" class="success-message">
+        <strong>Success!</strong> Your submission has been received. We'll contact you soon.
+    </div>
+
+    <!-- Scroll to Top Button -->
+    <button id="scrollToTopBtn" class="scroll-to-top" onclick="scrollToTop()" title="Go to top">↑</button>
+
+    <script src="script.js"></script>
+</body>
+</html>
