@@ -90,9 +90,6 @@ document.addEventListener('DOMContentLoaded', () => {
     serviceCards.forEach(card => {
         observer.observe(card);
     });
-    
-    // Initialize modern date pickers
-    initializeDatePickers();
 });
 
 // Modal Functions
@@ -124,11 +121,8 @@ window.onclick = function(event) {
 
 // Select Service
 function selectService(serviceName, price) {
-    // Check if user is logged in
-    if (!checkLoginStatus()) return;
-    
     openOrderModal();
-    document.getElementById('service').value = serviceName + ' - ' + price + ' Rs.';
+    document.getElementById('service').value = serviceName + ' - $' + price;
 }
 
 // Submit Order Form to Google Sheets
@@ -305,29 +299,7 @@ window.addEventListener('scroll', () => {
 // Scroll to top function
 function scrollToTop() {
     window.scrollTo({
- 
-
-// Initialize Modern Date Pickers
-function initializeDatePickers() {
-    // Date of Birth Picker
-    flatpickr('#birthdate', {
-        mode: 'single',
-        dateFormat: 'Y-m-d',
-        maxDate: 'today',
-        yearRange: [1950, new Date().getFullYear()],
-        theme: 'dark',
-        plugins: [new flatpickr.plugins.monthSelectPlugin({})]
-    });
-    
-    // Desired Deadline Picker
-    flatpickr('#deadline', {
-        mode: 'single',
-        dateFormat: 'Y-m-d',
-        minDate: 'today',
-        maxDate: new Date().fp_incr(365), // Max 1 year from today
-        theme: 'dark'
-    });
-}       top: 0,
+        top: 0,
         behavior: 'smooth'
     });
 }
