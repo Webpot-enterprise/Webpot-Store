@@ -36,8 +36,8 @@ body::before {
 /* Back Button */
 .back-btn {
     position: fixed;
-    top: 20px;
-    left: 20px;
+    bottom: 30px;
+    left: 30px;
     background: rgba(0, 212, 255, 0.15);
     color: var(--glow-color);
     padding: 0.8rem 1.5rem;
@@ -46,10 +46,11 @@ body::before {
     text-decoration: none;
     font-weight: 600;
     font-size: 0.95rem;
-    z-index: 1000;
+    z-index: 9999;
     transition: all 0.3s ease;
     backdrop-filter: blur(10px);
     text-shadow: var(--text-shadow);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
     display: flex;
     align-items: center;
     gap: 0.5rem;
