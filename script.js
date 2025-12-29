@@ -86,6 +86,7 @@ function logoutUser() {
 // Observe service cards on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
     displayUserProfile(); // Show user profile on page load
+    loadUpdates(); // Load updates from updates.html
     const serviceCards = document.querySelectorAll('.service-card');
     serviceCards.forEach(card => {
         observer.observe(card);
@@ -438,3 +439,49 @@ function scrollToTop() {
         behavior: 'smooth'
     });
 }
+
+// Toggle notification dropdown
+function toggleNotifications() {
+    const dropdown = document.getElementById('notificationDropdown');
+    dropdown.classList.toggle('active');
+}
+
+// Load updates from updates.html
+function loadUpdates() {
+    const notificationList = document.getElementById('notificationList');
+    
+    fetch('updates.html')
+        .then(response => response.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const updatesContainer = doc.querySelector('.updates-container');
+            
+            if (updatesContainer) {
+                notificationList.innerHTML = updatesContainer.innerHTML;
+                
+                // Add click handlers to update items
+                document.querySelectorAll('.update-item').forEach(item => {
+                    item.addEventListener('click', function() {
+                        const title = this.querySelector('.update-title').textContent;
+                        const description = this.querySelector('.update-description').textContent;
+                        alert(`${title}\n\n${description}`);
+                    });
+                });
+            }
+        })
+        .catch(err => {
+            console.error('Error loading updates:', err);
+            notificationList.innerHTML = '<div style="padding: 1rem; text-align: center; color: var(--text-muted);">Unable to load updates</div>';
+        });
+}
+
+// Close notification dropdown when clicking outside
+document.addEventListener('click', function(event) {
+    const notificationWrapper = document.querySelector('.notification-wrapper');
+    const dropdown = document.getElementById('notificationDropdown');
+    
+    if (notificationWrapper && !notificationWrapper.contains(event.target)) {
+        dropdown.classList.remove('active');
+    }
+});
