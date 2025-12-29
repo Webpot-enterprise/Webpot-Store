@@ -119,51 +119,139 @@ window.onclick = function(event) {
     }
 }
 
+// Service pricing mapping
+const servicePricing = {
+    'Starter': 2999,
+    'Basic': 5999,
+    'Premium': 9999
+};
+
+// Update service price dynamically
+function updateServicePrice() {
+    const serviceSelect = document.getElementById('service');
+    const amountField = document.getElementById('amount');
+    const selectedService = serviceSelect.value;
+    
+    if (selectedService && servicePricing[selectedService]) {
+        const price = servicePricing[selectedService];
+        amountField.value = '₹ ' + price.toLocaleString('en-IN');
+        amountField.classList.add('price-update-animation');
+        // Remove animation class after animation completes
+        setTimeout(() => {
+            amountField.classList.remove('price-update-animation');
+        }, 300);
+    } else {
+        amountField.value = '';
+    }
+}
+
 // Select Service
 function selectService(serviceName, price) {
     openOrderModal();
-    document.getElementById('service').value = serviceName + ' - $' + price;
+    document.getElementById('service').value = serviceName;
+    updateServicePrice();
 }
 
-// Submit Order Form to Google Sheets
+// Submit Order Form - Initiate Razorpay Payment
 function submitOrder(event) {
     event.preventDefault();
     
     const service = document.getElementById('service').value;
+    const amount = document.getElementById('amount').value;
     const name = document.getElementById('oname').value;
     const email = document.getElementById('oemail').value;
     const phone = document.getElementById('ophone').value;
     const details = document.getElementById('details') ? document.getElementById('details').value : '';
     
-    // Extract amount from service selection
-    let amount = 0;
-    if (service.includes('2999')) amount = 2999;
-    else if (service.includes('5999')) amount = 5999;
-    else if (service.includes('9999')) amount = 9999;
+    // Extract numeric amount
+    let amountInPaise = 0;
+    if (service && servicePricing[service]) {
+        amountInPaise = servicePricing[service] * 100; // Convert to paise
+    }
     
-    if (!service || !name || !email || !phone || !amount) {
+    if (!service || !name || !email || !phone || !amountInPaise) {
         alert('Please fill in all required fields');
         return;
     }
     
-    // Send to Google Apps Script backend
+    // Show loading state
+    const submitBtn = event.target.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = 'Processing...';
+    submitBtn.disabled = true;
+    
+    // Store order details for Razorpay callback
+    window.orderDetails = {
+        service: service,
+        amount: amountInPaise / 100,
+        name: name,
+        email: email,
+        phone: phone,
+        details: details
+    };
+    
+    // Initialize Razorpay
+    const options = {
+        key: 'rzp_live_YOUR_KEY_HERE', // Replace with your actual Razorpay key
+        amount: amountInPaise,
+        currency: 'INR',
+        name: 'Webpot',
+        description: 'Website Development Service - ' + service,
+        prefill: {
+            name: name,
+            email: email,
+            contact: phone
+        },
+        notes: {
+            service: service,
+            details: details
+        },
+        theme: {
+            color: '#00d4ff'
+        },
+        handler: function(response) {
+            handleRazorpaySuccess(response, submitBtn, originalText);
+        },
+        modal: {
+            ondismiss: function() {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+                alert('Payment cancelled. Please try again.');
+            }
+        }
+    };
+    
+    // Create Razorpay instance and open checkout
+    const razorpay = new Razorpay(options);
+    razorpay.on('payment.failed', function(response) {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+        alert('Payment failed: ' + response.error.description);
+    });
+    razorpay.open();
+}
+
+// Handle Razorpay payment success
+function handleRazorpaySuccess(response, submitBtn, originalText) {
+    const orderDetails = window.orderDetails;
+    
+    // Show success animation
+    showOrderSuccessAnimation();
+    
+    // Send order data to backend
     const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx9nmE6vvc9LXPon9-MrMQfSCDlvoeMJtMhbq0d80ftpYodypkm6RoSr8pz2H-Ro8kj/exec';
     
     const payload = {
         formType: 'order',
-        name: name,
-        email: email,
-        phone: phone,
-        service: service,
-        amount: amount,
-        details: details
+        name: orderDetails.name,
+        email: orderDetails.email,
+        phone: orderDetails.phone,
+        service: orderDetails.service,
+        amount: orderDetails.amount,
+        details: orderDetails.details,
+        paymentId: response.razorpay_payment_id,
+        orderId: response.razorpay_order_id
     };
-    
-    // Show loading state
-    const submitBtn = event.target.querySelector('button[type="submit"]');
-    const originalText = submitBtn.textContent;
-    submitBtn.textContent = 'Submitting...';
-    submitBtn.disabled = true;
     
     fetch(APPS_SCRIPT_URL, {
         method: 'POST',
@@ -171,22 +259,69 @@ function submitOrder(event) {
     })
     .then(res => res.json())
     .then(data => {
-        if (data.status === 'success') {
-            showSuccessModal('Order Submitted!', 'Your order has been received. Order ID: ' + data.orderId);
+        // Success animation already shown
+        setTimeout(() => {
+            showSuccessModal('Order Confirmed!', `Thank you! Your order for ${orderDetails.service} service has been confirmed. Payment ID: ${response.razorpay_payment_id}`);
             closeOrderModal();
             document.getElementById('orderForm').reset();
-        } else {
-            alert('Error: ' + (data.message || 'Failed to submit order'));
-        }
+            document.getElementById('amount').value = '';
+        }, 1500);
     })
     .catch(err => {
         console.error('Error:', err);
-        alert('Failed to place order. Please try again.');
+        showSuccessModal('Payment Received!', 'Your payment has been processed. We will contact you shortly.');
+        closeOrderModal();
+        document.getElementById('orderForm').reset();
+        document.getElementById('amount').value = '';
     })
     .finally(() => {
         submitBtn.textContent = originalText;
         submitBtn.disabled = false;
     });
+}
+
+// Order success animation
+function showOrderSuccessAnimation() {
+    const animationDiv = document.createElement('div');
+    animationDiv.className = 'success-animation';
+    animationDiv.innerHTML = `
+        <div class="success-animation-content">
+            <svg class="success-checkmark" viewBox="0 0 24 24" fill="none">
+                <circle class="success-checkmark-circle" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"></circle>
+                <path class="success-checkmark-path" d="M8 12l2 2 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="stroke-dasharray: 10; animation: checkmark 0.6s ease-out 0.3s forwards;"></path>
+            </svg>
+        </div>
+    `;
+    
+    document.body.appendChild(animationDiv);
+    
+    // Create confetti
+    for (let i = 0; i < 12; i++) {
+        createConfetti();
+    }
+    
+    // Remove animation after it completes
+    setTimeout(() => {
+        animationDiv.remove();
+    }, 2000);
+}
+
+// Create confetti particles
+function createConfetti() {
+    const confetti = document.createElement('div');
+    confetti.className = 'confetti-piece';
+    confetti.style.left = Math.random() * window.innerWidth + 'px';
+    confetti.style.top = '-10px';
+    confetti.style.width = (Math.random() * 10 + 5) + 'px';
+    confetti.style.height = (Math.random() * 10 + 5) + 'px';
+    confetti.style.backgroundColor = ['#00d4ff', '#b000ff', '#ff0099'][Math.floor(Math.random() * 3)];
+    confetti.style.borderRadius = '50%';
+    confetti.style.animation = `confetti ${Math.random() * 2 + 2}s ease-in-out forwards`;
+    confetti.style.opacity = '0.8';
+    
+    document.body.appendChild(confetti);
+    
+    setTimeout(() => confetti.remove(), 4000);
 }
 
 // Submit Contact Form to Google Sheets

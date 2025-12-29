@@ -217,12 +217,16 @@
             <form id="orderForm" onsubmit="submitOrder(event)">
                 <div class="form-group">
                     <label for="service">Select Service</label>
-                    <select id="service" name="service" required class="service-select">
+                    <select id="service" name="service" required class="service-select" onchange="updateServicePrice()">
                         <option value="">🗂️ Choose a service...</option>
-                        <option value="Starter - 2999 Rs.">🚀 Starter - 2,999 /-</option>
-                        <option value="Basic - 5999 Rs.">📈 Basic - 5,999 /-</option>
-                        <option value="Premium - 9999 Rs.">👑 Premium - 9,999 /-</option>
+                        <option value="Starter">🚀 Starter - 2,999 /-</option>
+                        <option value="Basic">📈 Basic - 5,999 /-</option>
+                        <option value="Premium">👑 Premium - 9,999 /-</option>
                     </select>
+                </div>
+                <div class="form-group">
+                    <label for="amount">Amount (₹)</label>
+                    <input type="text" id="amount" name="amount" readonly placeholder="Amount will update based on service selection" style="background-color: rgba(0, 212, 255, 0.1); cursor: not-allowed;">
                 </div>
                 <div class="form-group">
                     <label for="oname">Your Name</label>
@@ -248,7 +252,7 @@
                     <label for="deadline">Desired Deadline</label>
                     <input type="date" id="deadline" name="deadline">
                 </div>
-                <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;">Submit Order</button>
+                <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;">Place Order</button>
             </form>
         </div>
     </div>
@@ -261,6 +265,8 @@
     <!-- Scroll to Top Button -->
     <button id="scrollToTopBtn" class="scroll-to-top" onclick="scrollToTop()" title="Go to top">↑</button>
 
+    <!-- Razorpay Script -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

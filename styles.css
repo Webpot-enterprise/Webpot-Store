@@ -139,6 +139,83 @@ body::before {
     }
 }
 
+/* Order Success Animation */
+@keyframes successPulse {
+    0% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes confetti {
+    0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(300px) rotate(720deg);
+        opacity: 0;
+    }
+}
+
+@keyframes checkmark {
+    0% {
+        stroke-dashoffset: 50;
+    }
+    100% {
+        stroke-dashoffset: 0;
+    }
+}
+
+.success-animation {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 9999;
+    animation: successPulse 0.6s ease-out;
+}
+
+.success-animation-content {
+    background: linear-gradient(135deg, rgba(0, 212, 255, 0.1) 0%, rgba(176, 0, 255, 0.1) 100%);
+    border: 2px solid var(--neon-blue);
+    border-radius: 50%;
+    width: 150px;
+    height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 40px rgba(0, 212, 255, 0.6);
+}
+
+.success-checkmark {
+    width: 100px;
+    height: 100px;
+}
+
+.success-checkmark-circle {
+    stroke: var(--neon-blue);
+    stroke-dasharray: 50;
+    animation: checkmark 0.6s ease-out forwards;
+}
+
+.confetti-piece {
+    position: fixed;
+    pointer-events: none;
+    z-index: 9998;
+}
+
+.price-update-animation {
+    animation: fadeInScale 0.3s ease-out;
+}
+
 /* Header/Navigation */
 header {
     background: linear-gradient(135deg, rgba(2, 5, 17, 0.95) 0%, rgba(15, 20, 37, 0.95) 100%);

@@ -162,15 +162,24 @@ function updatePasswordStrength(password) {
     strengthText.textContent = texts[strength];
 }
 
-// Handle login form submission
+// Handle login form submission - supports Email OR Phone Number
 function handleLogin(event) {
     event.preventDefault();
     
-    const email = document.getElementById('login-email').value;
+    const emailOrPhone = document.getElementById('login-email-or-phone').value;
     const password = document.getElementById('login-password').value;
     
-    if (!email || !password) {
+    if (!emailOrPhone || !password) {
         alert('Please fill in all fields');
+        return;
+    }
+    
+    // Validate that input is either email or phone
+    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailOrPhone);
+    const isPhone = /^[0-9]{10,}$/.test(emailOrPhone.replace(/[\s\-\+\(\)]/g, ''));
+    
+    if (!isEmail && !isPhone) {
+        alert('Please enter a valid email address or 10-digit phone number');
         return;
     }
     
@@ -187,7 +196,7 @@ function handleLogin(event) {
         method: 'POST',
         body: JSON.stringify({
             formType: 'login',
-            email: email,
+            emailOrPhone: emailOrPhone,
             password: password
         })
     })
@@ -214,12 +223,14 @@ function handleLogin(event) {
             submitBtn.textContent = originalText;
             submitBtn.disabled = false;
             
-            alert('No account found with this email. Please create a new account.');
+            alert('No account found with this email or phone. Please create a new account.');
             
             // Switch to registration form and pre-fill email
             toggleForms(event);
             setTimeout(() => {
-                document.getElementById('register-email').value = email;
+                if (isEmail) {
+                    document.getElementById('register-email').value = emailOrPhone;
+                }
                 document.getElementById('register-name').focus();
             }, 300);
         } else {
@@ -493,7 +504,7 @@ window.addEventListener('click', function(event) {
     }
 });
 
-// Update form submission button text
+// Update form submission button text and ensure proper event handling
 document.addEventListener('DOMContentLoaded', function() {
     const loginForm = document.getElementById('loginForm');
     const registerForm = document.getElementById('registerForm');
@@ -503,6 +514,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (submitBtn) {
             submitBtn.textContent = 'Sign in';
         }
+        // Ensure form submission is properly bound
+        loginForm.addEventListener('submit', handleLogin);
     }
     
     if (registerForm) {
@@ -510,5 +523,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (submitBtn) {
             submitBtn.textContent = 'Sign up';
         }
+        // Ensure form submission is properly bound
+        registerForm.addEventListener('submit', handleRegister);
     }
 });
