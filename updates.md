@@ -16,3 +16,9 @@ also change the reserve section it not changed
 basic template: contact us today button connect karna or upar navigation mein se contact nikal dena ka , change the basic corp to basic web pot section sync with other to services
 premium mein cyberpunk, relaistic black and chromeistic, blured background 
 dont add a border in every service template where you change the theme of the website or the brand color or the vibe check .. remove border from their 
+
+
+new updates 
+change the gmails and support in all templates
+back to webpot pe 2 arrows hai single karde 
+kar itna baki ka batata 
