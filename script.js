@@ -361,7 +361,7 @@ function submitForm(event) {
     .then(res => res.json())
     .then(data => {
         if (data.status === 'success') {
-            showSuccessModal('Message Sent!', 'Thank you for contacting us. We will get back to you soon.');
+            showSuccessModal('Message Sent!', 'We have received your inquiry and will contact you shortly.');
             event.target.reset();
         } else {
             alert('Error: ' + (data.message || 'Failed to send message'));
