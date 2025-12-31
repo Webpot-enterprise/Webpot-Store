@@ -135,9 +135,9 @@ function updateServicePrice() {
     
     if (selectedService && servicePricing[selectedService]) {
         const price = servicePricing[selectedService];
-        amountField.value = '₹ ' + price.toLocaleString('en-IN');
+        const halfPrice = Math.round(price / 2);
+        amountField.value = '₹ ' + halfPrice.toLocaleString('en-IN') + ' (50% advance)';
         amountField.classList.add('price-update-animation');
-        // Remove animation class after animation completes
         setTimeout(() => {
             amountField.classList.remove('price-update-animation');
         }, 300);
@@ -167,7 +167,7 @@ function submitOrder(event) {
     // Extract numeric amount
     let amountInPaise = 0;
     if (service && servicePricing[service]) {
-        amountInPaise = servicePricing[service] * 100; // Convert to paise
+        amountInPaise = Math.round(servicePricing[service] / 2) * 100; // Half price in paise
     }
     
     if (!service || !name || !email || !phone || !amountInPaise) {

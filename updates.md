@@ -22,3 +22,7 @@ new updates
 change the gmails and support in all templates
 back to webpot pe 2 arrows hai single karde 
 kar itna baki ka batata 
+
+fix errors 
+- the orders confirming is not working properly 
+- login not working properly while the data is been updated on google sheets 
