@@ -30,5 +30,7 @@ fix errors
 - desired dealine section is not necessary (kyu ki hamne already bol diya hai 7 din me  denge 
 )
 
+- add a upi id refrence/utr detail in the google sheet
+
 - after the animation the user goes to a new html while where he view his order status and the information what he has provided to us 
 also this is to be converted into history for the user so that the user in future know that last he orders a website of .. (introdcution )

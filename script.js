@@ -114,6 +114,10 @@ function closeOrderModal() {
 }
 
 function closePaymentModal() {
+    // Clear QR timer when modal is closed
+    if (qrTimerInterval) {
+        clearInterval(qrTimerInterval);
+    }
     document.getElementById('paymentModal').style.display = 'none';
 }
 
@@ -123,8 +127,10 @@ window.onclick = function(event) {
     if (event.target === orderModal) {
         orderModal.style.display = 'none';
     }
-    if (event.target === paymentModal) {
-        paymentModal.style.display = 'none';
+    // Prevent closing payment modal by clicking on it - user must use Cancel button
+    if (event.target === paymentModal && event.target.id === 'paymentModal') {
+        // Do NOT close the modal
+        return;
     }
 }
 
@@ -137,6 +143,9 @@ const servicePricing = {
 
 // UPI Configuration
 const MY_UPI_ID = 'kakadiyasuprince@okhdfcbank';
+
+// QR Timer Variable
+let qrTimerInterval;
 
 // Update service price dynamically
 function updateServicePrice() {
@@ -232,6 +241,78 @@ function generateUPIQR(amount, name) {
     
     // Update the amount display
     document.getElementById('payAmount').textContent = '₹ ' + amount.toLocaleString('en-IN');
+    
+    // Ensure regenerate button is hidden and QR container is visible
+    const regenerateBtn = document.getElementById('regenerateBtn');
+    if (regenerateBtn) {
+        regenerateBtn.style.display = 'none';
+    }
+    qrContainer.style.display = 'block';
+    
+    // Start the timer for QR code
+    startQRTimer();
+}
+
+// Start QR Timer (5-minute countdown)
+function startQRTimer() {
+    // Clear any existing timer
+    if (qrTimerInterval) {
+        clearInterval(qrTimerInterval);
+    }
+    
+    let timeRemaining = 300; // 5 minutes in seconds
+    const timerElement = document.getElementById('qrTimer');
+    
+    // Update timer display immediately
+    if (timerElement) {
+        timerElement.style.display = 'block';
+        timerElement.textContent = 'Time remaining: 05:00';
+    }
+    
+    qrTimerInterval = setInterval(() => {
+        timeRemaining--;
+        
+        // Format time as MM:SS
+        const minutes = Math.floor(timeRemaining / 60);
+        const seconds = timeRemaining % 60;
+        const timeStr = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        
+        if (timerElement) {
+            timerElement.textContent = `Time remaining: ${timeStr}`;
+        }
+        
+        // When timer hits 0
+        if (timeRemaining <= 0) {
+            clearInterval(qrTimerInterval);
+            
+            // Clear QR code container
+            const qrContainer = document.getElementById('qrCodeContainer');
+            if (qrContainer) {
+                qrContainer.innerHTML = '';
+                qrContainer.style.display = 'none';
+            }
+            
+            // Hide timer text
+            if (timerElement) {
+                timerElement.style.display = 'none';
+            }
+            
+            // Show regenerate button
+            const regenerateBtn = document.getElementById('regenerateBtn');
+            if (regenerateBtn) {
+                regenerateBtn.style.display = 'block';
+            }
+        }
+    }, 1000);
+}
+
+// Regenerate QR Code
+function regenerateQR() {
+    // Get the stored order details
+    const orderDetails = window.orderDetails;
+    if (orderDetails) {
+        generateUPIQR(orderDetails.amount, orderDetails.name);
+    }
 }
 
 // Verify and Submit Payment
@@ -240,9 +321,9 @@ function verifyAndSubmitPayment(event) {
     
     const utrNumber = document.getElementById('utrNumber').value.trim();
     
-    // Validate UTR number
-    if (!utrNumber) {
-        alert('Please enter a valid UPI Reference ID / UTR');
+    // Strict UTR validation
+    if (!document.getElementById('utrNumber').value.trim()) {
+        alert('Please enter the UTR/Reference Number.');
         return;
     }
     

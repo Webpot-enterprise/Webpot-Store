@@ -219,23 +219,10 @@ function handleLogin(event) {
                 window.location.href = 'index.html';
             }, 2000);
         } else if (data.status === 'user_not_found') {
-            // FALLBACK: Check local storage for locally registered users
-            const localEmail = localStorage.getItem('webpotUserEmail');
-
-            // If the input matches the locally stored email (simple check)
-            if (localEmail && (localEmail === emailOrPhone)) {
-                console.log('Logging in via Local Storage Fallback');
-                localStorage.setItem('webpotUserLoggedIn', 'true');
-                // Redirect
-                showSuccessModal('Welcome!', 'Welcome back (Local)!');
-                setTimeout(() => window.location.href = 'index.html', 2000);
-                return;
-            }
-
-            // If not found locally either, then show error
+            // User not found - show error and stop (do NOT fall back to local login)
+            alert('No account found with this email or phone. Please create a new account.');
             submitBtn.textContent = originalText;
             submitBtn.disabled = false;
-            alert('No account found with this email or phone. Please create a new account.');
             
             // Switch to registration form and pre-fill email
             toggleForms(event);
@@ -322,30 +309,26 @@ function handleRegister(event) {
             setTimeout(() => {
                 window.location.href = 'index.html';
             }, 3000);
+        } else if (data && data.status === 'user_already_exists') {
+            // User already exists - show error and return without localStorage
+            alert('User already exists. Please login.');
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
+            return;
         } else {
             const errorMsg = data?.message || 'Registration failed. Please try again.';
             console.error('Registration error:', errorMsg);
             alert('Error: ' + errorMsg);
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
         }
     })
     .catch(err => {
         console.error('Network/Parse Error:', err);
-        // As a fallback, store user locally if Google Apps Script fails
-        // User can still use the app with local storage
-        localStorage.setItem('webpotUserLoggedIn', 'true');
-        localStorage.setItem('webpotUserEmail', email);
-        localStorage.setItem('webpotUserName', name);
-        
-        const initials = name.split(' ').map(n => n[0]).join('');
-        localStorage.setItem('webpotUserInitials', initials);
-        
-        showSuccessModal('Account Created!', 'Your account has been created successfully. Redirecting...');
-        document.getElementById('registerForm').reset();
-        updatePasswordStrength('');
-        
-        setTimeout(() => {
-            window.location.href = 'index.html';
-        }, 3000);
+        // Only alert network error - do NOT automatically log in
+        alert('Network Error. Please try again.');
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
     })
     .finally(() => {
         submitBtn.textContent = originalText;

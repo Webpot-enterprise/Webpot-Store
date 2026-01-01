@@ -290,6 +290,8 @@
                 <div id="qrCodeContainer"></div>
                 <h3 id="payAmount" style="color: var(--neon-blue); margin: 1rem 0;"></h3>
                 <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Scan with any UPI App (GPay, PhonePe, Paytm)</p>
+                <p id="qrTimer" style="color: var(--neon-pink); font-weight: bold;">Time remaining: 05:00</p>
+                <button id="regenerateBtn" onclick="regenerateQR()" class="btn-secondary" style="display:none; margin-top: 1rem;">↻ Regenerate QR</button>
             </div>
             <form id="paymentForm" onsubmit="verifyAndSubmitPayment(event)">
                 <div class="form-group">
