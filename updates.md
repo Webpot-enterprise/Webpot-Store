@@ -26,3 +26,9 @@ kar itna baki ka batata
 fix errors 
 - the orders confirming is not working properly 
 - login not working properly while the data is been updated on google sheets 
+
+- desired dealine section is not necessary (kyu ki hamne already bol diya hai 7 din me  denge 
+)
+
+- after the animation the user goes to a new html while where he view his order status and the information what he has provided to us 
+also this is to be converted into history for the user so that the user in future know that last he orders a website of .. (introdcution )

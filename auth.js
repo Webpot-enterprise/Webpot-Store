@@ -219,10 +219,22 @@ function handleLogin(event) {
                 window.location.href = 'index.html';
             }, 2000);
         } else if (data.status === 'user_not_found') {
-            // User doesn't exist - redirect to registration
+            // FALLBACK: Check local storage for locally registered users
+            const localEmail = localStorage.getItem('webpotUserEmail');
+
+            // If the input matches the locally stored email (simple check)
+            if (localEmail && (localEmail === emailOrPhone)) {
+                console.log('Logging in via Local Storage Fallback');
+                localStorage.setItem('webpotUserLoggedIn', 'true');
+                // Redirect
+                showSuccessModal('Welcome!', 'Welcome back (Local)!');
+                setTimeout(() => window.location.href = 'index.html', 2000);
+                return;
+            }
+
+            // If not found locally either, then show error
             submitBtn.textContent = originalText;
             submitBtn.disabled = false;
-            
             alert('No account found with this email or phone. Please create a new account.');
             
             // Switch to registration form and pre-fill email

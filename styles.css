@@ -782,8 +782,6 @@ nav a:hover::after {
 .btn-secondary:active {
     transform: translateY(-1px) scale(0.98);
 }
-
-/* Services Section */
 .services {
     max-width: 1200px;
     margin: 4rem auto;
@@ -1989,6 +1987,31 @@ footer {
 
 .scroll-to-top.show {
     display: flex;
+}
+
+/* Disable input animations in Order Modal */
+#orderModal .form-group input,
+#orderModal .form-group select,
+#orderModal .form-group textarea {
+    animation: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+}
+
+/* QR Code Container Styling */
+#qrCodeContainer {
+    display: flex;
+    justify-content: center;
+    margin: 20px auto;
+    padding: 15px;
+    background: white;
+    border-radius: 10px;
+    width: fit-content;
+}
+
+/* Payment Modal */
+#paymentModal {
+    z-index: 2001;
 }
 
 @media (max-width: 768px) {

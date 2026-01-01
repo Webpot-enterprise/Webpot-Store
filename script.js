@@ -113,18 +113,18 @@ function closeOrderModal() {
     document.getElementById('orderModal').style.display = 'none';
 }
 
-function closeUPIModal() {
-    document.getElementById('upiModal').style.display = 'none';
+function closePaymentModal() {
+    document.getElementById('paymentModal').style.display = 'none';
 }
 
 window.onclick = function(event) {
     const orderModal = document.getElementById('orderModal');
-    const upiModal = document.getElementById('upiModal');
+    const paymentModal = document.getElementById('paymentModal');
     if (event.target === orderModal) {
         orderModal.style.display = 'none';
     }
-    if (event.target === upiModal) {
-        upiModal.style.display = 'none';
+    if (event.target === paymentModal) {
+        paymentModal.style.display = 'none';
     }
 }
 
@@ -134,6 +134,9 @@ const servicePricing = {
     'Basic': 5999,
     'Premium': 9999
 };
+
+// UPI Configuration
+const MY_UPI_ID = 'kakadiyasuprince@okhdfcbank';
 
 // Update service price dynamically
 function updateServicePrice() {
@@ -161,7 +164,7 @@ function selectService(serviceName, price) {
     updateServicePrice();
 }
 
-// Submit Order Form - Show UPI Payment Modal
+// Submit Order Form - Show Payment Modal with QR Code
 function submitOrder(event) {
     event.preventDefault();
     
@@ -185,7 +188,7 @@ function submitOrder(event) {
         return;
     }
     
-    // Store order details for UPI payment
+    // Store order details for payment
     window.orderDetails = {
         service: service,
         amount: amountValue,
@@ -197,22 +200,49 @@ function submitOrder(event) {
         deadline: deadline
     };
     
-    // Hide order modal and show UPI modal
+    // Hide order modal and show payment modal
     closeOrderModal();
-    document.getElementById('upiModal').style.display = 'block';
-    document.getElementById('upiForm').reset();
-    document.getElementById('transactionId').focus();
+    document.getElementById('paymentModal').style.display = 'block';
+    document.getElementById('paymentForm').reset();
+    
+    // Generate QR code
+    generateUPIQR(amountValue, name);
+    
+    // Focus on UTR input
+    setTimeout(() => {
+        document.getElementById('utrNumber').focus();
+    }, 100);
 }
 
-// Confirm UPI Payment
-function confirmUPIPayment(event) {
+// Generate UPI QR Code
+function generateUPIQR(amount, name) {
+    // Construct the UPI URL
+    const upiLink = 'upi://pay?pa=' + MY_UPI_ID + '&pn=Webpot&am=' + amount + '&cu=INR';
+    
+    // Clear the QR code container
+    const qrContainer = document.getElementById('qrCodeContainer');
+    qrContainer.innerHTML = '';
+    
+    // Generate QR code
+    new QRCode(qrContainer, {
+        text: upiLink,
+        width: 200,
+        height: 200
+    });
+    
+    // Update the amount display
+    document.getElementById('payAmount').textContent = '₹ ' + amount.toLocaleString('en-IN');
+}
+
+// Verify and Submit Payment
+function verifyAndSubmitPayment(event) {
     event.preventDefault();
     
-    const transactionId = document.getElementById('transactionId').value.trim();
+    const utrNumber = document.getElementById('utrNumber').value.trim();
     
-    // Validate transaction ID
-    if (!transactionId) {
-        alert('Please enter a valid Transaction/UTR ID');
+    // Validate UTR number
+    if (!utrNumber) {
+        alert('Please enter a valid UPI Reference ID / UTR');
         return;
     }
     
@@ -241,7 +271,7 @@ function confirmUPIPayment(event) {
         birthdate: orderDetails.birthdate,
         deadline: orderDetails.deadline,
         paymentMethod: 'UPI',
-        transactionId: transactionId
+        transactionId: utrNumber
     };
     
     fetch(APPS_SCRIPT_URL, {
@@ -252,19 +282,19 @@ function confirmUPIPayment(event) {
     .then(data => {
         // Success animation already shown
         setTimeout(() => {
-            showSuccessModal('Order Confirmed!', `Thank you! Your order for ${orderDetails.service} service has been confirmed. Transaction ID: ${transactionId}`);
-            closeUPIModal();
+            showSuccessModal('Order Confirmed!', `Thank you! Your order for ${orderDetails.service} service has been confirmed. UPI Reference: ${utrNumber}`);
+            closePaymentModal();
             document.getElementById('orderForm').reset();
-            document.getElementById('upiForm').reset();
+            document.getElementById('paymentForm').reset();
             document.getElementById('amount').value = '';
         }, 1500);
     })
     .catch(err => {
         console.error('Error:', err);
         showSuccessModal('Payment Received!', 'Your payment has been processed. We will contact you shortly.');
-        closeUPIModal();
+        closePaymentModal();
         document.getElementById('orderForm').reset();
-        document.getElementById('upiForm').reset();
+        document.getElementById('paymentForm').reset();
         document.getElementById('amount').value = '';
     })
     .finally(() => {
