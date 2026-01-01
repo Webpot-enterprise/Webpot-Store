@@ -113,10 +113,18 @@ function closeOrderModal() {
     document.getElementById('orderModal').style.display = 'none';
 }
 
+function closeUPIModal() {
+    document.getElementById('upiModal').style.display = 'none';
+}
+
 window.onclick = function(event) {
-    const modal = document.getElementById('orderModal');
-    if (event.target === modal) {
-        modal.style.display = 'none';
+    const orderModal = document.getElementById('orderModal');
+    const upiModal = document.getElementById('upiModal');
+    if (event.target === orderModal) {
+        orderModal.style.display = 'none';
+    }
+    if (event.target === upiModal) {
+        upiModal.style.display = 'none';
     }
 }
 
@@ -153,7 +161,7 @@ function selectService(serviceName, price) {
     updateServicePrice();
 }
 
-// Submit Order Form - Initiate Razorpay Payment
+// Submit Order Form - Show UPI Payment Modal
 function submitOrder(event) {
     event.preventDefault();
     
@@ -163,78 +171,58 @@ function submitOrder(event) {
     const email = document.getElementById('oemail').value;
     const phone = document.getElementById('ophone').value;
     const details = document.getElementById('details') ? document.getElementById('details').value : '';
+    const birthdate = document.getElementById('birthdate') ? document.getElementById('birthdate').value : '';
+    const deadline = document.getElementById('deadline') ? document.getElementById('deadline').value : '';
     
     // Extract numeric amount
-    let amountInPaise = 0;
+    let amountValue = 0;
     if (service && servicePricing[service]) {
-        amountInPaise = Math.round(servicePricing[service] / 2) * 100; // Half price in paise
+        amountValue = Math.round(servicePricing[service] / 2); // Half price
     }
     
-    if (!service || !name || !email || !phone || !amountInPaise) {
+    if (!service || !name || !email || !phone || !amountValue) {
         alert('Please fill in all required fields');
         return;
     }
+    
+    // Store order details for UPI payment
+    window.orderDetails = {
+        service: service,
+        amount: amountValue,
+        name: name,
+        email: email,
+        phone: phone,
+        details: details,
+        birthdate: birthdate,
+        deadline: deadline
+    };
+    
+    // Hide order modal and show UPI modal
+    closeOrderModal();
+    document.getElementById('upiModal').style.display = 'block';
+    document.getElementById('upiForm').reset();
+    document.getElementById('transactionId').focus();
+}
+
+// Confirm UPI Payment
+function confirmUPIPayment(event) {
+    event.preventDefault();
+    
+    const transactionId = document.getElementById('transactionId').value.trim();
+    
+    // Validate transaction ID
+    if (!transactionId) {
+        alert('Please enter a valid Transaction/UTR ID');
+        return;
+    }
+    
+    const orderDetails = window.orderDetails;
     
     // Show loading state
     const submitBtn = event.target.querySelector('button[type="submit"]');
     const originalText = submitBtn.textContent;
     submitBtn.textContent = 'Processing...';
     submitBtn.disabled = true;
-    
-    // Store order details for Razorpay callback
-    window.orderDetails = {
-        service: service,
-        amount: amountInPaise / 100,
-        name: name,
-        email: email,
-        phone: phone,
-        details: details
-    };
-    
-    // Initialize Razorpay
-    const options = {
-        key: 'rzp_live_YOUR_KEY_HERE', // Replace with your actual Razorpay key
-        amount: amountInPaise,
-        currency: 'INR',
-        name: 'Webpot',
-        description: 'Website Development Service - ' + service,
-        prefill: {
-            name: name,
-            email: email,
-            contact: phone
-        },
-        notes: {
-            service: service,
-            details: details
-        },
-        theme: {
-            color: '#00d4ff'
-        },
-        handler: function(response) {
-            handleRazorpaySuccess(response, submitBtn, originalText);
-        },
-        modal: {
-            ondismiss: function() {
-                submitBtn.textContent = originalText;
-                submitBtn.disabled = false;
-                alert('Payment cancelled. Please try again.');
-            }
-        }
-    };
-    
-    // Create Razorpay instance and open checkout
-    const razorpay = new Razorpay(options);
-    razorpay.on('payment.failed', function(response) {
-        submitBtn.textContent = originalText;
-        submitBtn.disabled = false;
-        alert('Payment failed: ' + response.error.description);
-    });
-    razorpay.open();
-}
-
-// Handle Razorpay payment success
-function handleRazorpaySuccess(response, submitBtn, originalText) {
-    const orderDetails = window.orderDetails;
     
     // Show success animation
     showOrderSuccessAnimation();
@@ -250,8 +238,10 @@ function handleRazorpaySuccess(response, submitBtn, originalText) {
         service: orderDetails.service,
         amount: orderDetails.amount,
         details: orderDetails.details,
-        paymentId: response.razorpay_payment_id,
-        orderId: response.razorpay_order_id
+        birthdate: orderDetails.birthdate,
+        deadline: orderDetails.deadline,
+        paymentMethod: 'UPI',
+        transactionId: transactionId
     };
     
     fetch(APPS_SCRIPT_URL, {
@@ -262,17 +252,19 @@ function handleRazorpaySuccess(response, submitBtn, originalText) {
     .then(data => {
         // Success animation already shown
         setTimeout(() => {
-            showSuccessModal('Order Confirmed!', `Thank you! Your order for ${orderDetails.service} service has been confirmed. Payment ID: ${response.razorpay_payment_id}`);
-            closeOrderModal();
+            showSuccessModal('Order Confirmed!', `Thank you! Your order for ${orderDetails.service} service has been confirmed. Transaction ID: ${transactionId}`);
+            closeUPIModal();
             document.getElementById('orderForm').reset();
+            document.getElementById('upiForm').reset();
             document.getElementById('amount').value = '';
         }, 1500);
     })
     .catch(err => {
         console.error('Error:', err);
         showSuccessModal('Payment Received!', 'Your payment has been processed. We will contact you shortly.');
-        closeOrderModal();
+        closeUPIModal();
         document.getElementById('orderForm').reset();
+        document.getElementById('upiForm').reset();
         document.getElementById('amount').value = '';
     })
     .finally(() => {
