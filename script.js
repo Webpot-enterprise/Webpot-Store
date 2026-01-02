@@ -570,3 +570,35 @@ document.addEventListener('click', function(event) {
         dropdown.classList.remove('active');
     }
 });
+
+// Pay Later Function
+function payLater() {
+    if (!window.pendingOrderData) return;
+    
+    const submitBtn = document.querySelector('button[onclick="payLater()"]');
+    if(submitBtn) {
+        submitBtn.textContent = 'Processing...';
+        submitBtn.disabled = true;
+    }
+    
+    // Send order with NO transaction ID (Backend will mark as Pending / Due)
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxAyQxlHfJKcFBqJ-LUK6TgbEvOBN8_QbrGdpseK1R_veUxJDMa0FVKLpzpw4rX08rE/exec';
+    
+    fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify(window.pendingOrderData)
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success') {
+            alert('Order Placed! You can pay later from your Dashboard.');
+            window.location.href = 'dashboard.html';
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(err => {
+        console.error('Error:', err);
+        alert('Network error. Please try again.');
+    });
+}

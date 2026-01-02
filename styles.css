@@ -2053,3 +2053,44 @@ footer {
         margin: 10% auto !important;
     }
 }
+
+/* Global Header for Auth/Terms Pages */
+.nav-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 1.5rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+    z-index: 1000;
+}
+
+.back-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--neon-blue);
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.back-btn:hover {
+    transform: translateX(-5px);
+    text-shadow: 0 0 10px rgba(0, 212, 255, 0.6);
+}
+
+/* Ensure Pay Later button looks distinct */
+.btn-secondary[onclick="payLater()"] {
+    background: rgba(176, 0, 255, 0.1);
+}
+
+.btn-secondary[onclick="payLater()"]:hover {
+    background: rgba(176, 0, 255, 0.25);
+    box-shadow: 0 0 20px rgba(176, 0, 255, 0.4);
+}
