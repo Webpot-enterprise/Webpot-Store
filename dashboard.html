@@ -11,10 +11,10 @@
 <body>
     <!-- Sidebar Navigation -->
     <aside class="sidebar">
-        <div class="sidebar-header">
+        <a href="index.html" class="sidebar-header">
             <img src="logo.png" alt="Webpot Logo" class="sidebar-logo">
             <span class="sidebar-title">Webpot</span>
-        </div>
+        </a>
         <nav class="sidebar-nav">
             <a href="#dashboard" class="nav-item active" data-section="dashboard">
                 <span class="nav-icon">📊</span>
@@ -141,6 +141,7 @@
             <h2 style="color: var(--neon-blue); margin-bottom: 1.5rem;">Scan to Pay</h2>
             <div style="text-align: center;">
                 <div id="qrCodeContainer"></div>
+                <button id="payViaAppBtn" class="btn-primary mobile-only" style="margin: 1rem 0; display: none;">Pay via any UPI App</button>
                 <h3 id="payAmount" style="color: var(--neon-blue); margin: 1rem 0;"></h3>
                 <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Scan with any UPI App (GPay, PhonePe, Paytm)</p>
                 <p id="qrTimer" style="color: var(--neon-pink); font-weight: bold;">Time remaining: 05:00</p>

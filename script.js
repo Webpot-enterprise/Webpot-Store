@@ -87,10 +87,52 @@ function logoutUser() {
     window.location.href = 'index.html';
 }
 
+// Session Timeout Handler (30 minutes of inactivity)
+let sessionTimeoutInterval;
+const SESSION_TIMEOUT_DURATION = 30 * 60 * 1000; // 30 minutes in milliseconds
+
+function initSessionTimeout() {
+    // Only initialize for logged-in users
+    const isLoggedIn = localStorage.getItem('webpotUserLoggedIn');
+    if (!isLoggedIn) {
+        return;
+    }
+    
+    // Function to reset the timeout
+    function resetSessionTimeout() {
+        // Clear existing timeout
+        if (sessionTimeoutInterval) {
+            clearTimeout(sessionTimeoutInterval);
+        }
+        
+        // Set new timeout
+        sessionTimeoutInterval = setTimeout(() => {
+            // Session expired - log out user
+            console.log('Session expired due to inactivity');
+            localStorage.removeItem('webpotUserLoggedIn');
+            localStorage.removeItem('webpotUserEmail');
+            localStorage.removeItem('webpotUserName');
+            localStorage.removeItem('webpotUserProfilePic');
+            
+            alert('Your session has expired due to inactivity. Please log in again.');
+            window.location.href = 'auth.html';
+        }, SESSION_TIMEOUT_DURATION);
+    }
+    
+    // Reset timeout on user activity
+    document.addEventListener('mousemove', resetSessionTimeout);
+    document.addEventListener('keypress', resetSessionTimeout);
+    document.addEventListener('click', resetSessionTimeout);
+    
+    // Initialize timeout on load
+    resetSessionTimeout();
+}
+
 // Observe service cards on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
     displayUserProfile(); // Show user profile on page load
     loadUpdates(); // Load updates from updates.html
+    initSessionTimeout(); // Initialize session timeout
     const serviceCards = document.querySelectorAll('.service-card');
     serviceCards.forEach(card => {
         observer.observe(card);
@@ -122,6 +164,28 @@ function closePaymentModal() {
     if (qrTimerInterval) {
         clearInterval(qrTimerInterval);
     }
+    
+    // Clear pending order data
+    window.pendingOrderData = null;
+    
+    // Reset payment form
+    const paymentForm = document.getElementById('paymentForm');
+    if (paymentForm) {
+        paymentForm.reset();
+    }
+    
+    // Reset order form
+    const orderForm = document.getElementById('orderForm');
+    if (orderForm) {
+        orderForm.reset();
+    }
+    
+    // Clear QR code container
+    const qrContainer = document.getElementById('qrCodeContainer');
+    if (qrContainer) {
+        qrContainer.innerHTML = '';
+    }
+    
     document.getElementById('paymentModal').style.display = 'none';
 }
 
@@ -248,6 +312,24 @@ function generateUPIQR(amount, name) {
         regenerateBtn.style.display = 'none';
     }
     qrContainer.style.display = 'block';
+    
+    // Handle UPI App Button
+    const payViaAppBtn = document.getElementById('payViaAppBtn');
+    if (payViaAppBtn) {
+        // Set the href to the UPI link
+        payViaAppBtn.href = upiLink;
+        
+        // Detect if user is on mobile
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
+        
+        if (isMobile) {
+            // Show button on mobile
+            payViaAppBtn.style.display = 'inline-block';
+        } else {
+            // Hide button on desktop
+            payViaAppBtn.style.display = 'none';
+        }
+    }
     
     // Start the timer for QR code
     startQRTimer();

@@ -2094,3 +2094,16 @@ footer {
     background: rgba(176, 0, 255, 0.25);
     box-shadow: 0 0 20px rgba(176, 0, 255, 0.4);
 }
+
+/* Sidebar Header Link Styling */
+.sidebar-header {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* Mobile-only utility class */
+@media (min-width: 768px) {
+    .mobile-only {
+        display: none !important;
+    }
+}
