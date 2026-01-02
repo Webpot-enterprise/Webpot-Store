@@ -84,6 +84,52 @@ function displayUserProfile() {
     }
 }
 
+// Update navigation state based on login status
+function updateNavState() {
+    const isLoggedIn = localStorage.getItem('webpotUserLoggedIn');
+    const userName = localStorage.getItem('webpotUserName');
+    
+    const navUserName = document.getElementById('navUserName');
+    const userNavInfo = document.getElementById('userNavInfo');
+    const loginLink = document.querySelector('a[href="auth.html"]');
+    
+    if (isLoggedIn && userName) {
+        // Show user nav info
+        if (userNavInfo) {
+            userNavInfo.style.display = 'flex';
+        }
+        
+        // Set user name
+        if (navUserName) {
+            navUserName.textContent = userName.split(' ')[0]; // First name
+        }
+        
+        // Hide login link
+        if (loginLink) {
+            loginLink.parentElement.style.display = 'none';
+        }
+    } else {
+        // Hide user nav info
+        if (userNavInfo) {
+            userNavInfo.style.display = 'none';
+        }
+        
+        // Show login link
+        if (loginLink) {
+            loginLink.parentElement.style.display = 'block';
+        }
+    }
+}
+
+// Logout from navigation
+function navLogout() {
+    localStorage.removeItem('webpotUserLoggedIn');
+    localStorage.removeItem('webpotUserEmail');
+    localStorage.removeItem('webpotUserName');
+    localStorage.removeItem('webpotUserProfilePic');
+    window.location.reload();
+}
+
 // Logout user
 function logoutUser() {
     localStorage.removeItem('webpotUserLoggedIn');
@@ -139,6 +185,7 @@ function initSessionTimeout() {
 // Observe service cards on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
     displayUserProfile(); // Show user profile on page load
+    updateNavState(); // Update navigation state (show/hide user nav info)
     loadUpdates(); // Load updates from updates.html
     loadTestimonials(); // Load testimonials section
     initSessionTimeout(); // Initialize session timeout
@@ -173,10 +220,12 @@ window.openOrderModal = function() {
     const isLoggedIn = localStorage.getItem('webpotUserLoggedIn');
     
     if (!isLoggedIn) {
+        // User not logged in - redirect to auth
         window.location.href = 'auth.html';
         return;
     }
     
+    // User is logged in - open order modal
     const orderModal = document.getElementById('orderModal');
     if (orderModal) {
         orderModal.style.display = 'block';
@@ -760,36 +809,37 @@ const ADDON_PRICES = {
 const BASE_PRICE = 2000;
 const PRICE_PER_PAGE = 500;
 
-function calculateCustomPrice() {
+// Calculate and update custom price
+window.calculateCustomPrice = function() {
     const pagesSlider = document.getElementById('pagesSlider');
     const pagesValue = document.getElementById('pagesValue');
-    const addons = document.querySelectorAll('input[name="addon"]:checked');
-    
-    if (!pagesSlider) return; // Guard clause if element doesn't exist
-    
-    const pages = parseInt(pagesSlider.value) || 5;
-    
-    // Update pages display
-    if (pagesValue) {
-        pagesValue.textContent = pages;
-    }
-    
-    // Base price calculation: ₹2000 + (pages * ₹500)
-    const basePrice = BASE_PRICE + (pages * PRICE_PER_PAGE);
-    
-    // Add-ons sum
-    let addonsPrice = 0;
-    addons.forEach(addon => {
-        addonsPrice += ADDON_PRICES[addon.value] || 0;
-    });
-    
-    const totalPrice = basePrice + addonsPrice;
-    
-    // Update display elements with instant feedback
     const basePriceDisplay = document.getElementById('basePriceDisplay');
     const addonsPriceDisplay = document.getElementById('addonsPriceDisplay');
     const totalPriceDisplay = document.getElementById('totalPriceDisplay');
     
+    // Guard: ensure slider exists
+    if (!pagesSlider) return;
+    
+    const pages = parseInt(pagesSlider.value) || 5;
+    
+    // Get all checked addons
+    const checkedAddons = document.querySelectorAll('input[name="addon"]:checked');
+    
+    // Calculate base price: ₹2000 + (pages * ₹500)
+    const basePrice = BASE_PRICE + (pages * PRICE_PER_PAGE);
+    
+    // Sum addon prices
+    let addonsPrice = 0;
+    checkedAddons.forEach(addon => {
+        const value = addon.value;
+        addonsPrice += ADDON_PRICES[value] || 0;
+    });
+    
+    // Total price
+    const totalPrice = basePrice + addonsPrice;
+    
+    // Update display
+    if (pagesValue) pagesValue.textContent = pages;
     if (basePriceDisplay) basePriceDisplay.textContent = '₹' + basePrice.toLocaleString('en-IN');
     if (addonsPriceDisplay) addonsPriceDisplay.textContent = '₹' + addonsPrice.toLocaleString('en-IN');
     if (totalPriceDisplay) totalPriceDisplay.textContent = '₹' + totalPrice.toLocaleString('en-IN');
@@ -797,7 +847,7 @@ function calculateCustomPrice() {
     // Store for later use
     window.customPackagePrice = totalPrice;
     window.customPackagePages = pages;
-}
+};
 
 function selectCustomService() {
     calculateCustomPrice(); // Ensure latest prices

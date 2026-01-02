@@ -43,6 +43,11 @@
                     </div>
                 </div>
             </div>
+            <!-- User Navigation Info (shown when logged in) -->
+            <div class="user-nav-info" id="userNavInfo" style="display: none;">
+                <a id="navUserName" href="dashboard.html" class="nav-user-name"></a>
+                <button id="navLogoutBtn" class="nav-logout-btn" onclick="navLogout()">Logout</button>
+            </div>
             <button class="cta-btn" onclick="openOrderModal()">Get Started</button>
         </nav>
     </header>
@@ -135,7 +140,7 @@
                     <!-- Pages Slider -->
                     <div class="input-group">
                         <label for="pagesSlider">Number of Pages: <span id="pagesValue">5</span></label>
-                        <input type="range" id="pagesSlider" min="1" max="20" value="5" class="price-slider">
+                        <input type="range" id="pagesSlider" min="1" max="20" value="5" class="price-slider" oninput="calculateCustomPrice()">
                         <div class="slider-labels">
                             <span>1</span>
                             <span>20</span>
@@ -147,21 +152,21 @@
                         <label class="addon-title">Add Premium Features</label>
                         
                         <label class="checkbox-wrapper">
-                            <input type="checkbox" name="addon" value="seo" class="addon-checkbox">
+                            <input type="checkbox" name="addon" value="seo" class="addon-checkbox" onchange="calculateCustomPrice()">
                             <span class="checkbox-custom"></span>
                             <span class="addon-label">SEO Optimization</span>
                             <span class="addon-price">+₹2,000</span>
                         </label>
 
                         <label class="checkbox-wrapper">
-                            <input type="checkbox" name="addon" value="ecommerce" class="addon-checkbox">
+                            <input type="checkbox" name="addon" value="ecommerce" class="addon-checkbox" onchange="calculateCustomPrice()">
                             <span class="checkbox-custom"></span>
                             <span class="addon-label">E-Commerce Integration</span>
                             <span class="addon-price">+₹5,000</span>
                         </label>
 
                         <label class="checkbox-wrapper">
-                            <input type="checkbox" name="addon" value="darkmode" class="addon-checkbox">
+                            <input type="checkbox" name="addon" value="darkmode" class="addon-checkbox" onchange="calculateCustomPrice()">
                             <span class="checkbox-custom"></span>
                             <span class="addon-label">Dark Mode Design</span>
                             <span class="addon-price">+₹1,000</span>
