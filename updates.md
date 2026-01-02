@@ -11,7 +11,3 @@ term and service
 if the amount is due or not given by the customer the webpot team then the website will be shutdown from your side and not be start again with the same 
 it will remain shutdown till the cutomers does not the pay the due amount 
 the amount must recieved in the last week of the month if not then there will be three reminders for the user than website must be down 
-
-
-jab oder place ho admin ke pass ek message through a admin dashboard or the gmail services jaha per admin allow ya fhir accept after cross checking all the details about infromation and the funds 
-when we aprroves that the status must be turns into acitve 

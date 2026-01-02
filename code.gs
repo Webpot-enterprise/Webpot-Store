@@ -34,6 +34,12 @@ function doPost(e) {
       case 'update_payment':
         response = handlePaymentUpdate(data);
         break;
+      case 'get_all_orders':
+        response = handleGetAllOrders(data);
+        break;
+      case 'update_status':
+        response = handleUpdateStatus(data);
+        break;
       default:
         response = { status: 'error', message: 'Unknown action type: ' + action };
     }
@@ -298,4 +304,87 @@ function sendOrderEmails(data, orderId) {
   } catch (e) {
     console.error("Email error: " + e.toString());
   }
+}
+
+// ---------------- ADMIN HANDLERS ----------------
+
+function handleGetAllOrders(data) {
+  // Verify admin key
+  var ADMIN_KEY = 'WebpotAdmin2026';
+  if (data.adminKey !== ADMIN_KEY) {
+    return { status: 'error', message: 'Invalid admin key' };
+  }
+  
+  var sheet = getSheet('Orders Sheet');
+  var values = sheet.getDataRange().getValues();
+  var allOrders = [];
+  
+  // Skip header row (start at i=1)
+  for (var i = 1; i < values.length; i++) {
+    allOrders.push({
+      date: values[i][0],
+      orderId: values[i][1],
+      name: values[i][2],
+      email: values[i][3],
+      phone: values[i][4],
+      service: values[i][5],
+      totalAmount: values[i][6],
+      paidAmount: values[i][7],
+      dueAmount: values[i][8],
+      transactionId: values[i][9],
+      status: values[i][10],
+      details: values[i][11],
+      updated: values[i][12]
+    });
+  }
+  
+  return { status: 'success', orders: allOrders };
+}
+
+function handleUpdateStatus(data) {
+  // Verify admin key
+  var ADMIN_KEY = 'WebpotAdmin2026';
+  if (data.adminKey !== ADMIN_KEY) {
+    return { status: 'error', message: 'Invalid admin key' };
+  }
+  
+  var sheet = getSheet('Orders Sheet');
+  var values = sheet.getDataRange().getValues();
+  var rowIndex = -1;
+  var userEmail = '';
+  var userName = '';
+  
+  // Find the order by Order ID (Column B, Index 1)
+  for (var i = 1; i < values.length; i++) {
+    if (values[i][1] === data.orderId) {
+      rowIndex = i + 1; // 1-based index for Sheet API
+      userEmail = values[i][3]; // Column D: Email
+      userName = values[i][2];  // Column C: Name
+      break;
+    }
+  }
+  
+  if (rowIndex === -1) {
+    return { status: 'error', message: 'Order ID not found' };
+  }
+  
+  // Update Status column (Column K = Column 11, 1-based = column 11)
+  sheet.getRange(rowIndex, 11).setValue(data.status);
+  sheet.getRange(rowIndex, 13).setValue(new Date()); // Update timestamp
+  
+  // Send email notification if status is set to Active
+  if (data.status === 'Active') {
+    try {
+      var firstName = userName.split(" ")[0];
+      MailApp.sendEmail({
+        to: userEmail,
+        subject: "Your Order is Now Active - Webpot",
+        htmlBody: "<h2>Great News, " + firstName + "!</h2><p>Your order <strong>" + data.orderId + "</strong> is now <strong>Active</strong>.</p><p>We will begin working on your project right away. You can track the progress in your Dashboard.</p><p>Thank you for choosing Webpot!</p>"
+      });
+    } catch (e) {
+      console.error("Email notification error: " + e.toString());
+    }
+  }
+  
+  return { status: 'success', message: 'Order status updated to ' + data.status };
 }

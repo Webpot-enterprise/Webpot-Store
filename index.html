@@ -288,10 +288,10 @@
             <h2 style="color: var(--neon-blue); margin-bottom: 1.5rem;">Scan to Pay</h2>
             <div style="text-align: center;">
                 <div id="qrCodeContainer"></div>
-                <button id="payViaAppBtn" class="btn-primary mobile-only" style="margin: 1rem 0; display: none;">Pay via any UPI App</button>
                 <h3 id="payAmount" style="color: var(--neon-blue); margin: 1rem 0;"></h3>
                 <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Scan with any UPI App (GPay, PhonePe, Paytm)</p>
                 <p id="qrTimer" style="color: var(--neon-pink); font-weight: bold;">Time remaining: 05:00</p>
+                <a id="payViaAppBtn" class="btn-primary" style="display: none; margin: 1rem 0; text-decoration: none; padding: 10px 20px; border-radius: 5px; display: inline-block;">📱 Pay via UPI App</a>
                 <button id="regenerateBtn" onclick="regenerateQR()" class="btn-secondary" style="display:none; margin-top: 1rem;">↻ Regenerate QR</button>
             </div>
             <form id="paymentForm" onsubmit="verifyAndSubmitPayment(event)">

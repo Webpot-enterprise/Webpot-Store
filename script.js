@@ -399,7 +399,9 @@ function regenerateQR() {
 
 // Verify and Submit Payment
 // 2. Handle "Verify & Submit" click - Sends Data + UTR
-function verifyUPIPayment() {
+function verifyAndSubmitPayment(event) {
+    event.preventDefault();
+    
     const utrInput = document.getElementById('utrNumber'); // Ensure input ID matches HTML
     const utrValue = utrInput.value.trim();
 
@@ -412,13 +414,13 @@ function verifyUPIPayment() {
     window.pendingOrderData.transactionId = utrValue;
 
     // Show loading text
-    const verifyBtn = document.querySelector('button[onclick="verifyUPIPayment()"]');
+    const verifyBtn = event.target.querySelector('button[type="submit"]');
     const originalText = verifyBtn.textContent;
     verifyBtn.textContent = "Verifying...";
     verifyBtn.disabled = true;
 
     // Send to Backend
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxAyQxlHfJKcFBqJ-LUK6TgbEvOBN8_QbrGdpseK1R_veUxJDMa0FVKLpzpw4rX08rE/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzVFw6UYPH-_mB4Yf67PjnFcigs96WwgNhphaJU1WYIxEFqGIsFWr77e6DYHgSDYiBr/exec';
 
     fetch(APPS_SCRIPT_URL, {
         method: 'POST',
@@ -507,7 +509,7 @@ function submitForm(event) {
     }
     
     // Send to Google Apps Script backend
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxAyQxlHfJKcFBqJ-LUK6TgbEvOBN8_QbrGdpseK1R_veUxJDMa0FVKLpzpw4rX08rE/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzVFw6UYPH-_mB4Yf67PjnFcigs96WwgNhphaJU1WYIxEFqGIsFWr77e6DYHgSDYiBr/exec';
     
     // Show loading state
     const submitBtn = event.target.querySelector('button[type="submit"]');
@@ -664,7 +666,7 @@ function payLater() {
     }
     
     // Send order with NO transaction ID (Backend will mark as Pending / Due)
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxAyQxlHfJKcFBqJ-LUK6TgbEvOBN8_QbrGdpseK1R_veUxJDMa0FVKLpzpw4rX08rE/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzVFw6UYPH-_mB4Yf67PjnFcigs96WwgNhphaJU1WYIxEFqGIsFWr77e6DYHgSDYiBr/exec';
     
     fetch(APPS_SCRIPT_URL, {
         method: 'POST',

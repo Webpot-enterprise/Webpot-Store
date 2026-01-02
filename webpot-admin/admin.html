@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Webpot</title>
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+    <!-- Admin Login Section -->
+    <div id="loginSection" class="login-container">
+        <div class="login-box">
+            <div class="login-header">
+                <h1>🔐 Admin Dashboard</h1>
+                <p>Enter your admin password to continue</p>
+            </div>
+            
+            <form id="adminLoginForm" onsubmit="adminLogin(event)">
+                <div class="form-group">
+                    <label for="adminPassword">Admin Password:</label>
+                    <input 
+                        type="password" 
+                        id="adminPassword" 
+                        placeholder="Enter admin password" 
+                        required
+                        autofocus
+                    >
+                </div>
+                <button type="submit" class="btn-primary" style="width: 100%;">Login</button>
+            </form>
+            
+            <div id="loginError" class="error-message" style="display: none; margin-top: 1rem; text-align: center; color: #ff0099;">
+                Invalid password. Please try again.
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard Section -->
+    <div id="dashboardSection" class="dashboard-container" style="display: none;">
+        <header class="admin-header">
+            <h1>📊 Admin Dashboard</h1>
+            <button class="btn-secondary" onclick="adminLogout()">Logout</button>
+        </header>
+
+        <main class="admin-content">
+            <div class="dashboard-stats">
+                <div class="stat-card">
+                    <h3>Total Orders</h3>
+                    <p id="totalOrders" class="stat-value">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Active Orders</h3>
+                    <p id="activeOrders" class="stat-value">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Pending Orders</h3>
+                    <p id="pendingOrders" class="stat-value">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Revenue</h3>
+                    <p id="totalRevenue" class="stat-value">₹0</p>
+                </div>
+            </div>
+
+            <div class="orders-section">
+                <h2>All Orders</h2>
+                <div class="table-container">
+                    <table id="ordersTable">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Order ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Service</th>
+                                <th>Total Amount</th>
+                                <th>Paid Amount</th>
+                                <th>Due Amount</th>
+                                <th>Transaction ID</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTableBody">
+                            <tr>
+                                <td colspan="11" style="text-align: center; padding: 2rem; color: #888888;">Loading orders...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html>
