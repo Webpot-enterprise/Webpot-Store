@@ -51,9 +51,13 @@ function displayUserProfile() {
             profilePic.src = userProfilePic;
             profilePic.style.display = 'block';
             profilePic.title = userName;
+            profilePic.style.cursor = 'pointer';
+            profilePic.onclick = () => window.location.href = 'dashboard.html';
         }
         
         userNameDisplay.textContent = userName.split(' ')[0]; // Show first name
+        userNameDisplay.style.cursor = 'pointer';
+        userNameDisplay.onclick = () => window.location.href = 'dashboard.html';
         logoutBtn.style.display = 'inline-block';
         
         // Hide login link
@@ -368,6 +372,10 @@ function verifyAndSubmitPayment(event) {
             document.getElementById('orderForm').reset();
             document.getElementById('paymentForm').reset();
             document.getElementById('amount').value = '';
+            // Redirect to dashboard after 2 seconds
+            setTimeout(() => {
+                window.location.href = 'dashboard.html';
+            }, 2000);
         }, 1500);
     })
     .catch(err => {

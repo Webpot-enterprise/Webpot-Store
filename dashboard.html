@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Webpot</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="dashboard.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <img src="logo.png" alt="Webpot Logo" class="sidebar-logo">
+            <span class="sidebar-title">Webpot</span>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="#dashboard" class="nav-item active" data-section="dashboard">
+                <span class="nav-icon">📊</span>
+                <span class="nav-label">Dashboard</span>
+            </a>
+            <a href="#orders" class="nav-item" data-section="orders">
+                <span class="nav-icon">📦</span>
+                <span class="nav-label">My Orders</span>
+            </a>
+            <a href="#payments" class="nav-item" data-section="payments">
+                <span class="nav-icon">💰</span>
+                <span class="nav-label">Payments</span>
+            </a>
+            <a href="#profile" class="nav-item" data-section="profile">
+                <span class="nav-icon">👤</span>
+                <span class="nav-label">Profile</span>
+            </a>
+            <a href="#" class="nav-item" onclick="logoutUser()">
+                <span class="nav-icon">🚪</span>
+                <span class="nav-label">Logout</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <!-- Welcome Header -->
+        <section id="dashboard" class="dashboard-section active">
+            <div class="welcome-header">
+                <h1>Hello, <span id="welcomeName">User</span>!</h1>
+                <p id="lastLoginText" class="last-login">Last login: <span id="lastLoginTime">Just now</span></p>
+            </div>
+
+            <!-- Stats Row -->
+            <div class="stats-row">
+                <div class="stat-card">
+                    <div class="stat-icon">📋</div>
+                    <div class="stat-content">
+                        <p class="stat-label">Total Orders</p>
+                        <p class="stat-value" id="totalOrders">0</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">💸</div>
+                    <div class="stat-content">
+                        <p class="stat-label">Total Spent</p>
+                        <p class="stat-value" id="totalSpent">₹0</p>
+                    </div>
+                </div>
+                <div class="stat-card" id="pendingDuesCard">
+                    <div class="stat-icon">⚠️</div>
+                    <div class="stat-content">
+                        <p class="stat-label">Pending Dues</p>
+                        <p class="stat-value" id="pendingDues">₹0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Orders Table -->
+            <div class="orders-section">
+                <h2>Active Orders</h2>
+                <div class="table-container">
+                    <table class="orders-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Order ID</th>
+                                <th>Service</th>
+                                <th>Amount</th>
+                                <th>Due Amount</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTableBody">
+                            <tr>
+                                <td colspan="7" style="text-align: center; color: var(--text-muted);">Loading orders...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Activity Log -->
+            <div class="activity-section">
+                <h2>Activity Log</h2>
+                <div class="activity-log">
+                    <p id="activityLogText" style="color: var(--text-muted);">Your activity will appear here.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- My Orders Section -->
+        <section id="orders" class="dashboard-section">
+            <h2>My Orders</h2>
+            <div class="section-placeholder">
+                <p>All your orders are displayed on the Dashboard.</p>
+                <button onclick="switchSection('dashboard')" class="btn-primary">Back to Dashboard</button>
+            </div>
+        </section>
+
+        <!-- Payments Section -->
+        <section id="payments" class="dashboard-section">
+            <h2>Payment History</h2>
+            <div class="section-placeholder">
+                <p>Payment details are shown in the Active Orders table on the Dashboard.</p>
+                <button onclick="switchSection('dashboard')" class="btn-primary">Back to Dashboard</button>
+            </div>
+        </section>
+
+        <!-- Profile Section -->
+        <section id="profile" class="dashboard-section">
+            <h2>User Profile</h2>
+            <div class="profile-card">
+                <div class="profile-info">
+                    <p><strong>Name:</strong> <span id="profileName">-</span></p>
+                    <p><strong>Email:</strong> <span id="profileEmail">-</span></p>
+                    <p><strong>Member Since:</strong> <span id="memberSince">-</span></p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Payment Modal (Reused from index.html) -->
+    <div id="paymentModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closePaymentModal()">&times;</span>
+            <h2 style="color: var(--neon-blue); margin-bottom: 1.5rem;">Scan to Pay</h2>
+            <div style="text-align: center;">
+                <div id="qrCodeContainer"></div>
+                <h3 id="payAmount" style="color: var(--neon-blue); margin: 1rem 0;"></h3>
+                <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Scan with any UPI App (GPay, PhonePe, Paytm)</p>
+                <p id="qrTimer" style="color: var(--neon-pink); font-weight: bold;">Time remaining: 05:00</p>
+                <button id="regenerateBtn" onclick="regenerateQR()" class="btn-secondary" style="display:none; margin-top: 1rem;">↻ Regenerate QR</button>
+            </div>
+            <form id="paymentForm" onsubmit="verifyDashboardPayment(event)">
+                <div class="form-group">
+                    <label for="dashboardUtrNumber">UPI Reference ID / UTR</label>
+                    <input type="text" id="dashboardUtrNumber" name="utrNumber" placeholder="Enter UPI Reference ID / UTR" required>
+                </div>
+                <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem; margin-bottom: 0.5rem;">Verify & Submit</button>
+                <button type="button" class="btn-secondary" style="width: 100%;" onclick="closePaymentModal()">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div style="text-align: center;">
+                <div style="font-size: 48px; margin-bottom: 1rem;">✓</div>
+                <h2 id="successTitle" style="color: var(--neon-blue); margin-bottom: 1rem;">Success!</h2>
+                <p id="successMessage" style="color: var(--text-light); margin-bottom: 2rem;">Operation completed successfully.</p>
+                <button onclick="closeSuccessModal()" class="btn-primary">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="dashboard.js"></script>
+</body>
+</html>

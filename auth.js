@@ -218,20 +218,27 @@ function handleLogin(event) {
             setTimeout(() => {
                 window.location.href = 'index.html';
             }, 2000);
-        } else if (data.status === 'user_not_found') {
-            // User not found - show error and stop (do NOT fall back to local login)
-            alert('No account found with this email or phone. Please create a new account.');
-            submitBtn.textContent = originalText;
-            submitBtn.disabled = false;
-            
-            // Switch to registration form and pre-fill email
-            toggleForms(event);
-            setTimeout(() => {
-                if (isEmail) {
-                    document.getElementById('register-email').value = emailOrPhone;
-                }
-                document.getElementById('register-name').focus();
-            }, 300);
+        } else if (data.status === 'user_not_found' || data.status === 'error') {
+            // FALLBACK: Check local storage
+            const storedEmail = localStorage.getItem('webpotUserEmail');
+            const storedPass = localStorage.getItem('webpotUserPassword');
+            const storedName = localStorage.getItem('webpotUserName');
+            if (emailOrPhone === storedEmail && password === storedPass) {
+                // Success via Local Storage
+                console.log('Backend failed, logging in via Local Storage');
+                localStorage.setItem('webpotUserLoggedIn', 'true');
+                
+                // Re-save name if needed
+                if (storedName) localStorage.setItem('webpotUserName', storedName);
+                
+                showSuccessModal('Welcome Back!', 'Logged in successfully (Local Mode).');
+                setTimeout(() => window.location.href = 'index.html', 2000);
+            } else {
+                // Genuine failure
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+                alert('No account found. Please register first.');
+            }
         } else {
             alert('Login failed: ' + (data.message || 'Invalid credentials'));
             submitBtn.textContent = originalText;
@@ -296,6 +303,7 @@ function handleRegister(event) {
             localStorage.setItem('webpotUserLoggedIn', 'true');
             localStorage.setItem('webpotUserEmail', email);
             localStorage.setItem('webpotUserName', name);
+            localStorage.setItem('webpotUserPassword', password);
             
             // Create initials for avatar
             const initials = name.split(' ').map(n => n[0]).join('');

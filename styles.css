@@ -477,6 +477,12 @@ nav a:hover {
     color: var(--neon-blue);
     font-weight: 500;
     font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.user-name:hover {
+    text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
 }
 
 .logout-btn {

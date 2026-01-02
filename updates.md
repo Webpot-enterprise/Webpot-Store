@@ -34,3 +34,9 @@ fix errors
 
 - after the animation the user goes to a new html while where he view his order status and the information what he has provided to us 
 also this is to be converted into history for the user so that the user in future know that last he orders a website of .. (introdcution )
+
+- terms and services mein auto switch and the auto click button dalna hai 
+
+- add a dashboard
+
+- transaction id or paid ka refresh hona chaiye agar payment huva ho to yes ana chaiye or kitna pay kiya or kitna bai hai voh dikhana hai sheets mein 
