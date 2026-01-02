@@ -343,7 +343,7 @@ function verifyAndSubmitPayment(event) {
     showOrderSuccessAnimation();
     
     // Send order data to backend
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx9nmE6vvc9LXPon9-MrMQfSCDlvoeMJtMhbq0d80ftpYodypkm6RoSr8pz2H-Ro8kj/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwygph08gPs4wdwagXyfT7hH1udQG8F_dny0BwjUbBMCWtkXlEVbNOzIqSJisPN8FSB/exec';
     
     const payload = {
         formType: 'order',
@@ -451,7 +451,7 @@ function submitForm(event) {
     }
     
     // Send to Google Apps Script backend
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx9nmE6vvc9LXPon9-MrMQfSCDlvoeMJtMhbq0d80ftpYodypkm6RoSr8pz2H-Ro8kj/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwygph08gPs4wdwagXyfT7hH1udQG8F_dny0BwjUbBMCWtkXlEVbNOzIqSJisPN8FSB/exec';
     
     // Show loading state
     const submitBtn = event.target.querySelector('button[type="submit"]');
