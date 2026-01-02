@@ -23,7 +23,13 @@ function doPost(e) {
         response = handleUserRegistration(data);
         break;
       case 'login':
-        response = handleUserLogin(data);
+        response = handleUserLoginModified(data);
+        break;
+      case 'request_reset':
+        response = handleRequestReset(data);
+        break;
+      case 'verify_reset':
+        response = handleVerifyReset(data);
         break;
       case 'order':
         response = handleOrderSubmission(data);
@@ -36,6 +42,21 @@ function doPost(e) {
         break;
       case 'get_all_orders':
         response = handleGetAllOrders(data);
+        break;
+      case 'get_all_users':
+        response = handleGetAllUsers(data);
+        break;
+      case 'ban_user':
+        response = handleBanUser(data);
+        break;
+      case 'submit_review':
+        response = handleSubmitReview(data);
+        break;
+      case 'get_public_reviews':
+        response = handleGetPublicReviews(data);
+        break;
+      case 'verify_login_otp':
+        response = handleVerifyLoginOTP(data);
         break;
       case 'update_status':
         response = handleUpdateStatus(data);
@@ -87,8 +108,23 @@ function handleUserRegistration(data) {
   
   var timestamp = new Date();
   
-  // Columns: [Date, Name, Email, Password, Phone, Status, Created]
-  // We save 'data.phone' at index 4 (Column E)
+  // Generate unique referral code for new user
+  var myReferralCode = generateReferralCode(data.name);
+  
+  // Check if provided referral code is valid
+  var referredBy = '';
+  if (data.referralCode) {
+    for (var i = 1; i < values.length; i++) {
+      if (values[i][7] === data.referralCode) { // Column H (index 7) = My_Referral_Code
+        referredBy = data.referralCode;
+        // Log the referral connection
+        logReferral(values[i][2], data.email); // values[i][2] is referrer's email
+        break;
+      }
+    }
+  }
+  
+  // Columns: [Date, Name, Email, Password, Phone, Status, Created, My_Referral_Code, Referred_By, Wallet_Balance]
   sheet.appendRow([
     timestamp, 
     data.name, 
@@ -96,10 +132,20 @@ function handleUserRegistration(data) {
     data.password, 
     data.phone ? String(data.phone) : '', // Force String
     'active', 
-    timestamp
+    timestamp,
+    myReferralCode,      // Column H (index 7)
+    referredBy,          // Column I (index 8)
+    0                    // Column J (index 9) = Wallet_Balance
   ]);
   
-  return { status: 'success', message: 'User registered successfully' };
+  // Log the registration action
+  logAction(data.email, 'NEW_USER', 'New registration - Referral Code: ' + myReferralCode);
+  
+  return { 
+    status: 'success', 
+    message: 'User registered successfully',
+    referralCode: myReferralCode
+  };
 }
 
 function handleUserLogin(data) {
@@ -125,7 +171,10 @@ function handleUserLogin(data) {
     // Check if input matches EITHER Email OR Phone
     if (sheetEmail === inputStr || sheetPhone === inputStr) { 
       // Check Password (Column D -> Index 3)
-      if (String(values[i][3]) === String(data.password)) { 
+      if (String(values[i][3]) === String(data.password)) {
+        // Log successful login
+        logAction(values[i][2], 'USER_LOGIN', 'Login successful');
+        
         return { 
           status: 'success', 
           message: 'Login successful',
@@ -137,10 +186,13 @@ function handleUserLogin(data) {
           }
         };
       } else {
+        logAction(inputStr, 'USER_LOGIN', 'Failed login attempt - invalid password');
         return { status: 'invalid_password', message: 'Invalid password' };
       }
     }
   }
+  
+  logAction(inputStr, 'USER_LOGIN', 'Failed login attempt - user not found');
   return { status: 'user_not_found', message: 'User not found' };
 }
 
@@ -387,4 +439,416 @@ function handleUpdateStatus(data) {
   }
   
   return { status: 'success', message: 'Order status updated to ' + data.status };
+}
+
+// ============== FEATURE 1: FORGOT PASSWORD ==============
+
+function handleRequestReset(data) {
+  var email = data.email;
+  if (!email) {
+    return { status: 'error', message: 'Email is required' };
+  }
+
+  var sheet = getSheet('Users Sheet');
+  var values = sheet.getDataRange().getValues();
+  var userExists = false;
+  var userName = '';
+
+  for (var i = 1; i < values.length; i++) {
+    if (values[i][2] === email) {
+      userExists = true;
+      userName = values[i][1];
+      break;
+    }
+  }
+
+  if (!userExists) {
+    return { status: 'error', message: 'Email not found' };
+  }
+
+  var resetCode = String(Math.floor(Math.random() * 900000) + 100000);
+  var expiryTime = new Date(Date.now() + 15 * 60 * 1000);
+
+  var scriptProperties = PropertiesService.getScriptProperties();
+  var resetKey = 'reset_' + email;
+  scriptProperties.setProperty(resetKey, JSON.stringify({
+    code: resetCode,
+    expiry: expiryTime.getTime()
+  }));
+
+  try {
+    var firstName = userName.split(" ")[0];
+    MailApp.sendEmail({
+      to: email,
+      subject: "Password Reset Code - Webpot",
+      htmlBody: "<h2>Password Reset Request</h2>" +
+                "<p>Hi " + firstName + ",</p>" +
+                "<p>You requested a password reset. Use this code to reset your password:</p>" +
+                "<h3 style='background:#00d4ff; padding:10px; text-align:center; border-radius:5px; color:#000;'>" + resetCode + "</h3>" +
+                "<p>This code expires in 15 minutes.</p>" +
+                "<p>If you didn't request this, ignore this email.</p>" +
+                "<p>Regards, Webpot Team</p>"
+    });
+  } catch (e) {
+    console.error("Email error: " + e.toString());
+  }
+
+  return { status: 'success', message: 'Reset code sent to your email' };
+}
+
+function handleVerifyReset(data) {
+  var email = data.email;
+  var code = String(data.code);
+  var newPassword = data.newPassword;
+
+  if (!email || !code || !newPassword) {
+    return { status: 'error', message: 'All fields are required' };
+  }
+
+  var scriptProperties = PropertiesService.getScriptProperties();
+  var resetKey = 'reset_' + email;
+  var storedData = scriptProperties.getProperty(resetKey);
+
+  if (!storedData) {
+    return { status: 'error', message: 'No reset request found. Request a new code.' };
+  }
+
+  var resetInfo = JSON.parse(storedData);
+  var now = Date.now();
+
+  if (now > resetInfo.expiry) {
+    scriptProperties.deleteProperty(resetKey);
+    return { status: 'error', message: 'Reset code expired. Request a new one.' };
+  }
+
+  if (resetInfo.code !== code) {
+    return { status: 'error', message: 'Invalid reset code' };
+  }
+
+  var sheet = getSheet('Users Sheet');
+  var values = sheet.getDataRange().getValues();
+
+  for (var i = 1; i < values.length; i++) {
+    if (values[i][2] === email) {
+      sheet.getRange(i + 1, 4).setValue(newPassword);
+      break;
+    }
+  }
+
+  scriptProperties.deleteProperty(resetKey);
+
+  try {
+    MailApp.sendEmail({
+      to: email,
+      subject: "Password Reset Successful - Webpot",
+      htmlBody: "<h2>Password Updated</h2>" +
+                "<p>Your password has been reset successfully.</p>" +
+                "<p>You can now log in with your new password.</p>" +
+                "<p>If you didn't do this, please contact support.</p>"
+    });
+  } catch (e) {
+    console.error("Email error: " + e.toString());
+  }
+
+  return { status: 'success', message: 'Password reset successful. You can now log in.' };
+}
+
+// ============== FEATURE 3: ADMIN USER MANAGEMENT ==============
+
+function handleGetAllUsers(data) {
+  var ADMIN_KEY = 'WebpotAdmin2026';
+  if (data.adminKey !== ADMIN_KEY) {
+    return { status: 'error', message: 'Invalid admin key' };
+  }
+
+  var sheet = getSheet('Users Sheet');
+  var values = sheet.getDataRange().getValues();
+  var allUsers = [];
+
+  for (var i = 1; i < values.length; i++) {
+    allUsers.push({
+      name: values[i][1],
+      email: values[i][2],
+      phone: values[i][4],
+      status: values[i][5],
+      created: values[i][6]
+    });
+  }
+
+  return { status: 'success', users: allUsers };
+}
+
+function handleBanUser(data) {
+  var ADMIN_KEY = 'WebpotAdmin2026';
+  if (data.adminKey !== ADMIN_KEY) {
+    return { status: 'error', message: 'Invalid admin key' };
+  }
+
+  var email = data.email;
+  var sheet = getSheet('Users Sheet');
+  var values = sheet.getDataRange().getValues();
+
+  for (var i = 1; i < values.length; i++) {
+    if (values[i][2] === email) {
+      sheet.getRange(i + 1, 6).setValue('Banned');
+      return { status: 'success', message: 'User banned successfully' };
+    }
+  }
+
+  return { status: 'error', message: 'User not found' };
+}
+
+// ============== FEATURE 4: TESTIMONIALS ==============
+
+function handleSubmitReview(data) {
+  var sheet = getSheet('Testimonials');
+  var timestamp = new Date();
+
+  sheet.appendRow([
+    timestamp,
+    data.name || 'Anonymous',
+    data.email,
+    data.service,
+    data.rating,
+    data.comment,
+    'Pending'
+  ]);
+
+  return { status: 'success', message: 'Review submitted. Thank you!' };
+}
+
+function handleGetPublicReviews(data) {
+  var sheet = getSheet('Testimonials');
+  var values = sheet.getDataRange().getValues();
+  var publicReviews = [];
+
+  for (var i = 1; i < values.length; i++) {
+    if (values[i][6] === 'Approved') {
+      publicReviews.push({
+        name: values[i][1],
+        service: values[i][3],
+        rating: values[i][4],
+        comment: values[i][5]
+      });
+    }
+  }
+
+  return { status: 'success', reviews: publicReviews };
+}
+
+// ============== FEATURE 5: 2FA (EMAIL OTP) ==============
+
+function handleUserLoginModified(data) {
+  var sheet = getSheet('Users Sheet');
+  var values = sheet.getDataRange().getValues();
+  var loginInput = data.loginInput || data.email || data.emailOrPhone;
+
+  if (!loginInput) {
+    return { status: 'error', message: 'Email or Phone is required' };
+  }
+
+  var inputStr = String(loginInput).trim();
+
+  for (var i = 1; i < values.length; i++) {
+    var sheetEmail = String(values[i][2]);
+    var sheetPhone = String(values[i][4]);
+
+    if (sheetEmail === inputStr || sheetPhone === inputStr) {
+      if (String(values[i][3]) === String(data.password)) {
+        if (values[i][5] === 'Banned') {
+          return { status: 'user_banned', message: 'This account has been banned' };
+        }
+
+        var otp = String(Math.floor(Math.random() * 900000) + 100000);
+        var expiryTime = new Date(Date.now() + 10 * 60 * 1000);
+
+        var scriptProperties = PropertiesService.getScriptProperties();
+        var otpKey = 'login_otp_' + sheetEmail;
+        scriptProperties.setProperty(otpKey, JSON.stringify({
+          otp: otp,
+          expiry: expiryTime.getTime(),
+          password: data.password
+        }));
+
+        try {
+          var firstName = values[i][1].split(" ")[0];
+          MailApp.sendEmail({
+            to: sheetEmail,
+            subject: "Login Verification Code - Webpot",
+            htmlBody: "<h2>Two-Factor Authentication</h2>" +
+                      "<p>Hi " + firstName + ",</p>" +
+                      "<p>Your login verification code is:</p>" +
+                      "<h3 style='background:#00d4ff; padding:10px; text-align:center; border-radius:5px; color:#000;'>" + otp + "</h3>" +
+                      "<p>This code expires in 10 minutes.</p>" +
+                      "<p>If you didn't try to log in, ignore this email.</p>"
+          });
+        } catch (e) {
+          console.error("Email error: " + e.toString());
+        }
+
+        return {
+          status: 'otp_required',
+          message: 'OTP sent to your email',
+          email: sheetEmail
+        };
+      } else {
+        return { status: 'invalid_password', message: 'Invalid password' };
+      }
+    }
+  }
+
+  return { status: 'user_not_found', message: 'User not found' };
+}
+
+function handleVerifyLoginOTP(data) {
+  var email = data.email;
+  var otp = String(data.otp);
+
+  if (!email || !otp) {
+    return { status: 'error', message: 'Email and OTP are required' };
+  }
+
+  var scriptProperties = PropertiesService.getScriptProperties();
+  var otpKey = 'login_otp_' + email;
+  var storedData = scriptProperties.getProperty(otpKey);
+
+  if (!storedData) {
+    return { status: 'error', message: 'No OTP found. Request a new login.' };
+  }
+
+  var otpInfo = JSON.parse(storedData);
+  var now = Date.now();
+
+  if (now > otpInfo.expiry) {
+    scriptProperties.deleteProperty(otpKey);
+    return { status: 'error', message: 'OTP expired. Please log in again.' };
+  }
+
+  if (otpInfo.otp !== otp) {
+    return { status: 'error', message: 'Invalid OTP' };
+  }
+
+  var sheet = getSheet('Users Sheet');
+  var values = sheet.getDataRange().getValues();
+
+  for (var i = 1; i < values.length; i++) {
+    if (values[i][2] === email) {
+      scriptProperties.deleteProperty(otpKey);
+      return {
+        status: 'success',
+        message: 'Login successful',
+        user: {
+          name: values[i][1],
+          email: values[i][2],
+          phone: values[i][4],
+          status: values[i][5]
+        }
+      };
+    }
+  }
+
+  return { status: 'error', message: 'User not found' };
+}
+
+// ============== REFERRAL SYSTEM ==============
+
+function generateReferralCode(name) {
+  var prefix = 'WEBPOT-';
+  var namePrefix = name.substring(0, 3).toUpperCase();
+  if (namePrefix.length < 3) {
+    namePrefix = namePrefix + Math.random().toString(36).substring(2, 5).toUpperCase();
+  }
+  var randomDigits = Math.floor(Math.random() * 900) + 100;
+  return prefix + namePrefix + randomDigits;
+}
+
+function logReferral(referrerEmail, referredEmail) {
+  var sheet = getSheet('Referrals');
+  if (!sheet) {
+    try {
+      var ss = SpreadsheetApp.getActiveSpreadsheet();
+      sheet = ss.insertSheet('Referrals');
+      sheet.appendRow(['Referrer Email', 'Referred User Email', 'Date', 'Status']);
+    } catch (e) {
+      Logger.log('Error creating Referrals sheet: ' + e);
+      return;
+    }
+  }
+  
+  sheet.appendRow([
+    referrerEmail,
+    referredEmail,
+    new Date(),
+    'Completed'
+  ]);
+}
+
+// ============== AUDIT LOGGING ==============
+
+function logAction(actorEmail, actionType, details) {
+  var sheet = getSheet('Audit_Logs');
+  if (!sheet) {
+    try {
+      var ss = SpreadsheetApp.getActiveSpreadsheet();
+      sheet = ss.insertSheet('Audit_Logs');
+      sheet.appendRow(['Timestamp', 'Actor Email', 'Action Type', 'Target ID/Details']);
+    } catch (e) {
+      Logger.log('Error creating Audit_Logs sheet: ' + e);
+      return;
+    }
+  }
+  
+  sheet.appendRow([
+    new Date(),
+    actorEmail,
+    actionType,
+    details
+  ]);
+}
+
+// ============== BACKUP SYSTEM ==============
+
+function createDailyBackup() {
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var ssId = ss.getId();
+    var ssName = ss.getName();
+    
+    // Format current date as YYYY-MM-DD
+    var today = new Date();
+    var dateStr = Utilities.formatDate(today, Session.getScriptTimeZone(), 'yyyy-MM-dd');
+    
+    // Create backup file name
+    var backupName = 'Webpot_DB_Backup_' + dateStr;
+    
+    // Get the file to copy
+    var originalFile = DriveApp.getFileById(ssId);
+    
+    // Make a copy
+    var backupFile = originalFile.makeCopy(backupName);
+    
+    // Get or create 'Webpot Backups' folder
+    var backupFolder = null;
+    var folders = DriveApp.getFoldersByName('Webpot Backups');
+    
+    if (folders.hasNext()) {
+      backupFolder = folders.next();
+    } else {
+      backupFolder = DriveApp.createFolder('Webpot Backups');
+    }
+    
+    // Move backup file to folder
+    var parentFolders = backupFile.getParents();
+    while (parentFolders.hasNext()) {
+      parentFolders.next().removeFile(backupFile);
+    }
+    backupFolder.addFile(backupFile);
+    
+    // Log the backup action
+    logAction('System', 'DAILY_BACKUP', 'Backup created: ' + backupName);
+    
+    Logger.log('Backup created successfully: ' + backupName);
+  } catch (e) {
+    Logger.log('Error creating backup: ' + e);
+  }
 }

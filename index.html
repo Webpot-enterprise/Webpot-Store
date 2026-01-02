@@ -124,6 +124,77 @@
         </div>
     </section>
 
+    <!-- Cost Calculator Section -->
+    <section id="calculator" class="cost-calculator">
+        <div class="calculator-container">
+            <h2 class="section-title">Custom Price Calculator</h2>
+            <p class="calculator-subtitle">Design your perfect package</p>
+            
+            <div class="calculator-content">
+                <div class="calculator-inputs">
+                    <!-- Pages Slider -->
+                    <div class="input-group">
+                        <label for="pagesSlider">Number of Pages: <span id="pagesValue">5</span></label>
+                        <input type="range" id="pagesSlider" min="1" max="20" value="5" class="price-slider">
+                        <div class="slider-labels">
+                            <span>1</span>
+                            <span>20</span>
+                        </div>
+                    </div>
+
+                    <!-- Add-ons Checkboxes -->
+                    <div class="input-group addons">
+                        <label class="addon-title">Add Premium Features</label>
+                        
+                        <label class="checkbox-wrapper">
+                            <input type="checkbox" name="addon" value="seo" class="addon-checkbox">
+                            <span class="checkbox-custom"></span>
+                            <span class="addon-label">SEO Optimization</span>
+                            <span class="addon-price">+₹2,000</span>
+                        </label>
+
+                        <label class="checkbox-wrapper">
+                            <input type="checkbox" name="addon" value="ecommerce" class="addon-checkbox">
+                            <span class="checkbox-custom"></span>
+                            <span class="addon-label">E-Commerce Integration</span>
+                            <span class="addon-price">+₹5,000</span>
+                        </label>
+
+                        <label class="checkbox-wrapper">
+                            <input type="checkbox" name="addon" value="darkmode" class="addon-checkbox">
+                            <span class="checkbox-custom"></span>
+                            <span class="addon-label">Dark Mode Design</span>
+                            <span class="addon-price">+₹1,000</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Price Display -->
+                <div class="price-display">
+                    <div class="price-card">
+                        <h3>Estimated Price</h3>
+                        <div class="price-breakdown">
+                            <div class="price-item">
+                                <span>Base Price (Pages):</span>
+                                <span id="basePriceDisplay">₹4,500</span>
+                            </div>
+                            <div class="price-item">
+                                <span>Add-ons:</span>
+                                <span id="addonsPriceDisplay">₹0</span>
+                            </div>
+                            <div class="price-divider"></div>
+                            <div class="price-item total">
+                                <span>Total:</span>
+                                <span id="totalPriceDisplay">₹4,500</span>
+                            </div>
+                        </div>
+                        <button class="btn-primary btn-wide" onclick="selectCustomService()">Get Started</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- What We Do Section -->
     <section id="whatwedo" class="what-we-do">
         <div class="what-we-do-content" style="max-width: 1000px; margin: 0 auto; text-align: center;">
@@ -155,6 +226,16 @@
                     <h4>06. Support</h4>
                     <p>Continuous maintenance and updates</p>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section id="testimonials" class="testimonials">
+        <h2 class="section-title">What Our Clients Say</h2>
+        <div class="testimonials-grid" id="testimonialsGrid">
+            <div class="testimonial-card" style="text-align: center; color: #999;">
+                <p>Loading testimonials...</p>
             </div>
         </div>
     </section>
@@ -309,6 +390,13 @@
 
     <!-- Scroll to Top Button -->
     <button id="scrollToTopBtn" class="scroll-to-top" onclick="scrollToTop()" title="Go to top">↑</button>
+
+    <!-- WhatsApp Floating Button -->
+    <a href="https://wa.me/919408191506" target="_blank" rel="noopener noreferrer" class="whatsapp-btn" title="Chat on WhatsApp">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.076 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421-7.403h-.004a9.87 9.87 0 00-5.031 1.378c-1.536.946-2.504 2.294-2.504 3.785 0 .998.333 1.88 1.022 2.605l-1.077 3.768a.75.75 0 00.992.888l3.59-1.151c.707.451 1.582.734 2.522.734 3.666 0 6.65-2.973 6.65-6.622 0-1.769-.675-3.434-1.902-4.686-1.227-1.253-2.856-1.942-4.658-1.942Z"/>
+        </svg>
+    </a>
 
     <script src="script.js"></script>
     

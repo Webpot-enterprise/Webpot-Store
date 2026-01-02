@@ -132,6 +132,7 @@ function initSessionTimeout() {
 document.addEventListener('DOMContentLoaded', () => {
     displayUserProfile(); // Show user profile on page load
     loadUpdates(); // Load updates from updates.html
+    loadTestimonials(); // Load testimonials section
     initSessionTimeout(); // Initialize session timeout
     const serviceCards = document.querySelectorAll('.service-card');
     serviceCards.forEach(card => {
@@ -420,7 +421,7 @@ function verifyAndSubmitPayment(event) {
     verifyBtn.disabled = true;
 
     // Send to Backend
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzVFw6UYPH-_mB4Yf67PjnFcigs96WwgNhphaJU1WYIxEFqGIsFWr77e6DYHgSDYiBr/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbytVOTbt78wKn3TVjypTy4tkGiGUpetyXhw7VB6nJZmnMPsPWoW6xHMr71xNUCTvEq1/exec';
 
     fetch(APPS_SCRIPT_URL, {
         method: 'POST',
@@ -509,7 +510,7 @@ function submitForm(event) {
     }
     
     // Send to Google Apps Script backend
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzVFw6UYPH-_mB4Yf67PjnFcigs96WwgNhphaJU1WYIxEFqGIsFWr77e6DYHgSDYiBr/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbytVOTbt78wKn3TVjypTy4tkGiGUpetyXhw7VB6nJZmnMPsPWoW6xHMr71xNUCTvEq1/exec';
     
     // Show loading state
     const submitBtn = event.target.querySelector('button[type="submit"]');
@@ -666,7 +667,7 @@ function payLater() {
     }
     
     // Send order with NO transaction ID (Backend will mark as Pending / Due)
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzVFw6UYPH-_mB4Yf67PjnFcigs96WwgNhphaJU1WYIxEFqGIsFWr77e6DYHgSDYiBr/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbytVOTbt78wKn3TVjypTy4tkGiGUpetyXhw7VB6nJZmnMPsPWoW6xHMr71xNUCTvEq1/exec';
     
     fetch(APPS_SCRIPT_URL, {
         method: 'POST',
@@ -685,4 +686,109 @@ function payLater() {
         console.error('Error:', err);
         alert('Network error. Please try again.');
     });
+}
+
+function loadTestimonials() {
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbytVOTbt78wKn3TVjypTy4tkGiGUpetyXhw7VB6nJZmnMPsPWoW6xHMr71xNUCTvEq1/exec';
+    
+    fetch(APPS_SCRIPT_URL + '?action=get_public_reviews', {
+        method: 'GET'
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success') {
+            renderTestimonials(data.reviews);
+        }
+    })
+    .catch(err => console.error('Error loading testimonials:', err));
+}
+
+function renderTestimonials(reviews) {
+    const grid = document.getElementById('testimonialsGrid');
+    if (!grid) return;
+
+    if (reviews.length === 0) {
+        grid.innerHTML = '<p style="text-align: center; color: #999; grid-column: 1/-1;">No reviews yet. Be the first to share!</p>';
+        return;
+    }
+
+    grid.innerHTML = reviews.map(review => `
+        <div class="testimonial-card">
+            <div class="testimonial-author">${review.name}</div>
+            <div class="testimonial-service">${review.service}</div>
+            <div class="testimonial-rating">${'⭐'.repeat(review.rating)}</div>
+            <div class="testimonial-comment">"${review.comment}"</div>
+        </div>
+    `).join('');
+}
+
+// Cost Calculator Functions
+const ADDON_PRICES = {
+    seo: 2000,
+    ecommerce: 5000,
+    darkmode: 1000
+};
+
+const BASE_PRICE = 2000;
+const PRICE_PER_PAGE = 500;
+
+function calculateCustomPrice() {
+    const pagesSlider = document.getElementById('pagesSlider');
+    const pagesValue = document.getElementById('pagesValue');
+    const addons = document.querySelectorAll('input[name="addon"]:checked');
+    
+    const pages = parseInt(pagesSlider.value);
+    pagesValue.textContent = pages;
+    
+    // Base price calculation: 2000 + (pages * 500)
+    const basePrice = BASE_PRICE + (pages * PRICE_PER_PAGE);
+    
+    // Add-ons sum
+    let addonsPrice = 0;
+    addons.forEach(addon => {
+        addonsPrice += ADDON_PRICES[addon.value] || 0;
+    });
+    
+    const totalPrice = basePrice + addonsPrice;
+    
+    // Update display
+    document.getElementById('basePriceDisplay').textContent = '₹' + basePrice.toLocaleString('en-IN');
+    document.getElementById('addonsPriceDisplay').textContent = '₹' + addonsPrice.toLocaleString('en-IN');
+    document.getElementById('totalPriceDisplay').textContent = '₹' + totalPrice.toLocaleString('en-IN');
+    
+    // Store for later use
+    window.customPackagePrice = totalPrice;
+    window.customPackagePages = pages;
+}
+
+function selectCustomService() {
+    if (!window.customPackagePrice) {
+        calculateCustomPrice();
+    }
+    
+    const pages = window.customPackagePages || 5;
+    const price = window.customPackagePrice || 4500;
+    
+    selectService('Custom Package (' + pages + ' Pages)', price);
+}
+
+// Initialize calculator on page load
+document.addEventListener('DOMContentLoaded', () => {
+    const pagesSlider = document.getElementById('pagesSlider');
+    const addonCheckboxes = document.querySelectorAll('input[name="addon"]');
+    
+    if (pagesSlider) {
+        pagesSlider.addEventListener('input', calculateCustomPrice);
+        calculateCustomPrice(); // Initial calculation
+    }
+    
+    if (addonCheckboxes.length > 0) {
+        addonCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', calculateCustomPrice);
+        });
+    }
+});
+        </div>
+    `).join('');
+}
 }

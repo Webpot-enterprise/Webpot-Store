@@ -9,7 +9,7 @@ function handleCredentialResponse(response) {
     const userData = JSON.parse(jsonPayload);
     
     // Send to Google Apps Script backend
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzVFw6UYPH-_mB4Yf67PjnFcigs96WwgNhphaJU1WYIxEFqGIsFWr77e6DYHgSDYiBr/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbytVOTbt78wKn3TVjypTy4tkGiGUpetyXhw7VB6nJZmnMPsPWoW6xHMr71xNUCTvEq1/exec';
     
     fetch(APPS_SCRIPT_URL, {
         method: 'POST',
@@ -74,7 +74,7 @@ function handleLogin(event) {
     submitBtn.textContent = 'Logging in...';
     submitBtn.disabled = true;
     
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzVFw6UYPH-_mB4Yf67PjnFcigs96WwgNhphaJU1WYIxEFqGIsFWr77e6DYHgSDYiBr/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbytVOTbt78wKn3TVjypTy4tkGiGUpetyXhw7VB6nJZmnMPsPWoW6xHMr71xNUCTvEq1/exec';
     
     fetch(APPS_SCRIPT_URL, {
         method: 'POST',
@@ -86,14 +86,20 @@ function handleLogin(event) {
     })
     .then(res => res.json())
     .then(data => {
-        if (data.status === 'success') {
+        if (data.status === 'otp_required') {
+            document.getElementById('loginForm').style.display = 'none';
+            openOTPModal(data.email);
+        } else if (data.status === 'success') {
             localStorage.setItem('webpotUserLoggedIn', 'true');
             localStorage.setItem('webpotUserEmail', data.user.email);
             localStorage.setItem('webpotUserName', data.user.name);
             
             showSuccessModal('Welcome Back!', `Welcome, ${data.user.name}!`);
             setTimeout(() => window.location.href = 'index.html', 2000);
-            
+        } else if (data.status === 'user_banned') {
+            alert('This account has been banned. Please contact support.');
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
         } else if (data.status === 'user_not_found') {
             alert('User not found. Please create an account.');
             submitBtn.textContent = originalText;
@@ -121,6 +127,7 @@ function handleRegister(event) {
     const phone = document.getElementById('register-phone').value.trim();
     const password = document.getElementById('register-password').value;
     const confirm = document.getElementById('register-confirm').value;
+    const referralCode = document.getElementById('register-referral').value.trim();
     
     if (password !== confirm) {
         alert('Passwords do not match!');
@@ -132,7 +139,7 @@ function handleRegister(event) {
     submitBtn.textContent = 'Creating account...';
     submitBtn.disabled = true;
     
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzVFw6UYPH-_mB4Yf67PjnFcigs96WwgNhphaJU1WYIxEFqGIsFWr77e6DYHgSDYiBr/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbytVOTbt78wKn3TVjypTy4tkGiGUpetyXhw7VB6nJZmnMPsPWoW6xHMr71xNUCTvEq1/exec';
     
     fetch(APPS_SCRIPT_URL, {
         method: 'POST',
@@ -141,7 +148,8 @@ function handleRegister(event) {
             name: name,
             email: email,
             phone: phone,
-            password: password
+            password: password,
+            referralCode: referralCode
         })
     })
     .then(res => res.json())
@@ -292,5 +300,186 @@ function closeTermsModal() {
 
 function closePrivacyModal() {
     document.getElementById('privacyModal').style.display = 'none';
+}
+
+// ============== FEATURE 1: FORGOT PASSWORD ==============
+
+function openForgotPasswordModal(event) {
+    event.preventDefault();
+    const modal = document.getElementById('forgotPasswordModal');
+    modal.classList.add('active');
+    document.getElementById('resetStep1').classList.add('active');
+    document.getElementById('resetStep2').classList.remove('active');
+}
+
+function closeForgotPasswordModal() {
+    const modal = document.getElementById('forgotPasswordModal');
+    modal.classList.remove('active');
+    document.getElementById('reset-email').value = '';
+    document.getElementById('reset-code').value = '';
+    document.getElementById('reset-password').value = '';
+    document.getElementById('reset-confirm').value = '';
+}
+
+function submitResetEmail(event) {
+    event.preventDefault();
+    const email = document.getElementById('reset-email').value.trim();
+
+    if (!email) {
+        alert('Please enter your email');
+        return;
+    }
+
+    const btn = event.target.querySelector('button[type="submit"]');
+    const originalText = btn.textContent;
+    btn.textContent = 'Sending...';
+    btn.disabled = true;
+
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbytVOTbt78wKn3TVjypTy4tkGiGUpetyXhw7VB6nJZmnMPsPWoW6xHMr71xNUCTvEq1/exec';
+
+    fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+            action: 'request_reset',
+            email: email
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success') {
+            document.getElementById('resetStep1').classList.remove('active');
+            document.getElementById('resetStep2').classList.add('active');
+            alert('Code sent to your email!');
+        } else {
+            alert('Error: ' + data.message);
+            btn.textContent = originalText;
+            btn.disabled = false;
+        }
+    })
+    .catch(err => {
+        console.error('Error:', err);
+        alert('Network error. Please try again.');
+        btn.textContent = originalText;
+        btn.disabled = false;
+    });
+}
+
+function submitResetPassword(event) {
+    event.preventDefault();
+    const email = document.getElementById('reset-email').value.trim();
+    const code = document.getElementById('reset-code').value.trim();
+    const newPass = document.getElementById('reset-password').value;
+    const confirm = document.getElementById('reset-confirm').value;
+
+    if (newPass !== confirm) {
+        alert('Passwords do not match');
+        return;
+    }
+
+    const btn = event.target.querySelector('button[type="submit"]');
+    const originalText = btn.textContent;
+    btn.textContent = 'Resetting...';
+    btn.disabled = true;
+
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbytVOTbt78wKn3TVjypTy4tkGiGUpetyXhw7VB6nJZmnMPsPWoW6xHMr71xNUCTvEq1/exec';
+
+    fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+            action: 'verify_reset',
+            email: email,
+            code: code,
+            newPassword: newPass
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success') {
+            showSuccessModal('Password Reset!', 'Your password has been reset. Please log in.');
+            setTimeout(() => {
+                closeForgotPasswordModal();
+                toggleForms();
+                document.getElementById('login-email-or-phone').value = email;
+            }, 1500);
+        } else {
+            alert('Error: ' + data.message);
+            btn.textContent = originalText;
+            btn.disabled = false;
+        }
+    })
+    .catch(err => {
+        console.error('Error:', err);
+        alert('Network error. Please try again.');
+        btn.textContent = originalText;
+        btn.disabled = false;
+    });
+}
+
+// ============== FEATURE 5: 2FA (EMAIL OTP) ==============
+
+function openOTPModal(email) {
+    window.pendingOTPEmail = email;
+    const modal = document.getElementById('otpModal');
+    modal.classList.add('active');
+}
+
+function closeOTPModal() {
+    const modal = document.getElementById('otpModal');
+    modal.classList.remove('active');
+    document.getElementById('login-otp').value = '';
+    window.pendingOTPEmail = null;
+}
+
+function goBackToLogin() {
+    closeOTPModal();
+    document.getElementById('loginForm').style.display = 'block';
+}
+
+function verifyOTP(event) {
+    event.preventDefault();
+    const otp = document.getElementById('login-otp').value.trim();
+    const email = window.pendingOTPEmail;
+
+    if (!otp || !email) {
+        alert('Please enter the OTP');
+        return;
+    }
+
+    const btn = event.target.querySelector('button[type="submit"]');
+    const originalText = btn.textContent;
+    btn.textContent = 'Verifying...';
+    btn.disabled = true;
+
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbytVOTbt78wKn3TVjypTy4tkGiGUpetyXhw7VB6nJZmnMPsPWoW6xHMr71xNUCTvEq1/exec';
+
+    fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+            action: 'verify_login_otp',
+            email: email,
+            otp: otp
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success') {
+            localStorage.setItem('webpotUserLoggedIn', 'true');
+            localStorage.setItem('webpotUserEmail', data.user.email);
+            localStorage.setItem('webpotUserName', data.user.name);
+
+            showSuccessModal('Welcome!', `Welcome, ${data.user.name}!`);
+            setTimeout(() => window.location.href = 'index.html', 2000);
+        } else {
+            alert('Error: ' + data.message);
+            btn.textContent = originalText;
+            btn.disabled = false;
+        }
+    })
+    .catch(err => {
+        console.error('Error:', err);
+        alert('Network error. Please try again.');
+        btn.textContent = originalText;
+        btn.disabled = false;
+    });
 }
 

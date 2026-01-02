@@ -2107,3 +2107,332 @@ footer {
         display: none !important;
     }
 }
+
+/* Testimonials Section */
+.testimonials {
+    padding: 60px 20px;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    border-top: 1px solid #00d4ff;
+    border-bottom: 1px solid #00d4ff;
+}
+
+.testimonials .section-title {
+    text-align: center;
+    color: #00d4ff;
+    font-size: 36px;
+    margin-bottom: 50px;
+}
+
+.testimonials-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.testimonial-card {
+    background: linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 100%);
+    border: 1px solid #00d4ff;
+    border-radius: 10px;
+    padding: 30px;
+    box-shadow: 0 5px 20px rgba(0, 212, 255, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.testimonial-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 212, 255, 0.2);
+}
+
+.testimonial-author {
+    color: #00d4ff;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.testimonial-service {
+    color: #999;
+    font-size: 12px;
+    margin-bottom: 10px;
+}
+
+.testimonial-rating {
+    color: #ffd700;
+    margin-bottom: 15px;
+    font-size: 18px;
+}
+
+.testimonial-comment {
+    color: #e0e0e0;
+    font-style: italic;
+    line-height: 1.6;
+}
+
+/* WhatsApp Floating Button */
+.whatsapp-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #25D366 0%, #20BA58 100%);
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    cursor: pointer;
+    z-index: 999;
+    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+    transition: all 0.3s ease;
+    animation: whatsappPulse 2s infinite;
+}
+
+.whatsapp-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 8px 20px rgba(37, 211, 102, 0.7), 0 0 30px rgba(37, 211, 102, 0.5);
+    animation: none;
+}
+
+.whatsapp-btn svg {
+    width: 35px;
+    height: 35px;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+@keyframes whatsappPulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+/* Cost Calculator Section */
+.cost-calculator {
+    padding: 4rem 2rem;
+    background: linear-gradient(135deg, #0f1425 0%, #1a1f3a 50%, #0f1425 100%);
+    border-top: 1px solid var(--neon-blue);
+    border-bottom: 1px solid var(--neon-blue);
+}
+
+.calculator-container {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.calculator-subtitle {
+    text-align: center;
+    color: var(--neon-blue);
+    margin-bottom: 3rem;
+    font-size: 1.1rem;
+    letter-spacing: 1px;
+}
+
+.calculator-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: start;
+}
+
+.calculator-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.input-group label {
+    color: var(--text-light);
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.input-group #pagesSlider {
+    width: 100%;
+    height: 8px;
+    border-radius: 5px;
+    background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple));
+    outline: none;
+    -webkit-appearance: none;
+}
+
+.input-group #pagesSlider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--neon-blue);
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+    transition: all 0.3s ease;
+}
+
+.input-group #pagesSlider::-webkit-slider-thumb:hover {
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.8);
+    transform: scale(1.1);
+}
+
+.input-group #pagesSlider::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--neon-blue);
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.input-group #pagesSlider::-moz-range-thumb:hover {
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.8);
+    transform: scale(1.1);
+}
+
+.slider-labels {
+    display: flex;
+    justify-content: space-between;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.addons {
+    gap: 1.5rem;
+}
+
+.addon-title {
+    color: var(--neon-purple);
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(0, 212, 255, 0.05);
+    border: 1px solid rgba(0, 212, 255, 0.2);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.checkbox-wrapper:hover {
+    background: rgba(0, 212, 255, 0.1);
+    border-color: var(--neon-blue);
+}
+
+.checkbox-wrapper input[type="checkbox"] {
+    display: none;
+}
+
+.checkbox-custom {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--neon-blue);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.checkbox-wrapper input[type="checkbox"]:checked + .checkbox-custom {
+    background: var(--neon-blue);
+    box-shadow: 0 0 15px rgba(0, 212, 255, 0.6);
+}
+
+.checkbox-wrapper input[type="checkbox"]:checked + .checkbox-custom::after {
+    content: '✓';
+    color: #020511;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+.addon-label {
+    flex: 1;
+    color: var(--text-light);
+    font-weight: 500;
+}
+
+.addon-price {
+    color: var(--neon-blue);
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.price-display {
+    display: flex;
+    justify-content: center;
+    align-items: start;
+}
+
+.price-card {
+    background: linear-gradient(135deg, rgba(0, 212, 255, 0.1) 0%, rgba(176, 0, 255, 0.1) 100%);
+    border: 2px solid var(--neon-blue);
+    border-radius: 12px;
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 350px;
+    box-shadow: 0 0 30px rgba(0, 212, 255, 0.2);
+}
+
+.price-card h3 {
+    color: var(--neon-blue);
+    font-size: 1.3rem;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.price-breakdown {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.price-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--text-light);
+    font-size: 1rem;
+}
+
+.price-item.total {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--neon-blue);
+}
+
+.price-divider {
+    height: 1px;
+    background: rgba(0, 212, 255, 0.3);
+    margin: 0.5rem 0;
+}
+
+.btn-wide {
+    width: 100%;
+}
+
+@media (max-width: 768px) {
+    .calculator-content {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    .price-card {
+        max-width: 100%;
+    }
+}
