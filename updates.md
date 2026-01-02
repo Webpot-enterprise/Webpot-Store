@@ -40,3 +40,28 @@ also this is to be converted into history for the user so that the user in futur
 - add a dashboard
 
 - transaction id or paid ka refresh hona chaiye agar payment huva ho to yes ana chaiye or kitna pay kiya or kitna bai hai voh dikhana hai sheets mein 
+
+- when you login the user must go the dash board and connect all the details of the dashboard to the data of google sheets ... add a back to website button or the webpot logo add a link yo index.html matlab logo pe click kare to main page pe shift karde usko 
+
+
+- login wala bs email pe work kar raha hai phone number se bhi hona chaiye login 
+
+-  sheets mein jo ammount wala section hai usme total amount hena voh web service a total amount ana chaiye for example basic wala 6k hai to total amount bhi 6k ana chaiye no the amount which is been paid through the user 
+still the transaction id is not updated to ... udhar jo utr / wapas jo user type karta hai voh transaction id mein jana chaiye 
+
+- jab order confirm ho tab uska animation thoda sa lag kar raha ha to voh animation ko delte karke wapas laga de naya wala jaha pure page black ho not transparent or ye animation aye 
+
+- user ko ek option ana chaiye after ordering a website to view order or back to webpot wala jaha view order pe voh usko dashboard html wale file pe leke jana chaiye
+
+- active orders in website dashboard amount refresh nai huva hai to voh bhi dekhna padega.
+
+
+
+imp :
+term and service 
+if the amount is due or not given by the customer the webpot team then the website will be shutdown from your side and not be start again with the same 
+it will remain shutdown till the cutomers does not the pay the due amount 
+the amount must recieved in the last week of the month if not then there will be three reminders for the user than website must be down 
+
+
+the orders details must be filled compulsory 

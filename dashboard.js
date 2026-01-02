@@ -1,7 +1,14 @@
 // Dashboard Variables
 let currentOrderID = null;
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwygph08gPs4wdwagXyfT7hH1udQG8F_dny0BwjUbBMCWtkXlEVbNOzIqSJisPN8FSB/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxAyQxlHfJKcFBqJ-LUK6TgbEvOBN8_QbrGdpseK1R_veUxJDMa0FVKLpzpw4rX08rE/exec';
 const MY_UPI_ID = 'kakadiyasuprince@okhdfcbank';
+
+// Prices object based on your tiers
+const servicePrices = {
+    'starter': 2999,
+    'basic': 5999,
+    'premium': 6999
+};
 
 // Authentication Check on Page Load
 window.addEventListener('DOMContentLoaded', () => {
@@ -72,10 +79,16 @@ function loadDashboardData() {
     fetch(APPS_SCRIPT_URL + '?action=get_user_data&email=' + encodeURIComponent(userEmail))
         .then(res => res.json())
         .then(data => {
-            if (data.status === 'success' && data.orders) {
-                populateDashboard(data.orders);
+            if (data.status === 'success') {
+                if (data.orders) {
+                    populateDashboard(data.orders);
+                }
+                // If backend provides serviceType and currentStatus, use refreshDashboard
+                if (data.serviceType && data.currentStatus) {
+                    refreshDashboard(data.serviceType, data.currentStatus);
+                }
             } else {
-                console.log('No orders found or error in response');
+                console.log('No data found or error in response');
                 populateDashboard([]);
             }
         })
@@ -103,19 +116,23 @@ function populateDashboard(orders) {
     });
 
     // Update stat cards
-    document.getElementById('totalOrders').textContent = totalOrders;
-    document.getElementById('totalSpent').textContent = '₹' + totalSpent.toLocaleString('en-IN');
+    document.getElementById('displayTotal').textContent = '₹' + totalSpent.toLocaleString('en-IN');
+    document.getElementById('displayDue').textContent = '₹' + totalDue.toLocaleString('en-IN');
     
-    const pendingDuesCard = document.getElementById('pendingDuesCard');
-    const pendingDuesEl = document.getElementById('pendingDues');
-    pendingDuesEl.textContent = '₹' + totalDue.toLocaleString('en-IN');
-    
-    // Mark as red if there are dues
-    if (totalDue > 0) {
-        pendingDuesCard.classList.add('danger');
-    } else {
-        pendingDuesCard.classList.remove('danger');
+    // Determine current phase based on orders
+    let currentPhase = 'No Active Orders';
+    if (orders.length > 0) {
+        const latestOrder = orders[orders.length - 1];
+        currentPhase = latestOrder.status || 'Processing';
     }
+    document.getElementById('displayStatus').textContent = currentPhase;
+    document.getElementById('displayStatus').className = 'status-pending'; // Default class
+    
+    // Update action message
+    const actionMessage = totalDue > 0 ? 
+        'You have pending payments. Please complete your payments to continue.' : 
+        'All payments are up to date. Your dashboard is ready!';
+    document.getElementById('actionMessage').textContent = actionMessage;
 
     // Populate orders table
     const tableBody = document.getElementById('ordersTableBody');
@@ -165,6 +182,37 @@ function populateDashboard(orders) {
     const lastLogin = localStorage.getItem('webpotLastLogin') || new Date().toLocaleString('en-IN');
     document.getElementById('lastLoginTime').textContent = lastLogin;
     localStorage.setItem('webpotLastLogin', new Date().toLocaleString('en-IN'));
+}
+
+function refreshDashboard(serviceType, currentStatus) {
+    const total = servicePrices[serviceType.toLowerCase()];
+    const due = total / 2;
+
+    // 1. Update Financials
+    document.getElementById('displayTotal').innerText = `₹${total.toLocaleString('en-IN')}`;
+    document.getElementById('displayDue').innerText = `₹${due.toLocaleString('en-IN')}`;
+
+    // 2. Update Status and Action Messages
+    const statusEl = document.getElementById('displayStatus');
+    const messageEl = document.getElementById('actionMessage');
+    
+    statusEl.className = ''; // Clear existing classes
+
+    if (currentStatus === 'Pending') {
+        statusEl.innerText = 'Pending';
+        statusEl.classList.add('status-pending');
+        messageEl.innerText = "Payment Received. Our team is currently verifying your transaction via the backend. Please wait for activation.";
+    } 
+    else if (currentStatus === 'Active') {
+        statusEl.innerText = 'Active Order';
+        statusEl.classList.add('status-active');
+        messageEl.innerText = "Order Verified! Your website is now in the development phase. The dashboard will refresh once the site is ready.";
+    } 
+    else if (currentStatus === 'Delivered') {
+        statusEl.innerText = 'Delivered';
+        statusEl.classList.add('status-delivered');
+        messageEl.innerText = `Your website is ready! Please clear the remaining due of ₹${due.toLocaleString('en-IN')} to receive your final files.`;
+    }
 }
 
 // Open Payment Modal

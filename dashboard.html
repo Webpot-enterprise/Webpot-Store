@@ -49,28 +49,24 @@
             </div>
 
             <!-- Stats Row -->
-            <div class="stats-row">
+            <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-icon">📋</div>
-                    <div class="stat-content">
-                        <p class="stat-label">Total Orders</p>
-                        <p class="stat-value" id="totalOrders">0</p>
-                    </div>
+                    <h3>Total Amount</h3>
+                    <p id="displayTotal">₹0.00</p>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon">💸</div>
-                    <div class="stat-content">
-                        <p class="stat-label">Total Spent</p>
-                        <p class="stat-value" id="totalSpent">₹0</p>
-                    </div>
+                    <h3>Due Amount</h3>
+                    <p id="displayDue" class="text-danger">₹0.00</p>
                 </div>
-                <div class="stat-card" id="pendingDuesCard">
-                    <div class="stat-icon">⚠️</div>
-                    <div class="stat-content">
-                        <p class="stat-label">Pending Dues</p>
-                        <p class="stat-value" id="pendingDues">₹0</p>
-                    </div>
+                <div class="stat-card">
+                    <h3>Current Phase</h3>
+                    <p id="displayStatus" class="status-pending">Loading...</p>
                 </div>
+            </div>
+
+            <div id="actionBox" class="action-container">
+                <span class="info-icon">ℹ️</span>
+                <p id="actionMessage">Initializing your dashboard...</p>
             </div>
 
             <!-- Active Orders Table -->

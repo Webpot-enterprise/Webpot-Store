@@ -160,7 +160,7 @@ function updateServicePrice() {
     if (selectedService && servicePricing[selectedService]) {
         const price = servicePricing[selectedService];
         const halfPrice = Math.round(price / 2);
-        amountField.value = '₹ ' + halfPrice.toLocaleString('en-IN') + ' (50% advance)';
+        amountField.value = '₹ ' + halfPrice.toLocaleString('en-IN') + ' (50% Advance of Monthly Fee)';
         amountField.classList.add('price-update-animation');
         setTimeout(() => {
             amountField.classList.remove('price-update-animation');
@@ -178,53 +178,49 @@ function selectService(serviceName, price) {
 }
 
 // Submit Order Form - Show Payment Modal with QR Code
+// 1. Handle "Place Order" click - Opens QR Modal
 function submitOrder(event) {
     event.preventDefault();
     
+    // Get Form Values
     const service = document.getElementById('service').value;
-    const amount = document.getElementById('amount').value;
     const name = document.getElementById('oname').value;
     const email = document.getElementById('oemail').value;
     const phone = document.getElementById('ophone').value;
     const details = document.getElementById('details') ? document.getElementById('details').value : '';
-    const birthdate = document.getElementById('birthdate') ? document.getElementById('birthdate').value : '';
-    const deadline = document.getElementById('deadline') ? document.getElementById('deadline').value : '';
-    
-    // Extract numeric amount
-    let amountValue = 0;
-    if (service && servicePricing[service]) {
-        amountValue = Math.round(servicePricing[service] / 2); // Half price
+    const amountField = document.getElementById('amount').value; // e.g., "₹ 2,999"
+
+    // Clean up amount string to number
+    let cleanAmount = 0;
+    if(servicePricing[service]) {
+        cleanAmount = servicePricing[service];
     }
-    
-    if (!service || !name || !email || !phone || !amountValue) {
+
+    if (!service || !name || !email || !phone) {
         alert('Please fill in all required fields');
         return;
     }
-    
-    // Store order details for payment
-    window.orderDetails = {
+
+    // Save data temporarily
+    window.pendingOrderData = {
+        action: 'order', // Matches Code.gs
         service: service,
-        amount: amountValue,
+        amount: cleanAmount,
         name: name,
         email: email,
         phone: phone,
-        details: details,
-        birthdate: birthdate,
-        deadline: deadline
+        details: details
     };
-    
-    // Hide order modal and show payment modal
-    closeOrderModal();
-    document.getElementById('paymentModal').style.display = 'block';
-    document.getElementById('paymentForm').reset();
-    
-    // Generate QR code
-    generateUPIQR(amountValue, name);
-    
-    // Focus on UTR input
-    setTimeout(() => {
-        document.getElementById('utrNumber').focus();
-    }, 100);
+
+    // Show Payment Modal
+    document.getElementById('orderModal').style.display = 'none'; // Close form modal
+    const payModal = document.getElementById('paymentModal'); // Make sure you have this ID in HTML
+    if(payModal) {
+        payModal.style.display = 'flex'; // Or 'block'
+        // Optional: Generate QR here if dynamic
+    } else {
+        alert("Payment Modal not found in HTML");
+    }
 }
 
 // Generate UPI QR Code
@@ -320,75 +316,53 @@ function regenerateQR() {
 }
 
 // Verify and Submit Payment
-function verifyAndSubmitPayment(event) {
-    event.preventDefault();
-    
-    const utrNumber = document.getElementById('utrNumber').value.trim();
-    
-    // Strict UTR validation
-    if (!document.getElementById('utrNumber').value.trim()) {
-        alert('Please enter the UTR/Reference Number.');
+// 2. Handle "Verify & Submit" click - Sends Data + UTR
+function verifyUPIPayment() {
+    const utrInput = document.getElementById('utrNumber'); // Ensure input ID matches HTML
+    const utrValue = utrInput.value.trim();
+
+    if (!utrValue) {
+        alert("Please enter the UPI Reference ID / UTR.");
         return;
     }
-    
-    const orderDetails = window.orderDetails;
-    
-    // Show loading state
-    const submitBtn = event.target.querySelector('button[type="submit"]');
-    const originalText = submitBtn.textContent;
-    submitBtn.textContent = 'Processing...';
-    submitBtn.disabled = true;
-    
-    // Show success animation
-    showOrderSuccessAnimation();
-    
-    // Send order data to backend
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwygph08gPs4wdwagXyfT7hH1udQG8F_dny0BwjUbBMCWtkXlEVbNOzIqSJisPN8FSB/exec';
-    
-    const payload = {
-        formType: 'order',
-        name: orderDetails.name,
-        email: orderDetails.email,
-        phone: orderDetails.phone,
-        service: orderDetails.service,
-        amount: orderDetails.amount,
-        details: orderDetails.details,
-        birthdate: orderDetails.birthdate,
-        deadline: orderDetails.deadline,
-        paymentMethod: 'UPI',
-        transactionId: utrNumber
-    };
-    
+
+    // Add UTR to payload
+    window.pendingOrderData.transactionId = utrValue;
+
+    // Show loading text
+    const verifyBtn = document.querySelector('button[onclick="verifyUPIPayment()"]');
+    const originalText = verifyBtn.textContent;
+    verifyBtn.textContent = "Verifying...";
+    verifyBtn.disabled = true;
+
+    // Send to Backend
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxAyQxlHfJKcFBqJ-LUK6TgbEvOBN8_QbrGdpseK1R_veUxJDMa0FVKLpzpw4rX08rE/exec';
+
     fetch(APPS_SCRIPT_URL, {
         method: 'POST',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(window.pendingOrderData)
     })
     .then(res => res.json())
     .then(data => {
-        // Success animation already shown
-        setTimeout(() => {
-            showSuccessModal('Order Confirmed!', `Thank you! Your order for ${orderDetails.service} service has been confirmed. UPI Reference: ${utrNumber}`);
-            closePaymentModal();
+        if (data.status === 'success') {
+            document.getElementById('paymentModal').style.display = 'none';
+            showSuccessModal('Order Confirmed!', `Order ID: ${data.orderId}. We will contact you shortly.`);
+            
+            // Cleanup
             document.getElementById('orderForm').reset();
-            document.getElementById('paymentForm').reset();
-            document.getElementById('amount').value = '';
-            // Redirect to dashboard after 2 seconds
-            setTimeout(() => {
-                window.location.href = 'dashboard.html';
-            }, 2000);
-        }, 1500);
+            utrInput.value = '';
+            window.pendingOrderData = null;
+        } else {
+            alert('Error: ' + data.message);
+        }
     })
     .catch(err => {
         console.error('Error:', err);
-        showSuccessModal('Payment Received!', 'Your payment has been processed. We will contact you shortly.');
-        closePaymentModal();
-        document.getElementById('orderForm').reset();
-        document.getElementById('paymentForm').reset();
-        document.getElementById('amount').value = '';
+        alert('Network error. Please try again.');
     })
     .finally(() => {
-        submitBtn.textContent = originalText;
-        submitBtn.disabled = false;
+        verifyBtn.textContent = originalText;
+        verifyBtn.disabled = false;
     });
 }
 
@@ -451,7 +425,7 @@ function submitForm(event) {
     }
     
     // Send to Google Apps Script backend
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwygph08gPs4wdwagXyfT7hH1udQG8F_dny0BwjUbBMCWtkXlEVbNOzIqSJisPN8FSB/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxAyQxlHfJKcFBqJ-LUK6TgbEvOBN8_QbrGdpseK1R_veUxJDMa0FVKLpzpw4rX08rE/exec';
     
     // Show loading state
     const submitBtn = event.target.querySelector('button[type="submit"]');

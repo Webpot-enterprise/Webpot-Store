@@ -174,25 +174,30 @@ body::before {
     }
 }
 
+/* New Full Screen Black Overlay Success */
 .success-animation {
     position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 9999;
-    animation: successPulse 0.6s ease-out;
-}
-
-.success-animation-content {
-    background: linear-gradient(135deg, rgba(0, 212, 255, 0.1) 0%, rgba(176, 0, 255, 0.1) 100%);
-    border: 2px solid var(--neon-blue);
-    border-radius: 50%;
-    width: 150px;
-    height: 150px;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: #000000;
+    z-index: 10000;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 0 40px rgba(0, 212, 255, 0.6);
+    animation: fadeOverlay 0.5s ease-out;
+}
+.success-animation-content {
+    /* Removed glassmorphism, just simple centering */
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    transform: scale(2);
+}
+@keyframes fadeOverlay {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
 .success-checkmark {
@@ -2027,5 +2032,24 @@ footer {
         width: 45px;
         height: 45px;
         font-size: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    /* Disable entrance animations that cause layout bugs on mobile */
+    .modal-content, 
+    .form-group, 
+    .auth-form, 
+    .btn-primary {
+        animation: none !important;
+        transform: none !important;
+        opacity: 1 !important;
+        transition: opacity 0.3s ease !important;
+    }
+
+    /* Ensure modal fits screen */
+    .modal-content {
+        width: 95% !important;
+        margin: 10% auto !important;
     }
 }

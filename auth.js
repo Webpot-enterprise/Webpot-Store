@@ -9,12 +9,12 @@ function handleCredentialResponse(response) {
     const userData = JSON.parse(jsonPayload);
     
     // Send to Google Apps Script backend
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwygph08gPs4wdwagXyfT7hH1udQG8F_dny0BwjUbBMCWtkXlEVbNOzIqSJisPN8FSB/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxAyQxlHfJKcFBqJ-LUK6TgbEvOBN8_QbrGdpseK1R_veUxJDMa0FVKLpzpw4rX08rE/exec';
     
     fetch(APPS_SCRIPT_URL, {
         method: 'POST',
         body: JSON.stringify({
-            action: 'register', // Updated to match new backend router
+            action: 'register',
             name: userData.name,
             email: userData.email,
             password: 'google_oauth_' + userData.sub
@@ -22,7 +22,6 @@ function handleCredentialResponse(response) {
     })
     .then(res => res.json())
     .then(data => {
-        // Allow login if success OR if user already exists
         if (data.status === 'success' || data.status === 'user_already_exists') {
             localStorage.setItem('webpotUserLoggedIn', 'true');
             localStorage.setItem('webpotUserEmail', userData.email);
@@ -51,7 +50,7 @@ function toggleForms(event) {
 // Toggle password visibility
 function togglePasswordVisibility(fieldId) {
     const field = document.getElementById(fieldId);
-    const button = event.currentTarget; // Safer than event.target
+    const button = event.currentTarget;
     const isPassword = field.type === 'password';
     field.type = isPassword ? 'text' : 'password';
     button.textContent = isPassword ? '👁️‍🗨️' : '👁️';
@@ -61,7 +60,7 @@ function togglePasswordVisibility(fieldId) {
 function handleLogin(event) {
     event.preventDefault();
     
-    const emailOrPhone = document.getElementById('login-email-or-phone').value.trim(); // Added trim()
+    const emailOrPhone = document.getElementById('login-email-or-phone').value.trim();
     const password = document.getElementById('login-password').value;
     
     if (!emailOrPhone || !password) {
@@ -75,20 +74,19 @@ function handleLogin(event) {
     submitBtn.textContent = 'Logging in...';
     submitBtn.disabled = true;
     
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwygph08gPs4wdwagXyfT7hH1udQG8F_dny0BwjUbBMCWtkXlEVbNOzIqSJisPN8FSB/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxAyQxlHfJKcFBqJ-LUK6TgbEvOBN8_QbrGdpseK1R_veUxJDMa0FVKLpzpw4rX08rE/exec';
     
     fetch(APPS_SCRIPT_URL, {
         method: 'POST',
         body: JSON.stringify({
-            action: 'login', // Matches backend router
-            email: emailOrPhone, // CRITICAL FIX: Sending as 'email' so backend finds it
+            action: 'login',
+            loginInput: emailOrPhone,
             password: password
         })
     })
     .then(res => res.json())
     .then(data => {
         if (data.status === 'success') {
-            // Success
             localStorage.setItem('webpotUserLoggedIn', 'true');
             localStorage.setItem('webpotUserEmail', data.user.email);
             localStorage.setItem('webpotUserName', data.user.name);
@@ -101,7 +99,7 @@ function handleLogin(event) {
             submitBtn.textContent = originalText;
             submitBtn.disabled = false;
         } else {
-            alert('Login failed: ' + data.message);
+            alert(data.message);
             submitBtn.textContent = originalText;
             submitBtn.disabled = false;
         }
@@ -120,6 +118,7 @@ function handleRegister(event) {
     
     const name = document.getElementById('register-name').value;
     const email = document.getElementById('register-email').value.trim();
+    const phone = document.getElementById('register-phone').value.trim();
     const password = document.getElementById('register-password').value;
     const confirm = document.getElementById('register-confirm').value;
     
@@ -133,7 +132,7 @@ function handleRegister(event) {
     submitBtn.textContent = 'Creating account...';
     submitBtn.disabled = true;
     
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwygph08gPs4wdwagXyfT7hH1udQG8F_dny0BwjUbBMCWtkXlEVbNOzIqSJisPN8FSB/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxAyQxlHfJKcFBqJ-LUK6TgbEvOBN8_QbrGdpseK1R_veUxJDMa0FVKLpzpw4rX08rE/exec';
     
     fetch(APPS_SCRIPT_URL, {
         method: 'POST',
@@ -141,6 +140,7 @@ function handleRegister(event) {
             action: 'register',
             name: name,
             email: email,
+            phone: phone,
             password: password
         })
     })
@@ -156,7 +156,6 @@ function handleRegister(event) {
             
         } else if (data.status === 'user_already_exists') {
             alert('This email is already registered. Please log in.');
-            // Auto switch to login tab
             toggleForms(); 
             document.getElementById('login-email-or-phone').value = email;
             submitBtn.textContent = originalText;
@@ -188,5 +187,110 @@ function showSuccessModal(title, message) {
 function closeSuccess() {
     const modal = document.getElementById('successModal');
     if(modal) modal.classList.remove('show');
+}
+
+// --- FORCED READ LOGIC ---
+let termsScrolled = false;
+let privacyScrolled = false;
+
+document.addEventListener('DOMContentLoaded', () => {
+    loadLegalContent();
+    setupScrollListeners();
+});
+
+// Load external HTML content into modals
+function loadLegalContent() {
+    // Load Terms
+    fetch('terms.html')
+        .then(res => res.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            // Try to get container, fallback to body
+            const content = doc.querySelector('.terms-container') || doc.body;
+            document.getElementById('termsBody').innerHTML = content.innerHTML;
+        })
+        .catch(e => console.error('Error loading terms:', e));
+
+    // Load Privacy
+    fetch('privacy.html')
+        .then(res => res.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const content = doc.querySelector('.privacy-container') || doc.body;
+            document.getElementById('privacyBody').innerHTML = content.innerHTML;
+        })
+        .catch(e => console.error('Error loading privacy:', e));
+}
+
+// Handle Checkbox Click
+function handleTermsClick(event) {
+    const checkbox = event.target;
+
+    // If already checked via the flow, allow unchecking (optional) or do nothing
+    if (checkbox.checked && !privacyScrolled) {
+        event.preventDefault(); // Stop it from checking immediately
+        checkbox.checked = false;
+        
+        // Start the Flow
+        document.getElementById('termsModal').style.display = 'flex';
+        // Reset scroll positions
+        document.getElementById('termsBody').scrollTop = 0;
+        document.getElementById('privacyBody').scrollTop = 0;
+    }
+}
+
+// Setup Scroll Detection
+function setupScrollListeners() {
+    const termsBody = document.getElementById('termsBody');
+    const privacyBody = document.getElementById('privacyBody');
+
+    // Terms Scroll Listener
+    termsBody.addEventListener('scroll', function() {
+        // Check if scrolled to bottom (allow 10px buffer)
+        if (this.scrollTop + this.clientHeight >= this.scrollHeight - 10) {
+            if (!termsScrolled) {
+                termsScrolled = true;
+                // Small delay for UX, then switch to Privacy
+                setTimeout(() => {
+                    closeTermsModal();
+                    openPrivacyModal();
+                }, 500);
+            }
+        }
+    });
+
+    // Privacy Scroll Listener
+    privacyBody.addEventListener('scroll', function() {
+        if (this.scrollTop + this.clientHeight >= this.scrollHeight - 10) {
+            if (!privacyScrolled) {
+                privacyScrolled = true;
+                setTimeout(() => {
+                    closePrivacyModal();
+                    // Auto Tick the Checkbox
+                    const checkbox = document.getElementById('termsCheckbox');
+                    checkbox.checked = true;
+                    // Visual feedback
+                    checkbox.parentElement.style.color = '#00d4ff'; 
+                    checkbox.parentElement.classList.add('verified');
+                }, 500);
+            }
+        }
+    });
+}
+
+// Helper to open Privacy specifically for the flow
+function openPrivacyModal() {
+    document.getElementById('privacyModal').style.display = 'flex';
+}
+
+// Standard Close functions (ensure these exist or match your existing ones)
+function closeTermsModal() {
+    document.getElementById('termsModal').style.display = 'none';
+}
+
+function closePrivacyModal() {
+    document.getElementById('privacyModal').style.display = 'none';
 }
 
