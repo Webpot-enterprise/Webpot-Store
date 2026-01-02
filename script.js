@@ -188,8 +188,7 @@ function submitOrder(event) {
     const email = document.getElementById('oemail').value;
     const phone = document.getElementById('ophone').value;
     const details = document.getElementById('details') ? document.getElementById('details').value : '';
-    const amountField = document.getElementById('amount').value; // e.g., "₹ 2,999"
-
+    
     // Clean up amount string to number
     let cleanAmount = 0;
     if(servicePricing[service]) {
@@ -203,7 +202,7 @@ function submitOrder(event) {
 
     // Save data temporarily
     window.pendingOrderData = {
-        action: 'order', // Matches Code.gs
+        action: 'order',
         service: service,
         amount: cleanAmount,
         name: name,
@@ -213,11 +212,12 @@ function submitOrder(event) {
     };
 
     // Show Payment Modal
-    document.getElementById('orderModal').style.display = 'none'; // Close form modal
-    const payModal = document.getElementById('paymentModal'); // Make sure you have this ID in HTML
+    document.getElementById('orderModal').style.display = 'none';
+    const payModal = document.getElementById('paymentModal');
     if(payModal) {
-        payModal.style.display = 'flex'; // Or 'block'
-        // Optional: Generate QR here if dynamic
+        payModal.style.display = 'flex';
+        // FIX: Actually generate the QR code now!
+        generateUPIQR(cleanAmount, name);
     } else {
         alert("Payment Modal not found in HTML");
     }
@@ -308,10 +308,10 @@ function startQRTimer() {
 
 // Regenerate QR Code
 function regenerateQR() {
-    // Get the stored order details
-    const orderDetails = window.orderDetails;
-    if (orderDetails) {
-        generateUPIQR(orderDetails.amount, orderDetails.name);
+    // FIX: Use pendingOrderData instead of orderDetails
+    const orderData = window.pendingOrderData;
+    if (orderData) {
+        generateUPIQR(orderData.amount, orderData.name);
     }
 }
 
