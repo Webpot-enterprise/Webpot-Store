@@ -11,11 +11,12 @@
             background: linear-gradient(-45deg, #020511, #0f1425, #1a1f2e, #020511);
             background-size: 400% 400%;
             color: #e0e0e0;
-            padding: 2rem;
+            padding: 0;
+            padding-top: 80px;
         }
         .privacy-container {
             max-width: 900px;
-            margin: 0 auto;
+            margin: 2rem auto;
             background: linear-gradient(135deg, rgba(15, 20, 37, 0.9), rgba(0, 102, 255, 0.05));
             border: 2px solid #00d4ff;
             border-radius: 10px;
@@ -47,22 +48,17 @@
             margin-bottom: 0.5rem;
         }
         .back-link {
-            display: inline-block;
-            margin-bottom: 2rem;
-            color: #00d4ff;
-            text-decoration: none;
-            border: 1px solid #00d4ff;
-            padding: 0.5rem 1rem;
-            border-radius: 5px;
-            transition: all 0.3s ease;
-        }
-        .back-link:hover {
-            background: rgba(0, 212, 255, 0.1);
-            box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+            display: none;
         }
     </style>
 </head>
 <body>
+    <!-- Navigation Header -->
+    <div class="nav-header">
+        <a href="index.html" class="back-btn">← Back to Home</a>
+        <h2 style="color: var(--neon-blue); margin: 0;">Privacy Policy</h2>
+        <div style="width: 100px;"></div>
+    </div>
     <div class="privacy-container">
         <a href="index.html" class="back-link">← Back to Home</a>
         
