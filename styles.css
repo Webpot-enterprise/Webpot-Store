@@ -1,3 +1,7 @@
+html {
+    scroll-behavior: smooth;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -827,7 +831,7 @@ nav a:hover::after {
     cursor: pointer;
     position: relative;
     overflow: hidden;
-    opacity: 0;
+    opacity: 1;
 }
 
 .service-card.in-view {

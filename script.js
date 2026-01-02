@@ -46,6 +46,11 @@ function displayUserProfile() {
     const loginLink = document.querySelector('a[href="auth.html"]');
     
     if (isLoggedIn && userName) {
+        // Ensure profile container is visible
+        if (profileDiv) {
+            profileDiv.style.display = 'flex';
+        }
+        
         // Show profile picture if available
         if (userProfilePic) {
             profilePic.src = userProfilePic;
@@ -55,7 +60,9 @@ function displayUserProfile() {
             profilePic.onclick = () => window.location.href = 'dashboard.html';
         }
         
+        // Set user name and make it clickable
         userNameDisplay.textContent = userName.split(' ')[0]; // Show first name
+        userNameDisplay.style.display = 'inline';
         userNameDisplay.style.cursor = 'pointer';
         userNameDisplay.onclick = () => window.location.href = 'dashboard.html';
         logoutBtn.style.display = 'inline-block';
@@ -67,6 +74,7 @@ function displayUserProfile() {
     } else {
         profilePic.style.display = 'none';
         userNameDisplay.textContent = '';
+        userNameDisplay.style.display = 'none';
         logoutBtn.style.display = 'none';
         
         // Show login link
@@ -134,10 +142,20 @@ document.addEventListener('DOMContentLoaded', () => {
     loadUpdates(); // Load updates from updates.html
     loadTestimonials(); // Load testimonials section
     initSessionTimeout(); // Initialize session timeout
+    
     const serviceCards = document.querySelectorAll('.service-card');
-    serviceCards.forEach(card => {
-        observer.observe(card);
-    });
+    
+    // Fallback: if IntersectionObserver not supported, show cards immediately
+    if (!('IntersectionObserver' in window)) {
+        serviceCards.forEach(card => {
+            card.classList.add('in-view');
+        });
+    } else {
+        // Use observer for supported browsers
+        serviceCards.forEach(card => {
+            observer.observe(card);
+        });
+    }
 });
 
 // Modal Functions
@@ -150,11 +168,21 @@ function checkLoginStatus() {
     return true;
 }
 
-function openOrderModal() {
-    if (!checkLoginStatus()) return;
-    document.getElementById('orderModal').style.display = 'block';
+// Global order modal function - checks login before opening
+window.openOrderModal = function() {
+    const isLoggedIn = localStorage.getItem('webpotUserLoggedIn');
+    
+    if (!isLoggedIn) {
+        window.location.href = 'auth.html';
+        return;
+    }
+    
+    const orderModal = document.getElementById('orderModal');
+    if (orderModal) {
+        orderModal.style.display = 'block';
+    }
     closeMenu();
-}
+};
 
 function closeOrderModal() {
     document.getElementById('orderModal').style.display = 'none';
@@ -737,10 +765,16 @@ function calculateCustomPrice() {
     const pagesValue = document.getElementById('pagesValue');
     const addons = document.querySelectorAll('input[name="addon"]:checked');
     
-    const pages = parseInt(pagesSlider.value);
-    pagesValue.textContent = pages;
+    if (!pagesSlider) return; // Guard clause if element doesn't exist
     
-    // Base price calculation: 2000 + (pages * 500)
+    const pages = parseInt(pagesSlider.value) || 5;
+    
+    // Update pages display
+    if (pagesValue) {
+        pagesValue.textContent = pages;
+    }
+    
+    // Base price calculation: ₹2000 + (pages * ₹500)
     const basePrice = BASE_PRICE + (pages * PRICE_PER_PAGE);
     
     // Add-ons sum
@@ -751,10 +785,14 @@ function calculateCustomPrice() {
     
     const totalPrice = basePrice + addonsPrice;
     
-    // Update display
-    document.getElementById('basePriceDisplay').textContent = '₹' + basePrice.toLocaleString('en-IN');
-    document.getElementById('addonsPriceDisplay').textContent = '₹' + addonsPrice.toLocaleString('en-IN');
-    document.getElementById('totalPriceDisplay').textContent = '₹' + totalPrice.toLocaleString('en-IN');
+    // Update display elements with instant feedback
+    const basePriceDisplay = document.getElementById('basePriceDisplay');
+    const addonsPriceDisplay = document.getElementById('addonsPriceDisplay');
+    const totalPriceDisplay = document.getElementById('totalPriceDisplay');
+    
+    if (basePriceDisplay) basePriceDisplay.textContent = '₹' + basePrice.toLocaleString('en-IN');
+    if (addonsPriceDisplay) addonsPriceDisplay.textContent = '₹' + addonsPrice.toLocaleString('en-IN');
+    if (totalPriceDisplay) totalPriceDisplay.textContent = '₹' + totalPrice.toLocaleString('en-IN');
     
     // Store for later use
     window.customPackagePrice = totalPrice;
@@ -762,9 +800,7 @@ function calculateCustomPrice() {
 }
 
 function selectCustomService() {
-    if (!window.customPackagePrice) {
-        calculateCustomPrice();
-    }
+    calculateCustomPrice(); // Ensure latest prices
     
     const pages = window.customPackagePages || 5;
     const price = window.customPackagePrice || 4500;
@@ -772,22 +808,31 @@ function selectCustomService() {
     selectService('Custom Package (' + pages + ' Pages)', price);
 }
 
-// Initialize calculator on page load
-document.addEventListener('DOMContentLoaded', () => {
+// Initialize calculator on page load with robust event handling
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initCalculator);
+} else {
+    initCalculator();
+}
+
+function initCalculator() {
     const pagesSlider = document.getElementById('pagesSlider');
     const addonCheckboxes = document.querySelectorAll('input[name="addon"]');
     
     if (pagesSlider) {
+        // Attach listener with proper event binding
         pagesSlider.addEventListener('input', calculateCustomPrice);
-        calculateCustomPrice(); // Initial calculation
+        // Initial calculation
+        calculateCustomPrice();
     }
     
+    // Attach listeners to all addon checkboxes
     if (addonCheckboxes.length > 0) {
         addonCheckboxes.forEach(checkbox => {
             checkbox.addEventListener('change', calculateCustomPrice);
         });
     }
-});
+}
         </div>
     `).join('');
 }
