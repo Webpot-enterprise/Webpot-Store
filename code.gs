@@ -337,21 +337,90 @@ function handlePaymentUpdate(data) {
 // ---------------- EMAIL HELPER ----------------
 function sendOrderEmails(data, orderId) {
   try {
-    var adminEmail = "engagewebpot@gmail.com"; 
+    var adminEmail = "engagewebpot@gmail.com";
     
-    // Admin Alert
+    // Professional HTML template for Admin Alert
+    var adminHtmlBody = `
+      <div style="font-family: helvetica, Arial, sans-serif; background-color: #1a1a2e; color: #e0e0e0; padding: 20px; border-radius: 8px;">
+        <h2 style="color: #00d4ff; border-bottom: 2px solid #00d4ff; padding-bottom: 10px;">🎯 New Order Received</h2>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+          <tr style="background-color: #0f1425;">
+            <td style="padding: 10px; font-weight: bold; color: #00d4ff;">Order ID:</td>
+            <td style="padding: 10px;">${orderId}</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px; font-weight: bold; color: #00d4ff;">Client Name:</td>
+            <td style="padding: 10px;">${data.name}</td>
+          </tr>
+          <tr style="background-color: #0f1425;">
+            <td style="padding: 10px; font-weight: bold; color: #00d4ff;">Service Type:</td>
+            <td style="padding: 10px;">${data.service}</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px; font-weight: bold; color: #00d4ff;">Total Amount:</td>
+            <td style="padding: 10px; font-size: 16px; color: #00d4ff; font-weight: bold;">₹${(data.amount || 0).toLocaleString('en-IN')}</td>
+          </tr>
+          <tr style="background-color: #0f1425;">
+            <td style="padding: 10px; font-weight: bold; color: #00d4ff;">Email:</td>
+            <td style="padding: 10px;">${data.email}</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px; font-weight: bold; color: #00d4ff;">Phone:</td>
+            <td style="padding: 10px;">${data.phone || 'N/A'}</td>
+          </tr>
+        </table>
+        <p style="margin-top: 20px; text-align: center;">
+          <a href="https://script.google.com/macros/s/YOUR_APPS_SCRIPT_ID/usercss" style="background-color: #00d4ff; color: #000; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold;">View Admin Dashboard</a>
+        </p>
+      </div>
+    `;
+    
+    // Admin Alert Email
     MailApp.sendEmail({
       to: adminEmail,
-      subject: "💰 New Order: " + orderId,
-      htmlBody: "<h3>New Order Received</h3><p>Service: " + data.service + "</p><p>Total: ₹" + (data.amount || 0) + "</p>"
+      subject: "💰 New Order: " + orderId + " - " + data.service,
+      htmlBody: adminHtmlBody
     });
     
-    // Client Confirmation
+    // Professional HTML template for Client Confirmation
     var firstName = data.name.split(" ")[0];
+    var clientHtmlBody = `
+      <div style="font-family: helvetica, Arial, sans-serif; background-color: #1a1a2e; color: #e0e0e0; padding: 20px; border-radius: 8px;">
+        <div style="background-color: #0f1425; padding: 15px; border-radius: 4px; margin-bottom: 20px; border-left: 4px solid #00d4ff;">
+          <h1 style="color: #00d4ff; margin: 0;">✅ Order Confirmed!</h1>
+        </div>
+        <h2 style="color: #e0e0e0;">Hi ${firstName},</h2>
+        <p style="line-height: 1.6;">Thank you for placing an order with <strong>Webpot</strong>. We've received your request and are excited to work with you!</p>
+        
+        <div style="background-color: #0f1425; padding: 15px; border-radius: 4px; margin: 20px 0;">
+          <h3 style="color: #00d4ff; margin-top: 0;">Order Summary</h3>
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+              <td style="padding: 8px; font-weight: bold;">Order ID:</td>
+              <td style="padding: 8px; color: #00d4ff;">${orderId}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px; font-weight: bold;">Service:</td>
+              <td style="padding: 8px;">${data.service}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px; font-weight: bold;">Total Amount:</td>
+              <td style="padding: 8px; color: #00d4ff; font-weight: bold;">₹${(data.amount || 0).toLocaleString('en-IN')}</td>
+            </tr>
+          </table>
+        </div>
+        
+        <p style="line-height: 1.6;">You can track your order status and manage payments through your <strong>Dashboard</strong>. Our team will reach out shortly with project details.</p>
+        
+        <p style="color: #999; font-size: 12px; margin-top: 30px;">For support, reply to this email or contact us at <strong>engagewebpot@gmail.com</strong></p>
+      </div>
+    `;
+    
+    // Client Confirmation Email
     MailApp.sendEmail({
       to: data.email,
       subject: "Order Confirmation - Webpot (" + orderId + ")",
-      htmlBody: "<h2>Thanks " + firstName + "!</h2><p>We received your order for <strong>" + data.service + "</strong>.</p><p>You can track your order status and make payments in your Dashboard.</p>"
+      htmlBody: clientHtmlBody
     });
   } catch (e) {
     console.error("Email error: " + e.toString());

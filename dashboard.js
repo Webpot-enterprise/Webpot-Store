@@ -503,33 +503,44 @@ function generateInvoice(order) {
     const dark = [26, 26, 46];
     const text = [200, 200, 200];
 
+    // Header background
     pdf.setFillColor(...dark);
     pdf.rect(0, 0, 210, 40, 'F');
     
+    // WEBPOT brand - 22pt bold
     pdf.setFont('helvetica', 'bold');
-    pdf.setFontSize(24);
+    pdf.setFontSize(22);
     pdf.setTextColor(...cyan);
     pdf.text('WEBPOT', 20, 25);
     
+    // Tax Invoice label - 10pt normal
     pdf.setFont('helvetica', 'normal');
     pdf.setFontSize(10);
     pdf.setTextColor(...text);
     pdf.text('Tax Invoice', 150, 25);
 
+    // Invoice No - 12pt bold
+    pdf.setFont('helvetica', 'bold');
     pdf.setFontSize(12);
     pdf.setTextColor(...cyan);
     pdf.text(`Invoice No: ${order.orderId}`, 20, 55);
     
+    // Date and Status - 10pt normal
+    pdf.setFont('helvetica', 'normal');
     pdf.setFontSize(10);
     pdf.setTextColor(...text);
     pdf.text(`Date: ${new Date(order.date).toLocaleDateString('en-IN')}`, 20, 65);
     pdf.text(`Status: ${order.status}`, 20, 75);
 
+    // Client Details section heading
     pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(10);
     pdf.setTextColor(...cyan);
     pdf.text('Client Details:', 20, 95);
     
+    // Client details content
     pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(10);
     pdf.setTextColor(...text);
     const userName = localStorage.getItem('webpotUserName') || 'N/A';
     const userEmail = localStorage.getItem('webpotUserEmail') || 'N/A';
@@ -537,6 +548,7 @@ function generateInvoice(order) {
     pdf.text(`Name: ${userName}`, 20, 105);
     pdf.text(`Email: ${userEmail}`, 20, 115);
 
+    // Invoice details table
     const tableData = [
         ['Description', 'Amount (₹)'],
         [order.service, order.amount.toFixed(2)],
@@ -548,12 +560,25 @@ function generateInvoice(order) {
         startY: 130,
         head: [tableData[0]],
         body: tableData.slice(1),
-        headStyles: { fillColor: cyan, textColor: dark, fontStyle: 'bold' },
-        bodyStyles: { textColor: text, fillColor: [22, 33, 62] },
+        headStyles: { 
+            fillColor: cyan, 
+            textColor: dark, 
+            fontStyle: 'bold',
+            fontSize: 11,
+            font: 'helvetica'
+        },
+        bodyStyles: { 
+            textColor: text, 
+            fillColor: [22, 33, 62],
+            fontSize: 10,
+            font: 'helvetica'
+        },
         margin: 20
     });
 
+    // Footer
     const finalY = pdf.lastAutoTable.finalY + 20;
+    pdf.setFont('helvetica', 'normal');
     pdf.setFontSize(10);
     pdf.setTextColor(...text);
     pdf.text('Thank you for choosing Webpot!', 20, finalY);

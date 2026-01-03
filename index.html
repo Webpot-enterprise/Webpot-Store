@@ -23,11 +23,6 @@
                 <li><a href="#contact" onclick="closeMenu()">Contact</a></li>
                 <li><a href="auth.html" onclick="closeMenu()">Login</a></li>
             </ul>
-            <div class="user-profile" id="userProfile">
-                <img id="profilePic" alt="Profile" class="profile-pic" style="display:none;">
-                <span id="userNameDisplay" class="user-name"></span>
-                <button class="logout-btn" id="logoutBtn" onclick="logoutUser()" style="display:none;">Logout</button>
-            </div>
             <div class="notification-wrapper">
                 <button class="notification-btn" onclick="toggleNotifications()" title="Updates & Notifications">
                     <svg class="bell-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -276,16 +271,8 @@
                     <input type="tel" id="ophone" name="ophone">
                 </div>
                 <div class="form-group">
-                    <label for="birthdate">📅 Date of Birth</label>
-                    <input type="date" id="birthdate" name="birthdate" class="date-input">
-                </div>
-                <div class="form-group">
                     <label for="details">Project Details</label>
                     <textarea id="details" name="details" placeholder="Tell us about your project, timeline, and specific requirements..."></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="deadline">Desired Deadline</label>
-                    <input type="date" id="deadline" name="deadline">
                 </div>
                 <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;">Place Order</button>
             </form>

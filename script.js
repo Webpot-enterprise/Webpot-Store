@@ -33,69 +33,6 @@ const observer = new IntersectionObserver((entries) => {
 }, observerOptions);
 
 // Display user profile when logged in
-function displayUserProfile() {
-    const userName = localStorage.getItem('webpotUserName');
-    const userEmail = localStorage.getItem('webpotUserEmail');
-    const userProfilePic = localStorage.getItem('webpotUserProfilePic');
-    const isLoggedIn = localStorage.getItem('webpotUserLoggedIn');
-    
-    const profileDiv = document.getElementById('userProfile');
-    const profilePic = document.getElementById('profilePic');
-    const userNameDisplay = document.getElementById('userNameDisplay');
-    const logoutBtn = document.getElementById('logoutBtn');
-    const loginLink = document.querySelector('a[href="auth.html"]');
-    
-    if (isLoggedIn && userName) {
-        // Ensure profile container is visible
-        if (profileDiv) {
-            profileDiv.style.display = 'flex';
-            profileDiv.style.visibility = 'visible';
-        }
-        
-        // Show profile picture if available
-        if (profilePic && userProfilePic) {
-            profilePic.src = userProfilePic;
-            profilePic.style.display = 'inline-block';
-            profilePic.title = userName;
-            profilePic.style.cursor = 'pointer';
-            profilePic.onclick = () => window.location.href = 'dashboard.html';
-        }
-        
-        // Set user name and make it clickable
-        if (userNameDisplay) {
-            userNameDisplay.textContent = userName.split(' ')[0]; // Show first name
-            userNameDisplay.style.display = 'inline';
-            userNameDisplay.style.cursor = 'pointer';
-            userNameDisplay.onclick = () => window.location.href = 'dashboard.html';
-        }
-        
-        // Show logout button
-        if (logoutBtn) {
-            logoutBtn.style.display = 'inline-block';
-        }
-        
-        // Hide login link
-        if (loginLink) {
-            loginLink.parentElement.style.display = 'none';
-        }
-    } else {
-        // Hide profile section when not logged in
-        if (profileDiv) {
-            profileDiv.style.display = 'none';
-        }
-        
-        if (profilePic) profilePic.style.display = 'none';
-        if (userNameDisplay) userNameDisplay.textContent = '';
-        if (userNameDisplay) userNameDisplay.style.display = 'none';
-        if (logoutBtn) logoutBtn.style.display = 'none';
-        
-        // Show login link
-        if (loginLink) {
-            loginLink.parentElement.style.display = 'block';
-        }
-    }
-}
-
 // Update navigation state based on login status
 function updateNavState() {
     const isLoggedIn = localStorage.getItem('webpotUserLoggedIn');
@@ -210,7 +147,6 @@ function initSessionTimeout() {
 
 // Observe service cards on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
-    displayUserProfile(); // Show user profile on page load
     updateNavState(); // Update navigation state (show/hide user nav info)
     loadUpdates(); // Load updates from updates.html
     loadTestimonials(); // Load testimonials section
