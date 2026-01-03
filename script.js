@@ -46,6 +46,11 @@ function displayUserProfile() {
     const loginLink = document.querySelector('a[href="auth.html"]');
     
     if (isLoggedIn && userName) {
+        // Ensure profile container is visible
+        if (profileDiv) {
+            profileDiv.style.display = 'flex';
+        }
+        
         // Show profile picture if available
         if (userProfilePic) {
             profilePic.src = userProfilePic;
@@ -55,7 +60,9 @@ function displayUserProfile() {
             profilePic.onclick = () => window.location.href = 'dashboard.html';
         }
         
+        // Set user name and make it clickable
         userNameDisplay.textContent = userName.split(' ')[0]; // Show first name
+        userNameDisplay.style.display = 'inline';
         userNameDisplay.style.cursor = 'pointer';
         userNameDisplay.onclick = () => window.location.href = 'dashboard.html';
         logoutBtn.style.display = 'inline-block';
@@ -67,6 +74,7 @@ function displayUserProfile() {
     } else {
         profilePic.style.display = 'none';
         userNameDisplay.textContent = '';
+        userNameDisplay.style.display = 'none';
         logoutBtn.style.display = 'none';
         
         // Show login link
@@ -74,6 +82,52 @@ function displayUserProfile() {
             loginLink.style.display = 'inline';
         }
     }
+}
+
+// Update navigation state based on login status
+function updateNavState() {
+    const isLoggedIn = localStorage.getItem('webpotUserLoggedIn');
+    const userName = localStorage.getItem('webpotUserName');
+    
+    const navUserName = document.getElementById('navUserName');
+    const userNavInfo = document.getElementById('userNavInfo');
+    const loginLink = document.querySelector('a[href="auth.html"]');
+    
+    if (isLoggedIn && userName) {
+        // Show user nav info
+        if (userNavInfo) {
+            userNavInfo.style.display = 'flex';
+        }
+        
+        // Set user name
+        if (navUserName) {
+            navUserName.textContent = userName.split(' ')[0]; // First name
+        }
+        
+        // Hide login link
+        if (loginLink) {
+            loginLink.parentElement.style.display = 'none';
+        }
+    } else {
+        // Hide user nav info
+        if (userNavInfo) {
+            userNavInfo.style.display = 'none';
+        }
+        
+        // Show login link
+        if (loginLink) {
+            loginLink.parentElement.style.display = 'block';
+        }
+    }
+}
+
+// Logout from navigation
+function navLogout() {
+    localStorage.removeItem('webpotUserLoggedIn');
+    localStorage.removeItem('webpotUserEmail');
+    localStorage.removeItem('webpotUserName');
+    localStorage.removeItem('webpotUserProfilePic');
+    window.location.reload();
 }
 
 // Logout user
@@ -131,12 +185,24 @@ function initSessionTimeout() {
 // Observe service cards on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
     displayUserProfile(); // Show user profile on page load
+    updateNavState(); // Update navigation state (show/hide user nav info)
     loadUpdates(); // Load updates from updates.html
+    loadTestimonials(); // Load testimonials section
     initSessionTimeout(); // Initialize session timeout
+    
     const serviceCards = document.querySelectorAll('.service-card');
-    serviceCards.forEach(card => {
-        observer.observe(card);
-    });
+    
+    // Fallback: if IntersectionObserver not supported, show cards immediately
+    if (!('IntersectionObserver' in window)) {
+        serviceCards.forEach(card => {
+            card.classList.add('in-view');
+        });
+    } else {
+        // Use observer for supported browsers
+        serviceCards.forEach(card => {
+            observer.observe(card);
+        });
+    }
 });
 
 // Modal Functions
@@ -149,11 +215,23 @@ function checkLoginStatus() {
     return true;
 }
 
-function openOrderModal() {
-    if (!checkLoginStatus()) return;
-    document.getElementById('orderModal').style.display = 'block';
+// Global order modal function - checks login before opening
+window.openOrderModal = function() {
+    const isLoggedIn = localStorage.getItem('webpotUserLoggedIn');
+    
+    if (!isLoggedIn) {
+        // User not logged in - redirect to auth
+        window.location.href = 'auth.html';
+        return;
+    }
+    
+    // User is logged in - open order modal
+    const orderModal = document.getElementById('orderModal');
+    if (orderModal) {
+        orderModal.style.display = 'block';
+    }
     closeMenu();
-}
+};
 
 function closeOrderModal() {
     document.getElementById('orderModal').style.display = 'none';
@@ -420,7 +498,7 @@ function verifyAndSubmitPayment(event) {
     verifyBtn.disabled = true;
 
     // Send to Backend
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzVFw6UYPH-_mB4Yf67PjnFcigs96WwgNhphaJU1WYIxEFqGIsFWr77e6DYHgSDYiBr/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbytVOTbt78wKn3TVjypTy4tkGiGUpetyXhw7VB6nJZmnMPsPWoW6xHMr71xNUCTvEq1/exec';
 
     fetch(APPS_SCRIPT_URL, {
         method: 'POST',
@@ -509,7 +587,7 @@ function submitForm(event) {
     }
     
     // Send to Google Apps Script backend
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzVFw6UYPH-_mB4Yf67PjnFcigs96WwgNhphaJU1WYIxEFqGIsFWr77e6DYHgSDYiBr/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbytVOTbt78wKn3TVjypTy4tkGiGUpetyXhw7VB6nJZmnMPsPWoW6xHMr71xNUCTvEq1/exec';
     
     // Show loading state
     const submitBtn = event.target.querySelector('button[type="submit"]');
@@ -666,7 +744,7 @@ function payLater() {
     }
     
     // Send order with NO transaction ID (Backend will mark as Pending / Due)
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzVFw6UYPH-_mB4Yf67PjnFcigs96WwgNhphaJU1WYIxEFqGIsFWr77e6DYHgSDYiBr/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbytVOTbt78wKn3TVjypTy4tkGiGUpetyXhw7VB6nJZmnMPsPWoW6xHMr71xNUCTvEq1/exec';
     
     fetch(APPS_SCRIPT_URL, {
         method: 'POST',
@@ -685,4 +763,127 @@ function payLater() {
         console.error('Error:', err);
         alert('Network error. Please try again.');
     });
+}
+
+function loadTestimonials() {
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbytVOTbt78wKn3TVjypTy4tkGiGUpetyXhw7VB6nJZmnMPsPWoW6xHMr71xNUCTvEq1/exec';
+    
+    fetch(APPS_SCRIPT_URL + '?action=get_public_reviews', {
+        method: 'GET'
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success') {
+            renderTestimonials(data.reviews);
+        }
+    })
+    .catch(err => console.error('Error loading testimonials:', err));
+}
+
+function renderTestimonials(reviews) {
+    const grid = document.getElementById('testimonialsGrid');
+    if (!grid) return;
+
+    if (reviews.length === 0) {
+        grid.innerHTML = '<p style="text-align: center; color: #999; grid-column: 1/-1;">No reviews yet. Be the first to share!</p>';
+        return;
+    }
+
+    grid.innerHTML = reviews.map(review => `
+        <div class="testimonial-card">
+            <div class="testimonial-author">${review.name}</div>
+            <div class="testimonial-service">${review.service}</div>
+            <div class="testimonial-rating">${'⭐'.repeat(review.rating)}</div>
+            <div class="testimonial-comment">"${review.comment}"</div>
+        </div>
+    `).join('');
+}
+
+// Cost Calculator Functions
+const ADDON_PRICES = {
+    seo: 2000,
+    ecommerce: 5000,
+    darkmode: 1000
+};
+
+const BASE_PRICE = 2000;
+const PRICE_PER_PAGE = 500;
+
+// Calculate and update custom price
+window.calculateCustomPrice = function() {
+    const pagesSlider = document.getElementById('pagesSlider');
+    const pagesValue = document.getElementById('pagesValue');
+    const basePriceDisplay = document.getElementById('basePriceDisplay');
+    const addonsPriceDisplay = document.getElementById('addonsPriceDisplay');
+    const totalPriceDisplay = document.getElementById('totalPriceDisplay');
+    
+    // Guard: ensure slider exists
+    if (!pagesSlider) return;
+    
+    const pages = parseInt(pagesSlider.value) || 5;
+    
+    // Get all checked addons
+    const checkedAddons = document.querySelectorAll('input[name="addon"]:checked');
+    
+    // Calculate base price: ₹2000 + (pages * ₹500)
+    const basePrice = BASE_PRICE + (pages * PRICE_PER_PAGE);
+    
+    // Sum addon prices
+    let addonsPrice = 0;
+    checkedAddons.forEach(addon => {
+        const value = addon.value;
+        addonsPrice += ADDON_PRICES[value] || 0;
+    });
+    
+    // Total price
+    const totalPrice = basePrice + addonsPrice;
+    
+    // Update display
+    if (pagesValue) pagesValue.textContent = pages;
+    if (basePriceDisplay) basePriceDisplay.textContent = '₹' + basePrice.toLocaleString('en-IN');
+    if (addonsPriceDisplay) addonsPriceDisplay.textContent = '₹' + addonsPrice.toLocaleString('en-IN');
+    if (totalPriceDisplay) totalPriceDisplay.textContent = '₹' + totalPrice.toLocaleString('en-IN');
+    
+    // Store for later use
+    window.customPackagePrice = totalPrice;
+    window.customPackagePages = pages;
+};
+
+function selectCustomService() {
+    calculateCustomPrice(); // Ensure latest prices
+    
+    const pages = window.customPackagePages || 5;
+    const price = window.customPackagePrice || 4500;
+    
+    selectService('Custom Package (' + pages + ' Pages)', price);
+}
+
+// Initialize calculator on page load with robust event handling
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initCalculator);
+} else {
+    initCalculator();
+}
+
+function initCalculator() {
+    const pagesSlider = document.getElementById('pagesSlider');
+    const addonCheckboxes = document.querySelectorAll('input[name="addon"]');
+    
+    if (pagesSlider) {
+        // Attach listener with proper event binding
+        pagesSlider.addEventListener('input', calculateCustomPrice);
+        // Initial calculation
+        calculateCustomPrice();
+    }
+    
+    // Attach listeners to all addon checkboxes
+    if (addonCheckboxes.length > 0) {
+        addonCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', calculateCustomPrice);
+        });
+    }
+}
+        </div>
+    `).join('');
+}
 }

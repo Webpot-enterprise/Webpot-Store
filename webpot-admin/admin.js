@@ -1,181 +1,257 @@
-// Admin Dashboard Variables
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbytVOTbt78wKn3TVjypTy4tkGiGUpetyXhw7VB6nJZmnMPsPWoW6xHMr71xNUCTvEq1/exec';
 const ADMIN_KEY = 'WebpotAdmin2026';
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzVFw6UYPH-_mB4Yf67PjnFcigs96WwgNhphaJU1WYIxEFqGIsFWr77e6DYHgSDYiBr/exec';
 
-let allOrders = [];
-
-// Admin Login Handler
-function adminLogin(event) {
-    event.preventDefault();
-    
-    const passwordInput = document.getElementById('adminPassword');
-    const password = passwordInput.value.trim();
-    const errorDiv = document.getElementById('loginError');
-    
-    if (password === ADMIN_KEY) {
-        // Hide login section, show dashboard
-        document.getElementById('loginSection').style.display = 'none';
-        document.getElementById('dashboardSection').style.display = 'block';
-        
-        // Load all orders
-        loadAllOrders();
-        
-        // Clear password field
-        passwordInput.value = '';
-        errorDiv.style.display = 'none';
+// Authentication Check
+window.addEventListener('DOMContentLoaded', () => {
+    const adminPassword = localStorage.getItem('webpotAdminAuth');
+    if (adminPassword !== ADMIN_KEY) {
+        const pass = prompt('Enter Admin Password:');
+        if (pass === ADMIN_KEY) {
+            localStorage.setItem('webpotAdminAuth', ADMIN_KEY);
+            initAdmin();
+        } else {
+            alert('Invalid password');
+            window.location.href = '../index.html';
+        }
     } else {
-        // Show error
-        errorDiv.style.display = 'block';
-        passwordInput.focus();
-        passwordInput.select();
+        initAdmin();
     }
+});
+
+function initAdmin() {
+    setupSidebarNavigation();
+    loadAllOrders();
+    loadAllUsers();
+    loadAllReviews();
 }
 
-// Admin Logout Handler
-function adminLogout() {
-    if (confirm('Are you sure you want to logout?')) {
-        document.getElementById('dashboardSection').style.display = 'none';
-        document.getElementById('loginSection').style.display = 'flex';
-        document.getElementById('adminPassword').value = '';
-        document.getElementById('adminPassword').focus();
-        allOrders = [];
-    }
+function setupSidebarNavigation() {
+    const navItems = document.querySelectorAll('.nav-item');
+    navItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+            if (item.getAttribute('onclick') !== 'logoutAdmin()') {
+                e.preventDefault();
+                const section = item.getAttribute('data-section');
+                if (section) {
+                    switchAdminSection(section);
+                    navItems.forEach(ni => ni.classList.remove('active'));
+                    item.classList.add('active');
+                }
+            }
+        });
+    });
 }
 
-// Load All Orders from Backend
+function switchAdminSection(sectionName) {
+    const sections = document.querySelectorAll('.admin-section');
+    sections.forEach(section => section.classList.remove('active'));
+    const activeSection = document.getElementById(sectionName);
+    if (activeSection) activeSection.classList.add('active');
+}
+
+function logoutAdmin() {
+    localStorage.removeItem('webpotAdminAuth');
+    window.location.href = '../index.html';
+}
+
+// ============== ORDERS MANAGEMENT ==============
+
 function loadAllOrders() {
-    const payload = {
-        action: 'get_all_orders',
-        adminKey: ADMIN_KEY
-    };
-    
     fetch(APPS_SCRIPT_URL, {
         method: 'POST',
-        body: JSON.stringify(payload)
+        body: JSON.stringify({
+            action: 'get_all_orders',
+            adminKey: ADMIN_KEY
+        })
     })
     .then(res => res.json())
     .then(data => {
         if (data.status === 'success') {
-            allOrders = data.orders;
-            renderOrdersTable();
-            updateStats();
+            populateOrdersTable(data.orders);
         } else {
             alert('Error loading orders: ' + data.message);
         }
     })
-    .catch(err => {
-        console.error('Error:', err);
-        alert('Failed to load orders. Please try again.');
-    });
+    .catch(err => console.error('Error:', err));
 }
 
-// Render Orders Table
-function renderOrdersTable() {
-    const tableBody = document.getElementById('ordersTableBody');
-    
-    if (allOrders.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="11" style="text-align: center; padding: 2rem; color: #888888;">No orders found.</td></tr>';
+function populateOrdersTable(orders) {
+    const tbody = document.getElementById('ordersBody');
+    tbody.innerHTML = '';
+
+    if (orders.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8">No orders found</td></tr>';
         return;
     }
-    
-    tableBody.innerHTML = '';
-    
-    allOrders.forEach(order => {
-        const orderDate = new Date(order.date).toLocaleDateString('en-IN');
-        const totalAmount = parseFloat(order.totalAmount) || 0;
-        const paidAmount = parseFloat(order.paidAmount) || 0;
-        const dueAmount = parseFloat(order.dueAmount) || 0;
-        const status = order.status || 'Pending';
-        
-        // Determine status badge class
-        let statusClass = 'status-pending';
-        if (status === 'Active') statusClass = 'status-active';
-        else if (status === 'Completed') statusClass = 'status-completed';
-        else if (status === 'Partial') statusClass = 'status-partial';
-        
-        // Action button - only show if not Active
-        let actionHTML = '';
-        if (status !== 'Active') {
-            actionHTML = `<button class="btn-approve" onclick="approveOrder('${order.orderId}', '${order.email}')">Approve</button>`;
-        } else {
-            actionHTML = '<span style="color: #888888;">—</span>';
-        }
-        
-        const row = `
-            <tr>
-                <td>${orderDate}</td>
-                <td><strong>${order.orderId}</strong></td>
-                <td>${order.name}</td>
-                <td>${order.email}</td>
-                <td>${order.service}</td>
-                <td>₹${totalAmount.toLocaleString('en-IN')}</td>
-                <td>₹${paidAmount.toLocaleString('en-IN')}</td>
-                <td>₹${dueAmount.toLocaleString('en-IN')}</td>
-                <td>${order.transactionId || '—'}</td>
-                <td><span class="status-badge ${statusClass}">${status}</span></td>
-                <td>${actionHTML}</td>
-            </tr>
+
+    orders.forEach(order => {
+        const row = tbody.insertRow();
+        row.innerHTML = `
+            <td>${new Date(order.date).toLocaleDateString('en-IN')}</td>
+            <td>${order.orderId}</td>
+            <td>${order.name}</td>
+            <td>${order.email}</td>
+            <td>${order.service}</td>
+            <td>₹${parseFloat(order.totalAmount).toFixed(2)}</td>
+            <td>
+                <select onchange="updateOrderStatus('${order.orderId}', this.value)">
+                    <option value="${order.status}" selected>${order.status}</option>
+                    <option value="Active">Active</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Pending">Pending</option>
+                </select>
+            </td>
+            <td>
+                <button class="action-btn" onclick="viewOrderDetails('${order.orderId}')">View</button>
+            </td>
         `;
-        tableBody.innerHTML += row;
     });
 }
 
-// Approve / Activate Order
-function approveOrder(orderId, email) {
-    if (!confirm(`Are you sure you want to approve order ${orderId}?`)) {
-        return;
-    }
-    
-    const payload = {
-        action: 'update_status',
-        adminKey: ADMIN_KEY,
-        orderId: orderId,
-        status: 'Active'
-    };
-    
+function updateOrderStatus(orderId, newStatus) {
     fetch(APPS_SCRIPT_URL, {
         method: 'POST',
-        body: JSON.stringify(payload)
+        body: JSON.stringify({
+            action: 'update_status',
+            orderId: orderId,
+            status: newStatus,
+            adminKey: ADMIN_KEY
+        })
     })
     .then(res => res.json())
     .then(data => {
         if (data.status === 'success') {
-            alert('Order approved! User notification email has been sent.');
-            
-            // Update the local order object
-            const order = allOrders.find(o => o.orderId === orderId);
-            if (order) {
-                order.status = 'Active';
-            }
-            
-            // Re-render table
-            renderOrdersTable();
-            updateStats();
+            alert('Order status updated');
+            loadAllOrders();
         } else {
-            alert('Error updating status: ' + data.message);
+            alert('Error: ' + data.message);
         }
     })
-    .catch(err => {
-        console.error('Error:', err);
-        alert('Failed to update order status. Please try again.');
+    .catch(err => console.error('Error:', err));
+}
+
+function viewOrderDetails(orderId) {
+    alert('Order ID: ' + orderId + '\nDetailed view to be implemented');
+}
+
+// ============== USER MANAGEMENT ==============
+
+function loadAllUsers() {
+    fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+            action: 'get_all_users',
+            adminKey: ADMIN_KEY
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success') {
+            populateUsersTable(data.users);
+        } else {
+            alert('Error loading users: ' + data.message);
+        }
+    })
+    .catch(err => console.error('Error:', err));
+}
+
+function populateUsersTable(users) {
+    const tbody = document.getElementById('usersBody');
+    tbody.innerHTML = '';
+
+    if (users.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6">No users found</td></tr>';
+        return;
+    }
+
+    users.forEach(user => {
+        const row = tbody.insertRow();
+        const statusColor = user.status === 'Banned' ? '#ff6b6b' : '#00d4ff';
+        row.innerHTML = `
+            <td>${user.name}</td>
+            <td>${user.email}</td>
+            <td>${user.phone || 'N/A'}</td>
+            <td style="color: ${statusColor}; font-weight: bold;">${user.status}</td>
+            <td>${new Date(user.created).toLocaleDateString('en-IN')}</td>
+            <td>
+                ${user.status !== 'Banned' ? 
+                    `<button class="action-btn" onclick="banUser('${user.email}')">Ban User</button>` :
+                    '<span style="color: #ff6b6b;">Banned</span>'
+                }
+            </td>
+        `;
     });
 }
 
-// Update Statistics
-function updateStats() {
-    let totalOrders = allOrders.length;
-    let activeOrders = allOrders.filter(o => o.status === 'Active').length;
-    let pendingOrders = allOrders.filter(o => o.status === 'Pending').length;
-    let totalRevenue = allOrders.reduce((sum, o) => sum + (parseFloat(o.paidAmount) || 0), 0);
-    
-    document.getElementById('totalOrders').textContent = totalOrders;
-    document.getElementById('activeOrders').textContent = activeOrders;
-    document.getElementById('pendingOrders').textContent = pendingOrders;
-    document.getElementById('totalRevenue').textContent = '₹' + totalRevenue.toLocaleString('en-IN');
+function banUser(email) {
+    if (confirm(`Are you sure you want to ban ${email}?`)) {
+        fetch(APPS_SCRIPT_URL, {
+            method: 'POST',
+            body: JSON.stringify({
+                action: 'ban_user',
+                email: email,
+                adminKey: ADMIN_KEY
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert('User banned successfully');
+                loadAllUsers();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(err => console.error('Error:', err));
+    }
 }
 
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', () => {
-    // Focus on password input
-    document.getElementById('adminPassword').focus();
-});
+// ============== REVIEW MODERATION ==============
+
+function loadAllReviews() {
+    fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+            action: 'get_public_reviews'
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success') {
+            populateReviewsTable(data.reviews);
+        } else {
+            document.getElementById('reviewsBody').innerHTML = '<tr><td colspan="6">No reviews yet</td></tr>';
+        }
+    })
+    .catch(err => console.error('Error:', err));
+}
+
+function populateReviewsTable(reviews) {
+    const tbody = document.getElementById('reviewsBody');
+    tbody.innerHTML = '';
+
+    if (reviews.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6">No reviews found</td></tr>';
+        return;
+    }
+
+    reviews.forEach(review => {
+        const row = tbody.insertRow();
+        const stars = '⭐'.repeat(review.rating);
+        row.innerHTML = `
+            <td>${review.name}</td>
+            <td>${review.service}</td>
+            <td>${stars}</td>
+            <td>${review.comment.substring(0, 50)}...</td>
+            <td><span style="color: #00d4ff;">Approved</span></td>
+            <td>
+                <button class="action-btn" onclick="viewReview('${review.name}')">View</button>
+            </td>
+        `;
+    });
+}
+
+function viewReview(name) {
+    alert('Review from: ' + name + '\nFull view to be implemented');
+}

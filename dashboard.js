@@ -1,6 +1,6 @@
 // Dashboard Variables
 let currentOrderID = null;
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzVFw6UYPH-_mB4Yf67PjnFcigs96WwgNhphaJU1WYIxEFqGIsFWr77e6DYHgSDYiBr/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbytVOTbt78wKn3TVjypTy4tkGiGUpetyXhw7VB6nJZmnMPsPWoW6xHMr71xNUCTvEq1/exec';
 const MY_UPI_ID = 'kakadiyasuprince@okhdfcbank';
 
 // Prices object based on your tiers
@@ -76,6 +76,12 @@ window.addEventListener('DOMContentLoaded', () => {
     
     // Initialize session timeout
     initSessionTimeout();
+    
+    // Initialize review section
+    const reviewSection = document.getElementById('reviewName');
+    if (reviewSection) {
+        initializeReviewSection();
+    }
 });
 
 // Setup Sidebar Navigation
@@ -119,6 +125,10 @@ function switchSection(sectionName) {
 // Load Dashboard Data from Google Apps Script
 function loadDashboardData() {
     const userEmail = localStorage.getItem('webpotUserEmail');
+    const tbody = document.getElementById('ordersTableBody');
+    
+    // Show skeleton loaders before fetch
+    showSkeletonLoaders(tbody, 3);
     
     fetch(APPS_SCRIPT_URL + '?action=get_user_data&email=' + encodeURIComponent(userEmail))
         .then(res => res.json())
@@ -140,6 +150,23 @@ function loadDashboardData() {
             console.error('Error loading dashboard data:', err);
             populateDashboard([]);
         });
+}
+
+function showSkeletonLoaders(tbody, count) {
+    tbody.innerHTML = '';
+    for (let i = 0; i < count; i++) {
+        const skeletonRow = document.createElement('tr');
+        skeletonRow.className = 'skeleton-row';
+        skeletonRow.innerHTML = `
+            <td><div class="skeleton-cell"></div></td>
+            <td><div class="skeleton-cell"></div></td>
+            <td><div class="skeleton-cell"></div></td>
+            <td><div class="skeleton-cell"></div></td>
+            <td><div class="skeleton-cell"></div></td>
+            <td><div class="skeleton-cell"></div></td>
+        `;
+        tbody.appendChild(skeletonRow);
+    }
 }
 
 // Populate Dashboard with Data
@@ -207,6 +234,8 @@ function populateDashboard(orders) {
                 `<button class="pay-btn" onclick="openPaymentModal('${order.orderId}', ${due})">Pay Now</button>` : 
                 '<span style="color: var(--text-muted);">—</span>';
 
+            const invoiceBtn = `<button class="pay-btn" onclick="generateInvoice({orderId: '${order.orderId}', date: '${order.date}', service: '${order.service}', amount: ${amount}, paidAmount: ${paid}, dueAmount: ${due}, status: '${order.status}'})">📄 Invoice</button>`;
+
             const row = `
                 <tr>
                     <td>${orderDate}</td>
@@ -215,7 +244,7 @@ function populateDashboard(orders) {
                     <td>₹${amount.toLocaleString('en-IN')}</td>
                     <td>₹${Math.max(0, due).toLocaleString('en-IN')}</td>
                     <td><span class="status-badge ${statusClass}">${status}</span></td>
-                    <td>${actionBtn}</td>
+                    <td>${invoiceBtn} ${actionBtn}</td>
                 </tr>
             `;
             tableBody.innerHTML += row;
@@ -462,4 +491,153 @@ function logoutUser() {
     localStorage.removeItem('webpotUserProfilePic');
     
     window.location.href = 'index.html';
+}
+
+// ============== FEATURE 2: PDF INVOICES ==============
+
+function generateInvoice(order) {
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF();
+    
+    const cyan = [0, 212, 255];
+    const dark = [26, 26, 46];
+    const text = [200, 200, 200];
+
+    pdf.setFillColor(...dark);
+    pdf.rect(0, 0, 210, 40, 'F');
+    
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(24);
+    pdf.setTextColor(...cyan);
+    pdf.text('WEBPOT', 20, 25);
+    
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(10);
+    pdf.setTextColor(...text);
+    pdf.text('Tax Invoice', 150, 25);
+
+    pdf.setFontSize(12);
+    pdf.setTextColor(...cyan);
+    pdf.text(`Invoice No: ${order.orderId}`, 20, 55);
+    
+    pdf.setFontSize(10);
+    pdf.setTextColor(...text);
+    pdf.text(`Date: ${new Date(order.date).toLocaleDateString('en-IN')}`, 20, 65);
+    pdf.text(`Status: ${order.status}`, 20, 75);
+
+    pdf.setFont('helvetica', 'bold');
+    pdf.setTextColor(...cyan);
+    pdf.text('Client Details:', 20, 95);
+    
+    pdf.setFont('helvetica', 'normal');
+    pdf.setTextColor(...text);
+    const userName = localStorage.getItem('webpotUserName') || 'N/A';
+    const userEmail = localStorage.getItem('webpotUserEmail') || 'N/A';
+    
+    pdf.text(`Name: ${userName}`, 20, 105);
+    pdf.text(`Email: ${userEmail}`, 20, 115);
+
+    const tableData = [
+        ['Description', 'Amount (₹)'],
+        [order.service, order.amount.toFixed(2)],
+        ['Paid Amount', `-₹${order.paidAmount.toFixed(2)}`],
+        ['Due Amount', `₹${order.dueAmount.toFixed(2)}`]
+    ];
+
+    pdf.autoTable({
+        startY: 130,
+        head: [tableData[0]],
+        body: tableData.slice(1),
+        headStyles: { fillColor: cyan, textColor: dark, fontStyle: 'bold' },
+        bodyStyles: { textColor: text, fillColor: [22, 33, 62] },
+        margin: 20
+    });
+
+    const finalY = pdf.lastAutoTable.finalY + 20;
+    pdf.setFontSize(10);
+    pdf.setTextColor(...text);
+    pdf.text('Thank you for choosing Webpot!', 20, finalY);
+    pdf.text('For support: engagewebpot@gmail.com', 20, finalY + 10);
+
+    pdf.save(`Invoice_Webpot_${order.orderId}.pdf`);
+}
+
+// ============== FEATURE 4: TESTIMONIALS ==============
+
+let selectedRating = 0;
+
+function initializeReviewSection() {
+    const stars = document.querySelectorAll('#starRating .star');
+    stars.forEach(star => {
+        star.addEventListener('click', () => {
+            selectedRating = parseInt(star.getAttribute('data-value'));
+            document.getElementById('ratingValue').textContent = selectedRating + ' stars';
+            
+            stars.forEach((s, index) => {
+                if (index < selectedRating) {
+                    s.style.opacity = '1';
+                    s.style.color = '#00d4ff';
+                } else {
+                    s.style.opacity = '0.3';
+                    s.style.color = '#666';
+                }
+            });
+        });
+    });
+}
+
+function submitReview() {
+    const name = document.getElementById('reviewName').value.trim() || 'Anonymous';
+    const service = document.getElementById('reviewService').value;
+    const rating = selectedRating;
+    const comment = document.getElementById('reviewComment').value.trim();
+    const email = localStorage.getItem('webpotUserEmail');
+
+    if (!service || rating === 0 || !comment) {
+        alert('Please fill in all fields');
+        return;
+    }
+
+    const btn = event.target;
+    const originalText = btn.textContent;
+    btn.textContent = 'Submitting...';
+    btn.disabled = true;
+
+    fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+            action: 'submit_review',
+            name: name,
+            email: email,
+            service: service,
+            rating: rating,
+            comment: comment
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success') {
+            alert('Thank you! Your review has been submitted for approval.');
+            document.getElementById('reviewName').value = '';
+            document.getElementById('reviewService').value = '';
+            document.getElementById('reviewComment').value = '';
+            selectedRating = 0;
+            document.getElementById('ratingValue').textContent = '0 stars';
+            const stars = document.querySelectorAll('#starRating .star');
+            stars.forEach(s => {
+                s.style.opacity = '0.3';
+                s.style.color = '#666';
+            });
+        } else {
+            alert('Error: ' + data.message);
+        }
+        btn.textContent = originalText;
+        btn.disabled = false;
+    })
+    .catch(err => {
+        console.error('Error:', err);
+        alert('Failed to submit review');
+        btn.textContent = originalText;
+        btn.disabled = false;
+    });
 }
