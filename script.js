@@ -49,37 +49,49 @@ function displayUserProfile() {
         // Ensure profile container is visible
         if (profileDiv) {
             profileDiv.style.display = 'flex';
+            profileDiv.style.visibility = 'visible';
         }
         
         // Show profile picture if available
-        if (userProfilePic) {
+        if (profilePic && userProfilePic) {
             profilePic.src = userProfilePic;
-            profilePic.style.display = 'block';
+            profilePic.style.display = 'inline-block';
             profilePic.title = userName;
             profilePic.style.cursor = 'pointer';
             profilePic.onclick = () => window.location.href = 'dashboard.html';
         }
         
         // Set user name and make it clickable
-        userNameDisplay.textContent = userName.split(' ')[0]; // Show first name
-        userNameDisplay.style.display = 'inline';
-        userNameDisplay.style.cursor = 'pointer';
-        userNameDisplay.onclick = () => window.location.href = 'dashboard.html';
-        logoutBtn.style.display = 'inline-block';
+        if (userNameDisplay) {
+            userNameDisplay.textContent = userName.split(' ')[0]; // Show first name
+            userNameDisplay.style.display = 'inline';
+            userNameDisplay.style.cursor = 'pointer';
+            userNameDisplay.onclick = () => window.location.href = 'dashboard.html';
+        }
+        
+        // Show logout button
+        if (logoutBtn) {
+            logoutBtn.style.display = 'inline-block';
+        }
         
         // Hide login link
         if (loginLink) {
-            loginLink.style.display = 'none';
+            loginLink.parentElement.style.display = 'none';
         }
     } else {
-        profilePic.style.display = 'none';
-        userNameDisplay.textContent = '';
-        userNameDisplay.style.display = 'none';
-        logoutBtn.style.display = 'none';
+        // Hide profile section when not logged in
+        if (profileDiv) {
+            profileDiv.style.display = 'none';
+        }
+        
+        if (profilePic) profilePic.style.display = 'none';
+        if (userNameDisplay) userNameDisplay.textContent = '';
+        if (userNameDisplay) userNameDisplay.style.display = 'none';
+        if (logoutBtn) logoutBtn.style.display = 'none';
         
         // Show login link
         if (loginLink) {
-            loginLink.style.display = 'inline';
+            loginLink.parentElement.style.display = 'block';
         }
     }
 }
@@ -98,12 +110,22 @@ function updateNavState() {
         if (userNavInfo) {
             userNavInfo.style.display = 'flex';
         }
-        
+
         // Set user name
         if (navUserName) {
             navUserName.textContent = userName.split(' ')[0]; // First name
         }
-        
+
+        // Populate profile pic in nav if available
+        const navProfilePic = document.getElementById('navProfilePic');
+        const storedPic = localStorage.getItem('webpotUserProfilePic');
+        if (navProfilePic && storedPic) {
+            navProfilePic.src = storedPic;
+            navProfilePic.style.display = 'inline-block';
+        } else if (navProfilePic) {
+            navProfilePic.style.display = 'none';
+        }
+
         // Hide login link
         if (loginLink) {
             loginLink.parentElement.style.display = 'none';
@@ -113,7 +135,11 @@ function updateNavState() {
         if (userNavInfo) {
             userNavInfo.style.display = 'none';
         }
-        
+
+        // Hide nav profile pic if exists
+        const navProfilePic = document.getElementById('navProfilePic');
+        if (navProfilePic) navProfilePic.style.display = 'none';
+
         // Show login link
         if (loginLink) {
             loginLink.parentElement.style.display = 'block';
@@ -797,91 +823,6 @@ function renderTestimonials(reviews) {
             <div class="testimonial-comment">"${review.comment}"</div>
         </div>
     `).join('');
-}
-
-// Cost Calculator Functions
-const ADDON_PRICES = {
-    seo: 2000,
-    ecommerce: 5000,
-    darkmode: 1000
-};
-
-const BASE_PRICE = 2000;
-const PRICE_PER_PAGE = 500;
-
-// Calculate and update custom price
-window.calculateCustomPrice = function() {
-    const pagesSlider = document.getElementById('pagesSlider');
-    const pagesValue = document.getElementById('pagesValue');
-    const basePriceDisplay = document.getElementById('basePriceDisplay');
-    const addonsPriceDisplay = document.getElementById('addonsPriceDisplay');
-    const totalPriceDisplay = document.getElementById('totalPriceDisplay');
-    
-    // Guard: ensure slider exists
-    if (!pagesSlider) return;
-    
-    const pages = parseInt(pagesSlider.value) || 5;
-    
-    // Get all checked addons
-    const checkedAddons = document.querySelectorAll('input[name="addon"]:checked');
-    
-    // Calculate base price: ₹2000 + (pages * ₹500)
-    const basePrice = BASE_PRICE + (pages * PRICE_PER_PAGE);
-    
-    // Sum addon prices
-    let addonsPrice = 0;
-    checkedAddons.forEach(addon => {
-        const value = addon.value;
-        addonsPrice += ADDON_PRICES[value] || 0;
-    });
-    
-    // Total price
-    const totalPrice = basePrice + addonsPrice;
-    
-    // Update display
-    if (pagesValue) pagesValue.textContent = pages;
-    if (basePriceDisplay) basePriceDisplay.textContent = '₹' + basePrice.toLocaleString('en-IN');
-    if (addonsPriceDisplay) addonsPriceDisplay.textContent = '₹' + addonsPrice.toLocaleString('en-IN');
-    if (totalPriceDisplay) totalPriceDisplay.textContent = '₹' + totalPrice.toLocaleString('en-IN');
-    
-    // Store for later use
-    window.customPackagePrice = totalPrice;
-    window.customPackagePages = pages;
-};
-
-function selectCustomService() {
-    calculateCustomPrice(); // Ensure latest prices
-    
-    const pages = window.customPackagePages || 5;
-    const price = window.customPackagePrice || 4500;
-    
-    selectService('Custom Package (' + pages + ' Pages)', price);
-}
-
-// Initialize calculator on page load with robust event handling
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initCalculator);
-} else {
-    initCalculator();
-}
-
-function initCalculator() {
-    const pagesSlider = document.getElementById('pagesSlider');
-    const addonCheckboxes = document.querySelectorAll('input[name="addon"]');
-    
-    if (pagesSlider) {
-        // Attach listener with proper event binding
-        pagesSlider.addEventListener('input', calculateCustomPrice);
-        // Initial calculation
-        calculateCustomPrice();
-    }
-    
-    // Attach listeners to all addon checkboxes
-    if (addonCheckboxes.length > 0) {
-        addonCheckboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', calculateCustomPrice);
-        });
-    }
 }
         </div>
     `).join('');

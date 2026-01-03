@@ -93,6 +93,9 @@ function handleLogin(event) {
             localStorage.setItem('webpotUserLoggedIn', 'true');
             localStorage.setItem('webpotUserEmail', data.user.email);
             localStorage.setItem('webpotUserName', data.user.name);
+            // Set default avatar using UI Avatars service (generates initials-based avatar)
+            const defaultPicUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(data.user.name)}&background=0ad4ff&color=fff&rounded=true`;
+            localStorage.setItem('webpotUserProfilePic', defaultPicUrl);
             
             showSuccessModal('Welcome Back!', `Welcome, ${data.user.name}!`);
             setTimeout(() => window.location.href = 'index.html', 2000);
@@ -158,6 +161,9 @@ function handleRegister(event) {
             localStorage.setItem('webpotUserLoggedIn', 'true');
             localStorage.setItem('webpotUserEmail', email);
             localStorage.setItem('webpotUserName', name);
+            // Set default avatar using UI Avatars service (generates initials-based avatar)
+            const defaultPicUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=0ad4ff&color=fff&rounded=true`;
+            localStorage.setItem('webpotUserProfilePic', defaultPicUrl);
             
             showSuccessModal('Account Created!', 'Redirecting...');
             setTimeout(() => window.location.href = 'index.html', 2000);
@@ -466,6 +472,9 @@ function verifyOTP(event) {
             localStorage.setItem('webpotUserLoggedIn', 'true');
             localStorage.setItem('webpotUserEmail', data.user.email);
             localStorage.setItem('webpotUserName', data.user.name);
+            // Set default avatar using UI Avatars service (generates initials-based avatar)
+            const defaultPicUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(data.user.name)}&background=0ad4ff&color=fff&rounded=true`;
+            localStorage.setItem('webpotUserProfilePic', defaultPicUrl);
 
             showSuccessModal('Welcome!', `Welcome, ${data.user.name}!`);
             setTimeout(() => window.location.href = 'index.html', 2000);
