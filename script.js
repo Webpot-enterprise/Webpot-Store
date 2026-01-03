@@ -320,16 +320,17 @@ function submitOrder(event) {
     const payModal = document.getElementById('paymentModal');
     if(payModal) {
         payModal.style.display = 'flex';
-        // FIX: Actually generate the QR code now!
-        generateUPIQR(cleanAmount, name);
+        // Generate QR code with 50% of service amount
+        const qrAmount = Math.round(cleanAmount / 2);
+        generateUPIQR(qrAmount, name, cleanAmount);
     } else {
         alert("Payment Modal not found in HTML");
     }
 }
 
 // Generate UPI QR Code
-function generateUPIQR(amount, name) {
-    // Construct the UPI URL
+function generateUPIQR(amount, name, fullAmount) {
+    // Construct the UPI URL with 50% of service amount
     const upiLink = 'upi://pay?pa=' + MY_UPI_ID + '&pn=Webpot&am=' + amount + '&cu=INR';
     
     // Clear the QR code container
@@ -343,8 +344,16 @@ function generateUPIQR(amount, name) {
         height: 200
     });
     
-    // Update the amount display
-    document.getElementById('payAmount').textContent = '₹ ' + amount.toLocaleString('en-IN');
+    // Update the amount display - show both 50% payment and remaining balance
+    const paymentDisplay = document.getElementById('payAmount');
+    if (paymentDisplay) {
+        paymentDisplay.textContent = '₹ ' + amount.toLocaleString('en-IN') + ' (50% Advance)';
+        // Store the remaining balance for later
+        const remainingBalance = fullAmount ? (fullAmount - amount) : 0;
+        if (remainingBalance > 0) {
+            paymentDisplay.textContent += ' | Balance: ₹ ' + remainingBalance.toLocaleString('en-IN');
+        }
+    }
     
     // Ensure regenerate button is hidden and QR container is visible
     const regenerateBtn = document.getElementById('regenerateBtn');
@@ -450,8 +459,8 @@ function verifyAndSubmitPayment(event) {
         return;
     }
 
-    // Add UTR to payload
-    window.pendingOrderData.transactionId = utrValue;
+    // Add UTR to payload using explicit bracket notation
+    window.pendingOrderData['transactionId'] = utrValue;
 
     // Show loading text
     const verifyBtn = event.target.querySelector('button[type="submit"]');
@@ -459,8 +468,11 @@ function verifyAndSubmitPayment(event) {
     verifyBtn.textContent = "Verifying...";
     verifyBtn.disabled = true;
 
+    // Verify payload before sending
+    console.log('Sending payload:', window.pendingOrderData);
+
     // Send to Backend
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbytVOTbt78wKn3TVjypTy4tkGiGUpetyXhw7VB6nJZmnMPsPWoW6xHMr71xNUCTvEq1/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzy7Q-698-wKYvagSqUAWF_TiqKOOdl0hw_nVBSelY9qScQKL80km_nyXNEU08bifPL/exec';
 
     fetch(APPS_SCRIPT_URL, {
         method: 'POST',
@@ -549,7 +561,7 @@ function submitForm(event) {
     }
     
     // Send to Google Apps Script backend
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbytVOTbt78wKn3TVjypTy4tkGiGUpetyXhw7VB6nJZmnMPsPWoW6xHMr71xNUCTvEq1/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzy7Q-698-wKYvagSqUAWF_TiqKOOdl0hw_nVBSelY9qScQKL80km_nyXNEU08bifPL/exec';
     
     // Show loading state
     const submitBtn = event.target.querySelector('button[type="submit"]');
@@ -705,8 +717,11 @@ function payLater() {
         submitBtn.disabled = true;
     }
     
-    // Send order with NO transaction ID (Backend will mark as Pending / Due)
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbytVOTbt78wKn3TVjypTy4tkGiGUpetyXhw7VB6nJZmnMPsPWoW6xHMr71xNUCTvEq1/exec';
+    // Mark as Pay Later order for distinguishing from incomplete UTR submissions
+    window.pendingOrderData.transactionId = 'PAY_LATER';
+    
+    // Send order with PAY_LATER transaction ID
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzy7Q-698-wKYvagSqUAWF_TiqKOOdl0hw_nVBSelY9qScQKL80km_nyXNEU08bifPL/exec';
     
     fetch(APPS_SCRIPT_URL, {
         method: 'POST',
@@ -728,7 +743,7 @@ function payLater() {
 }
 
 function loadTestimonials() {
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbytVOTbt78wKn3TVjypTy4tkGiGUpetyXhw7VB6nJZmnMPsPWoW6xHMr71xNUCTvEq1/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzy7Q-698-wKYvagSqUAWF_TiqKOOdl0hw_nVBSelY9qScQKL80km_nyXNEU08bifPL/exec';
     
     fetch(APPS_SCRIPT_URL + '?action=get_public_reviews', {
         method: 'GET'

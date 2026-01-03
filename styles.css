@@ -478,13 +478,20 @@ nav a:hover {
 }
 
 .nav-profile-pic {
-    width: 32px;
-    height: 32px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid rgba(0,212,255,0.12);
-    box-shadow: 0 0 8px rgba(0,212,255,0.06);
+    border: 2px solid var(--neon-blue);
+    box-shadow: 0 0 15px rgba(0, 212, 255, 0.5), inset 0 0 10px rgba(0, 212, 255, 0.2);
     display: inline-block;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.nav-profile-pic:hover {
+    box-shadow: 0 0 25px rgba(0, 212, 255, 0.7), inset 0 0 15px rgba(0, 212, 255, 0.3);
+    transform: scale(1.05);
 }
 
 .nav-user-name:hover {
@@ -860,6 +867,43 @@ nav a:hover::after {
     border-color: var(--neon-purple);
     box-shadow: 0 0 30px rgba(0, 212, 255, 0.6), inset 0 0 20px rgba(0, 212, 255, 0.1);
     transform: translateY(-10px) scale(1.02);
+}
+
+/* Most Popular Card */
+.popular-card {
+    transform: scale(1.05);
+    border: 2px solid var(--neon-blue);
+    background: linear-gradient(135deg, rgba(15, 20, 37, 0.9), rgba(0, 159, 255, 0.15));
+    box-shadow: 0 0 30px rgba(0, 212, 255, 0.4), inset 0 0 20px rgba(0, 212, 255, 0.08);
+    animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.popular-card:hover {
+    transform: scale(1.08) translateY(-10px);
+    box-shadow: 0 0 50px rgba(0, 212, 255, 0.7), inset 0 0 25px rgba(0, 212, 255, 0.15);
+}
+
+.popular-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+    color: #020511;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    box-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
+}
+
+/* Pulse Glow Animation */
+@keyframes pulse-glow {
+    0%, 100% {
+        box-shadow: 0 0 30px rgba(0, 212, 255, 0.4), inset 0 0 20px rgba(0, 212, 255, 0.08);
+    }
+    50% {
+        box-shadow: 0 0 50px rgba(0, 212, 255, 0.6), inset 0 0 25px rgba(0, 212, 255, 0.15);
+    }
 }
 
 .service-card h3 {

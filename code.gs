@@ -124,7 +124,7 @@ function handleUserRegistration(data) {
     }
   }
   
-  // Columns: [Date, Name, Email, Password, Phone, Status, Created, My_Referral_Code, Referred_By, Wallet_Balance]
+  // Columns: [Date, Name, Email, Password, Phone, Status, Created, My_Referral_Code, Referred_By, Wallet_Balance, Profile_Pic]
   sheet.appendRow([
     timestamp, 
     data.name, 
@@ -135,7 +135,8 @@ function handleUserRegistration(data) {
     timestamp,
     myReferralCode,      // Column H (index 7)
     referredBy,          // Column I (index 8)
-    0                    // Column J (index 9) = Wallet_Balance
+    0,                   // Column J (index 9) = Wallet_Balance
+    data.profilePic ? String(data.profilePic) : ''  // Column K (index 10) = Profile_Pic
   ]);
   
   // Log the registration action
@@ -144,7 +145,12 @@ function handleUserRegistration(data) {
   return { 
     status: 'success', 
     message: 'User registered successfully',
-    referralCode: myReferralCode
+    referralCode: myReferralCode,
+    user: {
+      email: data.email,
+      name: data.name,
+      profilePic: data.profilePic ? String(data.profilePic) : ''
+    }
   };
 }
 
@@ -197,7 +203,11 @@ function handleUserLogin(data) {
 }
 
 function handleOrderSubmission(data) {
+  // Log received payload for verification
+  console.log('Received Order Data:', JSON.stringify(data));
+  
   var sheet = getSheet('Orders Sheet');
+  var usersSheet = getSheet('Users Sheet');
   var timestamp = new Date();
   var orderId = 'ORD-' + Date.now();
   
@@ -211,6 +221,17 @@ function handleOrderSubmission(data) {
   
   // Use fixed price if available, otherwise fallback (for custom amounts)
   var totalAmount = servicePrices[data.service] || parseFloat(data.amount) || 0;
+  
+  // Check if user joined via referral - apply 10% discount
+  var userValues = usersSheet.getDataRange().getValues();
+  var hasReferralDiscount = false;
+  for (var i = 1; i < userValues.length; i++) {
+    if (userValues[i][2] === data.email && userValues[i][8] !== '') { // Column C is email, Column I (index 8) is Referred_By
+      hasReferralDiscount = true;
+      totalAmount = totalAmount * 0.9; // Apply 10% discount
+      break;
+    }
+  }
 
   // 2. PAID AMOUNT (What user actually paid now)
   // If transactionId exists, we assume the user paid the amount they entered/scanned.
@@ -219,8 +240,8 @@ function handleOrderSubmission(data) {
   // 3. DUE AMOUNT
   var dueAmount = totalAmount - paidAmount;
   
-  // 4. TRANSACTION ID (if provided)
-  var transactionIds = data.transactionId || '';
+  // 4. TRANSACTION ID (if provided) - Robust assignment
+  var transactionIds = (data.transactionId || data.utrNumber || 'N/A').toString().trim();
   
   // 5. PAYMENT STATUS
   // If Due <= 0, Completed. If Paid > 0 but Due > 0, Partial. Else Pending.
@@ -240,13 +261,13 @@ function handleOrderSubmission(data) {
     dueAmount,
     transactionIds, // Column J
     payStatus,      // Column K
-    data.details || '', // Column L
+    (hasReferralDiscount ? 'Referral Discount Applied (10%)' : '') + (data.details ? ' ' + data.details : ''), // Column L
     timestamp       // Column M
   ]);
 
-  sendOrderEmails(data, orderId);
+  sendOrderEmails(data, orderId, hasReferralDiscount, dueAmount);
   
-  return { status: 'success', message: 'Order submitted', orderId: orderId };
+  return { status: 'success', message: 'Order submitted', orderId: orderId, discountApplied: hasReferralDiscount };
 }
 
 function handleContactInquiry(data) {
@@ -335,93 +356,134 @@ function handlePaymentUpdate(data) {
 }
 
 // ---------------- EMAIL HELPER ----------------
-function sendOrderEmails(data, orderId) {
+function sendOrderEmails(data, orderId, hasReferralDiscount, dueAmount) {
   try {
     var adminEmail = "engagewebpot@gmail.com";
+    var dashboardLink = "https://d:\My_Repos\Webpot-Store\dashboard.html";
     
-    // Professional HTML template for Admin Alert
+    // Client Confirmation Email - Casual and Friendly
+    var firstName = data.name.split(" ")[0];
+    var clientHtmlBody = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <style>
+              body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f5f5f5; }
+              .container { max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); overflow: hidden; }
+              .header { background: linear-gradient(135deg, #020511 0%, #0f1425 100%); color: #00d4ff; padding: 30px 20px; text-align: center; }
+              .header h1 { margin: 0; font-size: 28px; font-weight: 600; }
+              .content { padding: 30px 20px; color: #333; }
+              .content h2 { color: #020511; margin-top: 0; font-size: 20px; }
+              .highlight-box { background-color: #f0f9ff; border-left: 4px solid #00d4ff; padding: 15px; margin: 20px 0; border-radius: 4px; }
+              .detail-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
+              .detail-label { font-weight: 600; color: #555; }
+              .detail-value { color: #00d4ff; font-weight: 600; }
+              .cta-button { display: inline-block; background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%); color: #000; padding: 12px 30px; text-decoration: none; border-radius: 4px; font-weight: 600; margin: 20px 0; text-align: center; }
+              .footer { background-color: #f9f9f9; padding: 20px; text-align: center; font-size: 12px; color: #999; border-top: 1px solid #eee; }
+              .discount-badge { background-color: #4caf50; color: white; padding: 5px 10px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+          </style>
+      </head>
+      <body>
+          <div class="container">
+              <div class="header">
+                  <h1>🎉 Order Received!</h1>
+              </div>
+              <div class="content">
+                  <h2>Hey ${firstName}! 👋</h2>
+                  <p style="font-size: 16px; line-height: 1.6;">Thanks for choosing <strong>Webpot</strong>! We've received your request for the <strong>${data.service} plan</strong> and we're pumped to get started.</p>
+                  
+                  <div class="highlight-box">
+                      <h3 style="margin-top: 0; color: #020511;">Order Details</h3>
+                      <div class="detail-row">
+                          <span class="detail-label">Order ID:</span>
+                          <span class="detail-value">${orderId}</span>
+                      </div>
+                      <div class="detail-row">
+                          <span class="detail-label">Service:</span>
+                          <span class="detail-value">${data.service}</span>
+                      </div>
+                      <div class="detail-row">
+                          <span class="detail-label">Total Amount:</span>
+                          <span class="detail-value">₹${(parseFloat(data.amount) * (hasReferralDiscount ? 0.9 : 1)).toLocaleString('en-IN', {minimumFractionDigits: 0})}</span>
+                      </div>
+                      <div class="detail-row">
+                          <span class="detail-label">Due Amount:</span>
+                          <span class="detail-value">₹${dueAmount.toLocaleString('en-IN', {minimumFractionDigits: 0})}</span>
+                      </div>
+                      ${hasReferralDiscount ? '<div class="detail-row"><span class="detail-label">Discount:</span><span><span class="discount-badge">10% Referral Discount Applied</span></span></div>' : ''}
+                  </div>
+                  
+                  <p style="font-size: 15px; line-height: 1.6;">You can track everything and pay your balance here:</p>
+                  <div style="text-align: center;">
+                      <a href="${dashboardLink}" class="cta-button">Go to Your Dashboard</a>
+                  </div>
+                  
+                  <p style="font-size: 14px; color: #666; margin-top: 20px;">Our team will reach out soon with more details about your project. If you have any questions, just hit reply to this email!</p>
+              </div>
+              <div class="footer">
+                  <p style="margin: 0;">Made with ❤️ by Webpot | engagewebpot@gmail.com</p>
+              </div>
+          </div>
+      </body>
+      </html>
+    `;
+    
+    // Send Client Email
+    MailApp.sendEmail({
+      to: data.email,
+      subject: "🎉 Your Order is Confirmed - Webpot (" + orderId + ")",
+      htmlBody: clientHtmlBody
+    });
+    
+    // Admin Alert Email
     var adminHtmlBody = `
-      <div style="font-family: helvetica, Arial, sans-serif; background-color: #1a1a2e; color: #e0e0e0; padding: 20px; border-radius: 8px;">
-        <h2 style="color: #00d4ff; border-bottom: 2px solid #00d4ff; padding-bottom: 10px;">🎯 New Order Received</h2>
-        <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
-          <tr style="background-color: #0f1425;">
-            <td style="padding: 10px; font-weight: bold; color: #00d4ff;">Order ID:</td>
-            <td style="padding: 10px;">${orderId}</td>
-          </tr>
-          <tr>
-            <td style="padding: 10px; font-weight: bold; color: #00d4ff;">Client Name:</td>
-            <td style="padding: 10px;">${data.name}</td>
-          </tr>
-          <tr style="background-color: #0f1425;">
-            <td style="padding: 10px; font-weight: bold; color: #00d4ff;">Service Type:</td>
-            <td style="padding: 10px;">${data.service}</td>
-          </tr>
-          <tr>
-            <td style="padding: 10px; font-weight: bold; color: #00d4ff;">Total Amount:</td>
-            <td style="padding: 10px; font-size: 16px; color: #00d4ff; font-weight: bold;">₹${(data.amount || 0).toLocaleString('en-IN')}</td>
-          </tr>
-          <tr style="background-color: #0f1425;">
-            <td style="padding: 10px; font-weight: bold; color: #00d4ff;">Email:</td>
-            <td style="padding: 10px;">${data.email}</td>
-          </tr>
-          <tr>
-            <td style="padding: 10px; font-weight: bold; color: #00d4ff;">Phone:</td>
-            <td style="padding: 10px;">${data.phone || 'N/A'}</td>
-          </tr>
-        </table>
-        <p style="margin-top: 20px; text-align: center;">
-          <a href="https://script.google.com/macros/s/YOUR_APPS_SCRIPT_ID/usercss" style="background-color: #00d4ff; color: #000; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold;">View Admin Dashboard</a>
-        </p>
+      <div style="font-family: 'Segoe UI', sans-serif; background-color: #f5f5f5; padding: 20px;">
+          <div style="max-width: 600px; margin: 0 auto; background-color: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+              <div style="background: linear-gradient(135deg, #020511 0%, #0f1425 100%); color: #00d4ff; padding: 20px; text-align: center;">
+                  <h2 style="margin: 0;">💰 New Order: ${orderId}</h2>
+              </div>
+              <div style="padding: 20px;">
+                  <table style="width: 100%; border-collapse: collapse;">
+                      <tr style="border-bottom: 1px solid #eee;">
+                          <td style="padding: 10px; font-weight: 600;">Client Name:</td>
+                          <td style="padding: 10px;">${data.name}</td>
+                      </tr>
+                      <tr style="border-bottom: 1px solid #eee; background-color: #f9f9f9;">
+                          <td style="padding: 10px; font-weight: 600;">Email:</td>
+                          <td style="padding: 10px;">${data.email}</td>
+                      </tr>
+                      <tr style="border-bottom: 1px solid #eee;">
+                          <td style="padding: 10px; font-weight: 600;">Phone:</td>
+                          <td style="padding: 10px;">${data.phone || 'N/A'}</td>
+                      </tr>
+                      <tr style="border-bottom: 1px solid #eee; background-color: #f9f9f9;">
+                          <td style="padding: 10px; font-weight: 600;">Service:</td>
+                          <td style="padding: 10px; color: #00d4ff; font-weight: 600;">${data.service}</td>
+                      </tr>
+                      <tr style="border-bottom: 1px solid #eee;">
+                          <td style="padding: 10px; font-weight: 600;">Total Amount:</td>
+                          <td style="padding: 10px; color: #00d4ff; font-weight: 600;">₹${(parseFloat(data.amount) * (hasReferralDiscount ? 0.9 : 1)).toLocaleString('en-IN', {minimumFractionDigits: 0})}</td>
+                      </tr>
+                      <tr style="background-color: #f9f9f9;">
+                          <td style="padding: 10px; font-weight: 600;">Due Amount:</td>
+                          <td style="padding: 10px; color: #f44336; font-weight: 600;">₹${dueAmount.toLocaleString('en-IN', {minimumFractionDigits: 0})}</td>
+                      </tr>
+                  </table>
+                  ${hasReferralDiscount ? '<p style="background-color: #e8f5e9; padding: 10px; border-radius: 4px; color: #2e7d32; margin-top: 15px;"><strong>ℹ️ Referral Discount Applied: 10%</strong></p>' : ''}
+              </div>
+          </div>
       </div>
     `;
     
-    // Admin Alert Email
+    // Send Admin Alert
     MailApp.sendEmail({
       to: adminEmail,
       subject: "💰 New Order: " + orderId + " - " + data.service,
       htmlBody: adminHtmlBody
     });
     
-    // Professional HTML template for Client Confirmation
-    var firstName = data.name.split(" ")[0];
-    var clientHtmlBody = `
-      <div style="font-family: helvetica, Arial, sans-serif; background-color: #1a1a2e; color: #e0e0e0; padding: 20px; border-radius: 8px;">
-        <div style="background-color: #0f1425; padding: 15px; border-radius: 4px; margin-bottom: 20px; border-left: 4px solid #00d4ff;">
-          <h1 style="color: #00d4ff; margin: 0;">✅ Order Confirmed!</h1>
-        </div>
-        <h2 style="color: #e0e0e0;">Hi ${firstName},</h2>
-        <p style="line-height: 1.6;">Thank you for placing an order with <strong>Webpot</strong>. We've received your request and are excited to work with you!</p>
-        
-        <div style="background-color: #0f1425; padding: 15px; border-radius: 4px; margin: 20px 0;">
-          <h3 style="color: #00d4ff; margin-top: 0;">Order Summary</h3>
-          <table style="width: 100%; border-collapse: collapse;">
-            <tr>
-              <td style="padding: 8px; font-weight: bold;">Order ID:</td>
-              <td style="padding: 8px; color: #00d4ff;">${orderId}</td>
-            </tr>
-            <tr>
-              <td style="padding: 8px; font-weight: bold;">Service:</td>
-              <td style="padding: 8px;">${data.service}</td>
-            </tr>
-            <tr>
-              <td style="padding: 8px; font-weight: bold;">Total Amount:</td>
-              <td style="padding: 8px; color: #00d4ff; font-weight: bold;">₹${(data.amount || 0).toLocaleString('en-IN')}</td>
-            </tr>
-          </table>
-        </div>
-        
-        <p style="line-height: 1.6;">You can track your order status and manage payments through your <strong>Dashboard</strong>. Our team will reach out shortly with project details.</p>
-        
-        <p style="color: #999; font-size: 12px; margin-top: 30px;">For support, reply to this email or contact us at <strong>engagewebpot@gmail.com</strong></p>
-      </div>
-    `;
-    
-    // Client Confirmation Email
-    MailApp.sendEmail({
-      to: data.email,
-      subject: "Order Confirmation - Webpot (" + orderId + ")",
-      htmlBody: clientHtmlBody
-    });
   } catch (e) {
     console.error("Email error: " + e.toString());
   }
@@ -810,7 +872,8 @@ function handleVerifyLoginOTP(data) {
           name: values[i][1],
           email: values[i][2],
           phone: values[i][4],
-          status: values[i][5]
+          status: values[i][5],
+          profilePic: String(values[i][10] || '')  // Column K (index 10) = Profile_Pic
         }
       };
     }

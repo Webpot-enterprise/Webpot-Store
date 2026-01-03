@@ -1,6 +1,6 @@
 // Dashboard Variables
 let currentOrderID = null;
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbytVOTbt78wKn3TVjypTy4tkGiGUpetyXhw7VB6nJZmnMPsPWoW6xHMr71xNUCTvEq1/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzy7Q-698-wKYvagSqUAWF_TiqKOOdl0hw_nVBSelY9qScQKL80km_nyXNEU08bifPL/exec';
 const MY_UPI_ID = 'kakadiyasuprince@okhdfcbank';
 
 // Prices object based on your tiers
@@ -62,11 +62,19 @@ window.addEventListener('DOMContentLoaded', () => {
     // Display user information
     const userName = localStorage.getItem('webpotUserName');
     const userEmail = localStorage.getItem('webpotUserEmail');
+    const userProfilePic = localStorage.getItem('webpotUserProfilePic');
     
     document.getElementById('welcomeName').textContent = userName || 'User';
     document.getElementById('profileName').textContent = userName || '-';
     document.getElementById('profileEmail').textContent = userEmail || '-';
     document.getElementById('memberSince').textContent = new Date().toLocaleDateString('en-IN');
+    
+    // Display profile picture if available
+    const profilePicElement = document.getElementById('dashboardProfilePic');
+    if (profilePicElement && userProfilePic) {
+        profilePicElement.src = userProfilePic;
+        profilePicElement.style.display = 'block';
+    }
 
     // Load dashboard data
     loadDashboardData();
@@ -134,6 +142,10 @@ function loadDashboardData() {
         .then(res => res.json())
         .then(data => {
             if (data.status === 'success') {
+                // Display referral ID if available
+                if (data.referralCode) {
+                    document.getElementById('referralId').textContent = data.referralCode;
+                }
                 if (data.orders) {
                     populateDashboard(data.orders);
                 }
@@ -255,6 +267,69 @@ function populateDashboard(orders) {
     const lastLogin = localStorage.getItem('webpotLastLogin') || new Date().toLocaleString('en-IN');
     document.getElementById('lastLoginTime').textContent = lastLogin;
     localStorage.setItem('webpotLastLogin', new Date().toLocaleString('en-IN'));
+    
+    // Render order cards
+    renderOrderCards(orders);
+}
+
+// Render orders as cards in the orders section
+function renderOrderCards(orders) {
+    const cardsContainer = document.getElementById('ordersCardsContainer');
+    if (!cardsContainer) return;
+    
+    if (orders.length === 0) {
+        cardsContainer.innerHTML = '';
+        return;
+    }
+    
+    cardsContainer.innerHTML = '';
+    orders.forEach(order => {
+        const amount = parseFloat(order.amount) || 0;
+        const paid = parseFloat(order.paidAmount) || 0;
+        const due = amount - paid;
+        const orderDate = new Date(order.date).toLocaleDateString('en-IN');
+        
+        // Determine status
+        let status, statusClass;
+        if (due <= 0) {
+            status = 'Completed';
+            statusClass = 'status-completed';
+        } else if (paid > 0) {
+            status = 'Partial';
+            statusClass = 'status-partial';
+        } else {
+            status = 'Pending';
+            statusClass = 'status-pending';
+        }
+        
+        const card = document.createElement('div');
+        card.className = 'order-card';
+        card.innerHTML = `
+            <div class="order-card-header">
+                <div class="order-service-name">${order.service || 'N/A'}</div>
+                <div class="order-date">${orderDate}</div>
+            </div>
+            <div class="order-card-body">
+                <div class="order-detail">
+                    <span class="order-detail-label">Order ID:</span>
+                    <span class="order-detail-value">${order.orderId || 'N/A'}</span>
+                </div>
+                <div class="order-detail">
+                    <span class="order-detail-label">Total Price:</span>
+                    <span class="order-detail-value">₹${amount.toLocaleString('en-IN')}</span>
+                </div>
+                <div class="order-detail">
+                    <span class="order-detail-label">Due Amount:</span>
+                    <span class="order-detail-value">₹${Math.max(0, due).toLocaleString('en-IN')}</span>
+                </div>
+                <div class="order-detail">
+                    <span class="order-detail-label">Status:</span>
+                    <span class="order-status ${statusClass}">${status}</span>
+                </div>
+            </div>
+        `;
+        cardsContainer.appendChild(card);
+    });
 }
 
 function refreshDashboard(serviceType, currentStatus) {

@@ -113,8 +113,11 @@
         <!-- My Orders Section -->
         <section id="orders" class="dashboard-section">
             <h2>My Orders</h2>
+            <div id="ordersCardsContainer" class="orders-cards-grid">
+                <!-- Order cards will be rendered here -->
+            </div>
             <div class="section-placeholder">
-                <p>All your orders are displayed on the Dashboard.</p>
+                <p>No orders yet. Head to the home page to place your first order!</p>
                 <button onclick="switchSection('dashboard')" class="btn-primary">Back to Dashboard</button>
             </div>
         </section>
@@ -132,10 +135,14 @@
         <section id="profile" class="dashboard-section">
             <h2>User Profile</h2>
             <div class="profile-card">
+                <div class="profile-image-container">
+                    <img id="dashboardProfilePic" class="profile-image" src="" alt="Profile Picture" style="display:none;" />
+                </div>
                 <div class="profile-info">
                     <p><strong>Name:</strong> <span id="profileName">-</span></p>
                     <p><strong>Email:</strong> <span id="profileEmail">-</span></p>
                     <p><strong>Member Since:</strong> <span id="memberSince">-</span></p>
+                    <p><strong>Referral ID:</strong> <span id="referralId" class="referral-code">-</span></p>
                 </div>
             </div>
         </section>
