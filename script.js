@@ -824,7 +824,3 @@ function renderTestimonials(reviews) {
         </div>
     `).join('');
 }
-        </div>
-    `).join('');
-}
-}
