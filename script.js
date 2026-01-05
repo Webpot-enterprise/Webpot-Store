@@ -1,12 +1,25 @@
 // Mobile Menu Toggle Functions
 function toggleMenu() {
     const navMenu = document.getElementById('navMenu');
+    const body = document.body;
     navMenu.classList.toggle('active');
+    
+    // Prevent background scrolling when menu is open
+    if (navMenu.classList.contains('active')) {
+        body.classList.add('menu-open');
+        body.style.overflow = 'hidden';
+    } else {
+        body.classList.remove('menu-open');
+        body.style.overflow = '';
+    }
 }
 
 function closeMenu() {
     const navMenu = document.getElementById('navMenu');
+    const body = document.body;
     navMenu.classList.remove('active');
+    body.classList.remove('menu-open');
+    body.style.overflow = '';
 }
 
 // Close menu when clicking outside
@@ -14,8 +27,16 @@ document.addEventListener('click', function(event) {
     const navMenu = document.getElementById('navMenu');
     const menuToggle = document.getElementById('menuToggle');
     if (!navMenu.contains(event.target) && !menuToggle.contains(event.target)) {
-        navMenu.classList.remove('active');
+        closeMenu();
     }
+});
+
+// Close menu when a navigation link is clicked
+document.addEventListener('DOMContentLoaded', function() {
+    const navLinks = document.querySelectorAll('.nav-menu a');
+    navLinks.forEach(link => {
+        link.addEventListener('click', closeMenu);
+    });
 });
 
 // Intersection Observer for scroll-triggered animations

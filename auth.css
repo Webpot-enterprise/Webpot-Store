@@ -108,17 +108,25 @@ body {
 .back-btn {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(0, 212, 255, 0.3);
     color: var(--neon-blue);
     text-decoration: none;
-    font-weight: 600;
+    font-size: 1.2rem;
     transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
     animation: slideInLeft 0.6s ease;
 }
 
 .back-btn:hover {
-    transform: translateX(-5px);
+    background: rgba(0, 212, 255, 0.1);
+    border-color: var(--neon-blue);
     text-shadow: 0 0 10px rgba(0, 212, 255, 0.6);
+    transform: scale(1.1);
 }
 
 .back-icon {
@@ -677,7 +685,11 @@ body {
     }
 
     .back-btn {
-        font-size: 0.9rem;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
     .logo-link {
@@ -688,8 +700,62 @@ body {
 
     .auth-container {
         margin-top: 90px;
-        padding: 1rem;
-        padding-top: 2rem;
+        padding: 1.5rem;
+        width: 90%;
+        max-width: 100%;
+    }
+
+    .auth-form {
+        padding: 1.5rem;
+    }
+
+    .form-group input,
+    .form-group textarea {
+        font-size: 16px; /* Prevent iOS auto-zoom */
+        min-height: 44px; /* Better touch targets */
+    }
+
+    .submit-btn {
+        min-height: 44px;
+        font-size: 1rem;
+    }
+
+    .social-login-container {
+        flex-direction: column;
+    }
+
+    .social-btn {
+        width: 100%;
+        min-height: 44px;
+    }
+
+    .google-signin-btn {
+        width: 100%;
+        min-height: 44px;
+    }
+
+    .social-login {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .toggle-password {
+        min-height: 44px;
+    }
+    
+    .auth-divider {
+        margin: 1rem 0;
+    }
+    
+    .form-header h1 {
+        font-size: clamp(1.3rem, 4vw, 1.8rem);
+    }
+    
+    .form-header p {
+        font-size: 0.9rem;
+    }
+}
     }
 
     .auth-form {

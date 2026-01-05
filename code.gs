@@ -359,7 +359,7 @@ function handlePaymentUpdate(data) {
 function sendOrderEmails(data, orderId, hasReferralDiscount, dueAmount) {
   try {
     var adminEmail = "engagewebpot@gmail.com";
-    var dashboardLink = "https://d:\My_Repos\Webpot-Store\dashboard.html";
+    var dashboardLink = "https://webpot-store.web.app/dashboard/index.html";
     
     // Client Confirmation Email - Casual and Friendly
     var firstName = data.name.split(" ")[0];

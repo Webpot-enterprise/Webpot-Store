@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>Login & Register - Webpot</title>
     <link rel="stylesheet" href="auth.css">
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
-<body>
+<body class="mobile-optimized">
     <!-- Background Elements -->
     <div class="background">
         <div class="glow glow-1"></div>
@@ -17,11 +17,11 @@
 
     <!-- Navigation Back to Home -->
     <nav class="nav-header">
-        <a href="index.html" class="back-btn" title="Back to home">
-            <span class="back-icon">←</span> Back
+        <a href="../index.html" class="back-btn" title="Back to home">
+            ←
         </a>
-        <a href="index.html" class="logo-link">
-            <img src="logo.png" alt="Webpot Logo" class="logo-img">
+        <a href="../index.html" class="logo-link">
+            <img src="../logo.png" alt="Webpot Logo" class="logo-img">
             <span>Webpot</span>
         </a>
     </nav>
@@ -75,7 +75,6 @@
                      data-callback="handleCredentialResponse"
                      data-auto_prompt="false">
                 </div>
-                <div class="g_id_signin" data-type="standard" data-theme="outline" data-size="large" data-text="signin_with"></div>
             </div>
 
             <!-- Social Login Buttons -->
@@ -198,7 +197,6 @@
                      data-client_id="602785019830-1r8laqtcrshl8m1dlktdeiisdfmtvdpt.apps.googleusercontent.com"
                      data-callback="handleCredentialResponse">
                 </div>
-                <div class="g_id_signin" data-type="standard" data-size="large" data-theme="dark"></div>
             </div>
 
             <div class="auth-footer">

@@ -317,5 +317,32 @@ footer {
     .back-btn {
         padding: 0.6rem 1rem;
         font-size: 0.9rem;
+        bottom: 20px;
+        left: 20px;
+    }
+    
+    body {
+        overflow-x: hidden;
+    }
+    
+    * {
+        box-sizing: border-box;
     }
 }
+
+/* Additional Mobile Optimizations */
+@media (max-width: 480px) {
+    .back-btn {
+        bottom: 15px;
+        left: 15px;
+        padding: 0.6rem 0.9rem;
+        font-size: 0.85rem;
+    }
+}
+
+/* Reduce animations on mobile for performance */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;

@@ -2,20 +2,20 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>Dashboard - Webpot</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="../styles.css">
     <link rel="stylesheet" href="dashboard.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 </head>
-<body>
+<body class="mobile-optimized">
     <!-- Sidebar Navigation -->
     <aside class="sidebar">
         <a href="index.html" class="sidebar-header">
-            <img src="logo.png" alt="Webpot Logo" class="sidebar-logo">
+            <img src="../logo.png" alt="Webpot Logo" class="sidebar-logo">
             <span class="sidebar-title">Webpot</span>
         </a>
         <nav class="sidebar-nav">
@@ -45,9 +45,14 @@
             </a>
         </nav>
     </aside>
+    
+    <!-- Sidebar Overlay for mobile -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
     <!-- Main Content Area -->
     <main class="main-content">
+        <!-- Mobile Sidebar Toggle Button -->
+        <button id="sidebarToggle" class="sidebar-toggle" title="Toggle sidebar">☰</button>
         <!-- Welcome Header -->
         <section id="dashboard" class="dashboard-section active">
             <div class="welcome-header">

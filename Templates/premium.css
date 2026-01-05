@@ -394,4 +394,40 @@ footer {
         top: 10px;
         right: 10px;
     }
+    
+    body {
+        overflow-x: hidden;
+    }
+    
+    * {
+        box-sizing: border-box;
+    }
 }
+
+/* Mobile-First Responsive Design */
+@media (min-width: 769px) {
+    /* Desktop layouts wrap in this */
+    body {
+        display: flex;
+    }
+}
+
+@media (max-width: 480px) {
+    .back-btn {
+        bottom: 15px;
+        left: 15px;
+        padding: 0.6rem 0.9rem;
+    }
+    
+    .vibe-dropdown-container {
+        min-width: 150px;
+    }
+}
+
+/* Reduce animations on mobile */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }

@@ -30,7 +30,8 @@ function handleCredentialResponse(response) {
             if (userData.picture) localStorage.setItem('webpotUserProfilePic', userData.picture);
             
             showSuccessModal('Welcome!', `Welcome ${userData.name}!`);
-            setTimeout(() => window.location.href = 'dashboard.html', 2000);
+            const cleanUsername = userData.name.toLowerCase().replace(/\s+/g, '-');
+            setTimeout(() => window.location.href = '../dashboard/index.html?u=' + cleanUsername, 2000);
         } else {
             alert('Google Sign-In failed: ' + data.message);
         }
@@ -99,7 +100,8 @@ function handleLogin(event) {
             localStorage.setItem('webpotUserProfilePic', profilePic);
             
             showSuccessModal('Welcome Back!', `Welcome, ${data.user.name}!`);
-            setTimeout(() => window.location.href = 'dashboard.html', 2000);
+            const cleanUsername = data.user.name.toLowerCase().replace(/\s+/g, '-');
+            setTimeout(() => window.location.href = '../dashboard/index.html?u=' + cleanUsername, 2000);
         } else if (data.status === 'user_banned') {
             alert('This account has been banned. Please contact support.');
             submitBtn.textContent = originalText;
@@ -167,7 +169,8 @@ function handleRegister(event) {
             localStorage.setItem('webpotUserProfilePic', defaultPicUrl);
             
             showSuccessModal('Account Created!', 'Redirecting to Dashboard...');
-            setTimeout(() => window.location.href = 'dashboard.html', 2000);
+            const cleanUsername = name.toLowerCase().replace(/\s+/g, '-');
+            setTimeout(() => window.location.href = '../dashboard/index.html?u=' + cleanUsername, 2000);
             
         } else if (data.status === 'user_already_exists') {
             alert('This email is already registered. Please log in.');
@@ -490,7 +493,8 @@ function verifyOTP(event) {
             localStorage.setItem('webpotUserProfilePic', defaultPicUrl);
 
             showSuccessModal('Welcome!', `Welcome, ${data.user.name}!`);
-            setTimeout(() => window.location.href = 'dashboard.html', 2000);
+            const cleanUsername = data.user.name.toLowerCase().replace(/\s+/g, '-');
+            setTimeout(() => window.location.href = '../dashboard/index.html?u=' + cleanUsername, 2000);
         } else {
             alert('Error: ' + data.message);
             btn.textContent = originalText;
@@ -504,4 +508,26 @@ function verifyOTP(event) {
         btn.disabled = false;
     });
 }
+
+// Initialize Google Sign-In on page load
+window.addEventListener('DOMContentLoaded', () => {
+    // Initialize Google Identity Services
+    if (window.google && window.google.accounts) {
+        window.google.accounts.id.initialize({
+            client_id: '522296612988-phrs7trh1l6ghauk2khm1181s4a5mvl1.apps.googleusercontent.com',
+            callback: handleCredentialResponse,
+            auto_prompt: false
+        });
+    }
+    
+    // Add click handler to custom Google button
+    const googleBtn = document.getElementById('googleSignInBtn');
+    if (googleBtn) {
+        googleBtn.addEventListener('click', () => {
+            if (window.google && window.google.accounts && window.google.accounts.id) {
+                window.google.accounts.id.prompt();
+            }
+        });
+    }
+});
 

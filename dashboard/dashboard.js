@@ -3,6 +3,31 @@ let currentOrderID = null;
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzy7Q-698-wKYvagSqUAWF_TiqKOOdl0hw_nVBSelY9qScQKL80km_nyXNEU08bifPL/exec';
 const MY_UPI_ID = 'kakadiyasuprince@okhdfcbank';
 
+// Parse URL parameters and verify username
+function verifyURLUserParameter() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlUser = urlParams.get('u');
+    const webpotUserName = localStorage.getItem('webpotUserName');
+    
+    if (!webpotUserName) {
+        // User not logged in, redirect to auth
+        window.location.href = '../auth.html';
+        return false;
+    }
+    
+    // Clean the stored username and compare with URL parameter
+    const cleanStoredUsername = webpotUserName.toLowerCase().replace(/\s+/g, '-');
+    
+    if (!urlUser || urlUser !== cleanStoredUsername) {
+        // URL parameter doesn't match logged-in user, redirect to auth
+        console.warn('URL username mismatch or missing. Redirecting to login.');
+        window.location.href = '../auth.html';
+        return false;
+    }
+    
+    return true;
+}
+
 // Prices object based on your tiers
 const servicePrices = {
     'starter': 2999,
@@ -53,9 +78,14 @@ function initSessionTimeout() {
 
 // Authentication Check on Page Load
 window.addEventListener('DOMContentLoaded', () => {
+    // First verify URL parameter matches user
+    if (!verifyURLUserParameter()) {
+        return;
+    }
+    
     const isLoggedIn = localStorage.getItem('webpotUserLoggedIn');
     if (!isLoggedIn) {
-        window.location.href = 'auth.html';
+        window.location.href = '../auth.html';
         return;
     }
 
@@ -82,6 +112,25 @@ window.addEventListener('DOMContentLoaded', () => {
     // Setup sidebar navigation
     setupSidebarNavigation();
     
+    // Setup sidebar toggle button
+    const sidebarToggleBtn = document.getElementById('sidebarToggle');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    
+    if (sidebarToggleBtn) {
+        sidebarToggleBtn.addEventListener('click', toggleSidebar);
+    }
+    
+    if (sidebarOverlay) {
+        sidebarOverlay.addEventListener('click', closeSidebar);
+    }
+    
+    // Close sidebar when window is resized to desktop size
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 992) {
+            closeSidebar();
+        }
+    });
+    
     // Initialize session timeout
     initSessionTimeout();
     
@@ -98,6 +147,61 @@ function setupSidebarNavigation() {
     navItems.forEach(item => {
         item.addEventListener('click', (e) => {
             if (item.getAttribute('onclick') !== 'logoutUser()') {
+                e.preventDefault();
+                const section = item.getAttribute('data-section');
+                if (section) {
+                    switchDashboardSection(section);
+                    navItems.forEach(ni => ni.classList.remove('active'));
+                    item.classList.add('active');
+                }
+            }
+            // Close sidebar on mobile when link is clicked
+            const sidebar = document.querySelector('.sidebar');
+            if (sidebar && sidebar.classList.contains('active')) {
+                closeSidebar();
+            }
+        });
+    });
+}
+
+// Sidebar Toggle Function
+function toggleSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.querySelector('.sidebar-overlay');
+    
+    if (sidebar) {
+        sidebar.classList.toggle('active');
+    }
+    if (overlay) {
+        overlay.classList.toggle('active');
+    }
+}
+
+// Close Sidebar
+function closeSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.querySelector('.sidebar-overlay');
+    
+    if (sidebar) {
+        sidebar.classList.remove('active');
+    }
+    if (overlay) {
+        overlay.classList.remove('active');
+    }
+}
+
+// Open Sidebar
+function openSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.querySelector('.sidebar-overlay');
+    
+    if (sidebar) {
+        sidebar.classList.add('active');
+    }
+    if (overlay) {
+        overlay.classList.add('active');
+    }
+}
                 e.preventDefault();
                 const section = item.getAttribute('data-section');
                 if (section) {
@@ -565,7 +669,7 @@ function logoutUser() {
     localStorage.removeItem('webpotUserPassword');
     localStorage.removeItem('webpotUserProfilePic');
     
-    window.location.href = 'index.html';
+    window.location.href = '../index.html';
 }
 
 // ============== FEATURE 2: PDF INVOICES ==============
