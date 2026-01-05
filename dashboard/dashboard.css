@@ -1,5 +1,33 @@
 /* Dashboard Styles */
 
+/* Back Button Styling */
+.back-btn {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(0, 212, 255, 0.3);
+    backdrop-filter: blur(10px);
+    color: var(--neon-blue);
+    text-decoration: none;
+    font-size: 1.3rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.back-btn:hover {
+    transform: scale(1.05);
+    border-color: rgba(0, 212, 255, 0.6);
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
+}
+
 /* Layout: Sidebar + Main Content */
 body {
     display: flex;
@@ -16,8 +44,10 @@ body {
     top: 0;
     height: 100vh;
     overflow-y: auto;
+    overflow-x: hidden;
     box-shadow: -10px 0 30px rgba(0, 212, 255, 0.1);
     z-index: 100;
+    box-sizing: border-box;
 }
 
 .sidebar-header {
@@ -53,12 +83,14 @@ body {
     display: flex;
     align-items: center;
     gap: 1rem;
-    padding: 1rem 1.5rem;
+    padding: 12px 20px;
     color: var(--text-light);
     text-decoration: none;
     transition: all 0.3s ease;
     border-left: 3px solid transparent;
     cursor: pointer;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .nav-item:hover {
@@ -88,10 +120,13 @@ body {
     flex: 1;
     padding: 3rem;
     overflow-y: auto;
+    overflow-x: hidden;
     background: linear-gradient(-45deg, var(--primary-black), var(--secondary-black), var(--tertiary-black), var(--primary-black));
     background-size: 400% 400%;
     animation: gradientShift 15s ease infinite;
     min-height: 100vh;
+    max-width: calc(100vw - 250px);
+    box-sizing: border-box;
 }
 
 /* Sections */

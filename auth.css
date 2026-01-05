@@ -106,27 +106,30 @@ body {
 }
 
 .back-btn {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 9999;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
+    width: 45px;
+    height: 45px;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(0, 212, 255, 0.3);
+    backdrop-filter: blur(10px);
     color: var(--neon-blue);
     text-decoration: none;
-    font-size: 1.2rem;
+    font-size: 1.3rem;
     transition: all 0.3s ease;
-    backdrop-filter: blur(10px);
-    animation: slideInLeft 0.6s ease;
+    cursor: pointer;
 }
 
 .back-btn:hover {
-    background: rgba(0, 212, 255, 0.1);
-    border-color: var(--neon-blue);
-    text-shadow: 0 0 10px rgba(0, 212, 255, 0.6);
-    transform: scale(1.1);
+    transform: scale(1.05);
+    border-color: rgba(0, 212, 255, 0.6);
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
 }
 
 .back-icon {
@@ -187,6 +190,8 @@ body {
     padding: 2rem 1rem;
     margin-top: 120px;
     padding-top: 3rem;
+    max-width: 100vw;
+    overflow-x: hidden;
 }
 
 .auth-form {
@@ -202,6 +207,7 @@ body {
     transform: translateX(100px) rotateY(90deg);
     transition: all 0.7s cubic-bezier(0.68, -0.55, 0.265, 1.55);
     pointer-events: none;
+    overflow: hidden;
 }
 
 .auth-form.active {
@@ -721,11 +727,15 @@ body {
     }
 
     .social-login-container {
-        flex-direction: column;
+        flex-direction: row;
+        gap: 10px;
     }
 
     .social-btn {
-        width: 100%;
+        flex: 1;
+        min-width: 0;
+        padding: 10px 5px;
+        font-size: 14px;
         min-height: 44px;
     }
 
@@ -784,6 +794,14 @@ body {
         padding: 0.8rem 1rem;
     }
 
+    .back-btn {
+        top: 10px;
+        left: 10px;
+        width: 38px;
+        height: 38px;
+        font-size: 1.3rem;
+    }
+
     .auth-container {
         margin-top: 80px;
         padding: 0.8rem;
@@ -814,6 +832,11 @@ body {
     .submit-btn {
         padding: 0.8rem;
         font-size: 0.95rem;
+    }
+
+    .social-btn {
+        font-size: 0.75rem;
+        padding: 0.8rem 1rem;
     }
 }
 
@@ -1065,39 +1088,83 @@ body {
 .coming-soon-btn:active {
     transform: translateY(0);
 }
-/* Google Identity Services Sign-In Container */
-.google-signin-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    margin: 1rem 0;
-    padding: 1rem;
-    background: rgba(0, 212, 255, 0.05);
-    border: 1px solid rgba(0, 212, 255, 0.2);
-    border-radius: 12px;
-    transition: all 0.3s ease;
-}
-
-.google-signin-container:hover {
-    background: rgba(0, 212, 255, 0.08);
-    border-color: var(--neon-blue);
-    box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
-}
-
-/* Style the Google sign-in button */
-.google-signin-container div[data-theme="outline"] {
-    width: 100% !important;
-}
 
 /* Social Login Container */
-.social-login-container {
+.social-login-row {
     display: flex;
-    gap: 1rem;
+    flex-wrap: nowrap;
+    gap: 10px;
+    width: 100%;
+    justify-content: space-between;
+    margin: 20px 0;
+    animation: slideInUp 0.8s ease 0.85s backwards;
+}
+
+/* Shared Social Button Style */
+.social-btn {
+    display: flex;
+    align-items: center;
     justify-content: center;
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 1px solid rgba(0, 212, 255, 0.2);
+    gap: 6px;
+    flex: 1;
+    min-width: 0;
+    padding: 10px 5px;
+    margin-bottom: 0;
+    cursor: pointer;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(0, 212, 255, 0.3);
+    color: var(--text-light);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    backdrop-filter: blur(10px);
+    min-height: 44px;
+}
+
+.social-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+.social-btn:hover {
+    transform: scale(1.02);
+    border-color: rgba(0, 212, 255, 0.6);
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.social-btn:last-child {
+    margin-bottom: 0;
+}
+
+.google-btn {
+    color: #4285F4;
+}
+
+.google-btn:hover {
+    border-color: #4285F4;
+    box-shadow: 0 0 20px rgba(66, 133, 244, 0.4);
+}
+
+.github-btn {
+    color: var(--text-light);
+}
+
+.github-btn:hover {
+    border-color: var(--neon-blue);
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
+}
+
+.facebook-btn {
+    color: #1877F2;
+}
+
+.facebook-btn:hover {
+    border-color: #1877F2;
+    box-shadow: 0 0 20px rgba(24, 119, 242, 0.4);
 }
 
 .social-btn {
@@ -1139,34 +1206,55 @@ body {
     background: rgba(24, 119, 242, 0.1);
 }
 
+/* Google Identity Services Sign-In Container */
+.google-signin-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin: 1rem 0;
+    padding: 1rem;
+    background: rgba(0, 212, 255, 0.05);
+    border: 1px solid rgba(0, 212, 255, 0.2);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.google-signin-container:hover {
+    background: rgba(0, 212, 255, 0.08);
+    border-color: var(--neon-blue);
+    box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
+}
+
+/* Style the Google sign-in button */
+.google-signin-container div[data-theme="outline"] {
+    width: 100% !important;
+}
+
 /* Back to Home Button Styling */
 .back-btn {
     position: fixed;
-    top: 2rem;
-    left: 2rem;
-    padding: 0.75rem 1.5rem;
-    background: rgba(0, 212, 255, 0.05);
-    border: 2px solid var(--neon-blue);
-    color: var(--neon-blue);
-    text-decoration: none;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 0.95rem;
-    transition: all 0.3s ease;
-    z-index: 100;
+    top: 20px;
+    left: 20px;
+    z-index: 9999;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    justify-content: center;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(0, 212, 255, 0.3);
+    backdrop-filter: blur(10px);
+    color: var(--neon-blue);
+    text-decoration: none;
+    font-size: 1.3rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
 }
 
 .back-btn:hover {
-    background: var(--neon-blue);
-    color: var(--primary-black);
-    box-shadow: 0 0 20px rgba(0, 212, 255, 0.6);
-    transform: translateY(-2px);
-}
-
-.back-btn::before {
-    content: '←';
-    font-size: 1.2rem;
+    transform: scale(1.05);
+    border-color: rgba(0, 212, 255, 0.6);
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
 }

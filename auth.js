@@ -521,7 +521,7 @@ window.addEventListener('DOMContentLoaded', () => {
     }
     
     // Add click handler to custom Google button
-    const googleBtn = document.getElementById('googleSignInBtn');
+    const googleBtn = document.getElementById('customGoogleLogin');
     if (googleBtn) {
         googleBtn.addEventListener('click', () => {
             if (window.google && window.google.accounts && window.google.accounts.id) {
