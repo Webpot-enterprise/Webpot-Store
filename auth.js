@@ -99,9 +99,21 @@ function handleLogin(event) {
             const profilePic = data.user.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(data.user.name)}&background=0ad4ff&color=fff&rounded=true`;
             localStorage.setItem('webpotUserProfilePic', profilePic);
             
+            // Store admin flag if provided
+            if (data.isAdmin) {
+                localStorage.setItem('webpotUserIsAdmin', 'true');
+            }
+            
             showSuccessModal('Welcome Back!', `Welcome, ${data.user.name}!`);
             const cleanUsername = data.user.name.toLowerCase().replace(/\s+/g, '-');
-            setTimeout(() => window.location.href = '../dashboard/index.html?u=' + cleanUsername, 2000);
+            
+            // If user is admin, show admin access button and redirect to admin panel
+            if (data.isAdmin) {
+                // Add a 2-second delay, then redirect to admin panel
+                setTimeout(() => window.location.href = '../webpot-admin/admin.html', 2000);
+            } else {
+                setTimeout(() => window.location.href = '../dashboard/index.html?u=' + cleanUsername, 2000);
+            }
         } else if (data.status === 'user_banned') {
             alert('This account has been banned. Please contact support.');
             submitBtn.textContent = originalText;

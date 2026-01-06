@@ -99,6 +99,17 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('profileEmail').textContent = userEmail || '-';
     document.getElementById('memberSince').textContent = new Date().toLocaleDateString('en-IN');
     
+    // Check if user is admin and show admin portal link
+    const masterAdminEmail = 'kakadiyasuprince@gmail.com'; // Set your master admin email here
+    const adminPortalLink = document.getElementById('adminPortalLink');
+    if (adminPortalLink) {
+        if (userEmail === masterAdminEmail) {
+            adminPortalLink.style.display = 'flex';
+        } else {
+            adminPortalLink.style.display = 'none';
+        }
+    }
+    
     // Display profile picture if available
     const profilePicElement = document.getElementById('dashboardProfilePic');
     if (profilePicElement && userProfilePic) {

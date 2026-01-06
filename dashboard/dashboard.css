@@ -1,21 +1,36 @@
 /* Dashboard Styles */
 
+/* CSS Variables */
+:root {
+    --bg-black: #0f1115;
+    --surface-dark: #1c1f26;
+    --primary-accent: #2563eb;
+    --secondary-accent: #3b82f6;
+    --text-primary: #ffffff;
+    --text-secondary: #94a3b8;
+    --border-color: #2d333f;
+    --neon-blue: #2563eb;
+    --neon-purple: #3b82f6;
+    --text-light: #ffffff;
+    --text-muted: #94a3b8;
+}
+
 /* Back Button Styling */
 .back-btn {
     position: fixed;
     top: 20px;
     left: 20px;
-    z-index: 9999;
+    z-index: 2000;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 45px;
-    height: 45px;
+    width: 42px;
+    height: 42px;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(0, 212, 255, 0.3);
+    border: 1px solid #2d333f;
     backdrop-filter: blur(10px);
-    color: var(--neon-blue);
+    color: #ffffff;
     text-decoration: none;
     font-size: 1.3rem;
     transition: all 0.3s ease;
@@ -23,9 +38,10 @@
 }
 
 .back-btn:hover {
-    transform: scale(1.05);
-    border-color: rgba(0, 212, 255, 0.6);
-    box-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
+    transform: scale(1.08);
+    border-color: #2563eb;
+    background: rgba(37, 99, 235, 0.1);
+    color: #2563eb;
 }
 
 /* Layout: Sidebar + Main Content */
@@ -36,8 +52,8 @@ body {
 
 .sidebar {
     width: 250px;
-    background: linear-gradient(180deg, var(--secondary-black) 0%, var(--tertiary-black) 100%);
-    border-right: 2px solid var(--neon-blue);
+    background: #0f1115;
+    border-right: 1px solid #2d333f;
     padding: 2rem 0;
     position: fixed;
     left: 0;
@@ -45,7 +61,6 @@ body {
     height: 100vh;
     overflow-y: auto;
     overflow-x: hidden;
-    box-shadow: -10px 0 30px rgba(0, 212, 255, 0.1);
     z-index: 100;
     box-sizing: border-box;
 }
@@ -62,13 +77,13 @@ body {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    border: 2px solid var(--neon-blue);
+    border: 2px solid #2563eb;
 }
 
 .sidebar-title {
     font-size: 1.5rem;
     font-weight: bold;
-    color: var(--neon-blue);
+    color: #2563eb;
     text-transform: uppercase;
     letter-spacing: 2px;
 }
@@ -94,16 +109,21 @@ body {
 }
 
 .nav-item:hover {
-    background: rgba(0, 212, 255, 0.1);
-    border-left-color: var(--neon-blue);
-    color: var(--neon-blue);
+    background: rgba(37, 99, 235, 0.1);
+    border-left-color: #2563eb;
+    color: #ffffff;
     padding-left: 2rem;
 }
 
 .nav-item.active {
-    background: rgba(0, 212, 255, 0.2);
-    border-left-color: var(--neon-blue);
-    color: var(--neon-blue);
+    background: rgba(37, 99, 235, 0.15);
+    border-left-color: #2563eb;
+    color: #ffffff;
+}
+
+#adminPortalLink {
+    border-left: 3px solid #3b82f6;
+    background: rgba(59, 130, 246, 0.1);
 }
 
 .nav-icon {
@@ -936,7 +956,6 @@ body {
 
 /* Sidebar Overlay */
 .sidebar-overlay {
-    display: none;
     position: fixed;
     top: 0;
     left: 0;
@@ -945,10 +964,14 @@ body {
     background: rgba(0, 0, 0, 0.7);
     backdrop-filter: blur(5px);
     z-index: 80;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
 
 .sidebar-overlay.active {
-    display: block;
+    pointer-events: auto;
+    opacity: 1;
 }
 
 /* Mobile Media Queries */
