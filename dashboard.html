@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>Dashboard - Webpot</title>
-    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="dashboard.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -14,8 +14,8 @@
 <body class="mobile-optimized">
     <!-- Sidebar Navigation -->
     <aside class="sidebar">
-        <a href="../index.html" class="sidebar-header">
-            <img src="../logo.png" alt="Webpot Logo" class="sidebar-logo">
+        <a href="index.html" class="sidebar-header">
+            <img src="logo.png" alt="Webpot Logo" class="sidebar-logo">
             <span class="sidebar-title">Webpot</span>
         </a>
         <nav class="sidebar-nav">
@@ -43,7 +43,7 @@
                 <span class="nav-icon">🔐</span>
                 <span class="nav-label">Admin Portal</span>
             </a>
-            <a href="../index.html" class="nav-item" onclick="logoutUser(); return false;">
+            <a href="index.html" class="nav-item" onclick="logoutUser(); return false;">
                 <span class="nav-icon">🚪</span>
                 <span class="nav-label">Logout</span>
             </a>
@@ -88,41 +88,6 @@
             <!-- Active Orders Table -->
             <div class="orders-section">
                 <h2>Active Orders</h2>
-                
-                <!-- Order Progress Tracker -->
-                <div id="orderProgressTracker" class="progress-tracker" style="display: none;">
-                    <h3>Current Order Progress</h3>
-                    <div id="statusStepper" class="progress-steps">
-                        <div class="progress-step">
-                            <div class="progress-dot completed">
-                                <div class="step-circle">1</div>
-                                <div class="step-label">Placed</div>
-                            </div>
-                        </div>
-                        <div class="progress-line"></div>
-                        <div class="progress-step">
-                            <div class="progress-dot">
-                                <div class="step-circle">2</div>
-                                <div class="step-label">Designing</div>
-                            </div>
-                        </div>
-                        <div class="progress-line"></div>
-                        <div class="progress-step">
-                            <div class="progress-dot">
-                                <div class="step-circle">3</div>
-                                <div class="step-label">Developing</div>
-                            </div>
-                        </div>
-                        <div class="progress-line"></div>
-                        <div class="progress-step">
-                            <div class="progress-dot">
-                                <div class="step-circle">4</div>
-                                <div class="step-label">Completed</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
                 <div class="table-container">
                     <table class="orders-table">
                         <thead>

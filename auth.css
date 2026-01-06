@@ -5,28 +5,56 @@
 }
 
 :root {
-    --bg-black: #0f1115;
-    --surface-dark: #1c1f26;
-    --primary-accent: #2563eb;
-    --secondary-accent: #3b82f6;
+    /* Main Color Variables */
+    --bg: #0f1115;
+    --surface: #1c1f26;
+    --text: #ffffff;
+    --accent: #2563eb;
+    
+    /* Legacy variables for compatibility */
+    --bg-color: #0f1115;
+    --surface-color: #1c1f26;
     --text-primary: #ffffff;
     --text-secondary: #94a3b8;
+    --text-muted: #94a3b8;
+    --text-light: #ffffff;
+    --primary-accent: #2563eb;
+    --secondary-accent: #3b82f6;
     --border-color: #2d333f;
+    --bg-black: #0f1115;
+    --surface-dark: #1c1f26;
     --neon-blue: #2563eb;
     --neon-purple: #3b82f6;
     --neon-pink: #94a3b8;
-    --text-light: #ffffff;
-    --text-muted: #94a3b8;
+}
+
+:root.light-mode {
+    --bg: #ffffff;
+    --surface: #f8fafc;
+    --text: #0f172a;
+    --accent: #2563eb;
+    
+    /* Legacy support */
+    --bg-color: #ffffff;
+    --surface-color: #f8fafc;
+    --text-primary: #0f172a;
+    --text-secondary: #4a5568;
+    --text-muted: #718096;
+    --text-light: #0f172a;
+    --border-color: #e2e8f0;
+    --bg-black: #ffffff;
+    --surface-dark: #f8fafc;
 }
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #0f1115;
-    color: var(--text-light);
+    background: var(--bg);
+    color: var(--text);
     line-height: 1.6;
     overflow-x: hidden;
     position: relative;
     min-height: 100vh;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 @keyframes gradientShift {
@@ -243,6 +271,7 @@ body {
     font-size: 0.95rem;
     transition: all 0.3s ease;
     outline: none;
+    box-sizing: border-box;
 }
 
 .input-wrapper input:focus {
@@ -262,6 +291,9 @@ body {
     transform: translateY(-50%);
     font-size: 1.1rem;
     pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* Password Toggle Button */
@@ -1077,25 +1109,31 @@ body {
     animation: slideInUp 0.8s ease 0.85s backwards;
 }
 
+.social-login-grid {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+    justify-content: space-between;
+    margin-top: 1rem;
+}
+
 /* Shared Social Button Style */
 .social-btn {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border: 1px solid #2563eb;
+    background: #1c1f26;
+    color: #ffffff;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    flex: 1;
-    min-width: 0;
-    padding: 10px 5px;
-    margin-bottom: 0;
-    cursor: pointer;
-    border-radius: 8px;
-    font-weight: 500;
-    font-size: 14px;
+    gap: 0.5rem;
     transition: all 0.3s ease;
-    background: #1c1f26;
-    border: 1px solid #2563eb;
-    color: #ffffff;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    box-sizing: border-box;
     min-height: 44px;
 }
 
@@ -1106,87 +1144,27 @@ body {
 }
 
 .social-btn:hover {
-    transform: scale(1.03);
     border-color: #2563eb;
     background: rgba(37, 99, 235, 0.15);
     color: #ffffff;
+    box-shadow: 0 0 12px rgba(37, 99, 235, 0.3);
 }
 
-.social-btn:last-child {
-    margin-bottom: 0;
-}
-
-.google-btn {
-    color: #ffffff;
-}
-
-.google-btn:hover {
-    border-color: #2563eb;
-    background: rgba(37, 99, 235, 0.15);
-}
-
-.github-btn {
-    color: #ffffff;
-}
-
-.github-btn:hover {
-    border-color: #2563eb;
-    background: rgba(37, 99, 235, 0.15);
-}
-
+.google-btn,
+.github-btn,
 .facebook-btn {
     color: #ffffff;
 }
 
+.google-btn:hover,
+.github-btn:hover,
 .facebook-btn:hover {
     border-color: #2563eb;
     background: rgba(37, 99, 235, 0.15);
 }
 
 .social-actions-row {
-    display: flex;
-    gap: 10px;
-    width: 100%;
-    margin-top: 1rem;
-}
-
-.social-btn {
-    flex: 1;
-    max-width: 200px;
-    padding: 0.75rem 1.5rem;
-    border: 2px solid var(--neon-blue);
-    background: rgba(0, 212, 255, 0.05);
-    color: var(--neon-blue);
-    border-radius: 8px;
-    font-size: 0.95rem;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    transition: all 0.3s ease;
-}
-
-.social-icon {
-    width: 20px;
-    height: 20px;
-}
-
-.social-btn:hover {
-    background: var(--neon-blue);
-    color: var(--primary-black);
-    box-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
-    transform: translateY(-2px);
-}
-
-.github-btn:hover {
-    border-color: #00d4ff;
-}
-
-.facebook-btn:hover {
-    border-color: #1877f2;
-    background: rgba(24, 119, 242, 0.1);
+    display: none;
 }
 
 /* Google Identity Services Sign-In Container */

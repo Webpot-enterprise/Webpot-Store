@@ -1,4 +1,4 @@
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzy7Q-698-wKYvagSqUAWF_TiqKOOdl0hw_nVBSelY9qScQKL80km_nyXNEU08bifPL/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzcRQLcNbqGqCKP14xzS9rypweuH796gNsbV1sceySj3gDuBUL1rjonmWC6X4MVaov5/exec';
 const ADMIN_KEY = 'WebpotAdmin2026';
 
 // Authentication Check
@@ -11,7 +11,7 @@ window.addEventListener('DOMContentLoaded', () => {
             initAdmin();
         } else {
             alert('Invalid password');
-            window.location.href = '../index.html';
+            window.location.href = 'index.html';
         }
     } else {
         initAdmin();
@@ -51,7 +51,7 @@ function switchAdminSection(sectionName) {
 
 function logoutAdmin() {
     localStorage.removeItem('webpotAdminAuth');
-    window.location.href = '../index.html';
+    window.location.href = 'index.html';
 }
 
 // ============== ORDERS MANAGEMENT ==============

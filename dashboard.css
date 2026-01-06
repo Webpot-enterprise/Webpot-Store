@@ -2,17 +2,44 @@
 
 /* CSS Variables */
 :root {
-    --bg-black: #0f1115;
-    --surface-dark: #1c1f26;
-    --primary-accent: #2563eb;
-    --secondary-accent: #3b82f6;
+    /* Main Color Variables */
+    --bg: #0f1115;
+    --surface: #1c1f26;
+    --text: #ffffff;
+    --accent: #2563eb;
+    
+    /* Legacy variables for compatibility */
+    --bg-color: #0f1115;
+    --surface-color: #1c1f26;
     --text-primary: #ffffff;
     --text-secondary: #94a3b8;
+    --text-muted: #94a3b8;
+    --text-light: #ffffff;
+    --primary-accent: #2563eb;
+    --secondary-accent: #3b82f6;
     --border-color: #2d333f;
+    --bg-black: #0f1115;
+    --surface-dark: #1c1f26;
     --neon-blue: #2563eb;
     --neon-purple: #3b82f6;
-    --text-light: #ffffff;
-    --text-muted: #94a3b8;
+}
+
+:root.light-mode {
+    --bg: #ffffff;
+    --surface: #f8fafc;
+    --text: #0f172a;
+    --accent: #2563eb;
+    
+    /* Legacy support */
+    --bg-color: #ffffff;
+    --surface-color: #f8fafc;
+    --text-primary: #0f172a;
+    --text-secondary: #4a5568;
+    --text-muted: #718096;
+    --text-light: #0f172a;
+    --border-color: #e2e8f0;
+    --bg-black: #ffffff;
+    --surface-dark: #f8fafc;
 }
 
 /* Back Button Styling */
@@ -48,12 +75,15 @@
 body {
     display: flex;
     flex-direction: row;
+    background: var(--bg);
+    color: var(--text);
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .sidebar {
     width: 250px;
-    background: #0f1115;
-    border-right: 1px solid #2d333f;
+    background: var(--bg);
+    border-right: 1px solid var(--border-color);
     padding: 2rem 0;
     position: fixed;
     left: 0;
@@ -63,6 +93,7 @@ body {
     overflow-x: hidden;
     z-index: 100;
     box-sizing: border-box;
+    transition: transform 0.3s ease;
 }
 
 .sidebar-header {
@@ -147,6 +178,7 @@ body {
     min-height: 100vh;
     max-width: calc(100vw - 250px);
     box-sizing: border-box;
+    transition: margin-left 0.3s ease, max-width 0.3s ease;
 }
 
 /* Sections */
@@ -896,12 +928,6 @@ body {
     text-transform: uppercase;
 }
 
-.status-pending {
-    background: rgba(255, 193, 7, 0.2);
-    color: #ffc107;
-    border: 1px solid #ffc107;
-}
-
 .status-completed {
     background: rgba(76, 175, 80, 0.2);
     color: #4caf50;
@@ -1174,7 +1200,114 @@ body {
     }
 }
 
-/* Ensure box-sizing for all elements */
+/* Order Progress Tracker */
+.progress-tracker {
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(37, 99, 235, 0.02));
+    border: 2px solid var(--primary-accent);
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.progress-tracker h3 {
+    color: var(--neon-blue);
+    margin-bottom: 1.5rem;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.progress-steps {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.progress-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.8rem;
+    flex: 1;
+    text-align: center;
+    position: relative;
+}
+
+.progress-dot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.8rem;
+    width: 100%;
+}
+
+.step-circle {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: rgba(37, 99, 235, 0.1);
+    border: 2px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-light);
+    font-weight: 700;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+}
+
+.progress-dot.completed .step-circle {
+    background: var(--primary-accent);
+    border-color: var(--primary-accent);
+    color: white;
+    box-shadow: 0 0 15px rgba(37, 99, 235, 0.5);
+}
+
+.progress-dot.active .step-circle {
+    background: linear-gradient(135deg, var(--primary-accent), rgba(37, 99, 235, 0.3));
+    border-color: var(--primary-accent);
+    color: white;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+.step-label {
+    color: var(--text-light);
+    font-size: 0.85rem;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.progress-dot.completed .step-label {
+    color: var(--primary-accent);
+    font-weight: 600;
+}
+
+.progress-dot.active .step-label {
+    color: var(--primary-accent);
+    font-weight: 600;
+}
+
+.progress-line {
+    flex: 1;
+    height: 2px;
+    background: var(--border-color);
+    margin-top: 25px;
+    position: relative;
+}
+
+.progress-step:last-child .progress-line {
+    display: none;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        box-shadow: 0 0 15px rgba(37, 99, 235, 0.5);
+    }
+    50% {
+        box-shadow: 0 0 25px rgba(37, 99, 235, 0.8);
+    }
+}
 * {
     box-sizing: border-box;
 }

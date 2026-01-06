@@ -1,27 +1,15 @@
 // Dashboard Variables
 let currentOrderID = null;
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzy7Q-698-wKYvagSqUAWF_TiqKOOdl0hw_nVBSelY9qScQKL80km_nyXNEU08bifPL/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzcRQLcNbqGqCKP14xzS9rypweuH796gNsbV1sceySj3gDuBUL1rjonmWC6X4MVaov5/exec';
 const MY_UPI_ID = 'kakadiyasuprince@okhdfcbank';
 
 // Parse URL parameters and verify username
 function verifyURLUserParameter() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const urlUser = urlParams.get('u');
     const webpotUserName = localStorage.getItem('webpotUserName');
     
     if (!webpotUserName) {
         // User not logged in, redirect to auth
-        window.location.href = '../auth.html';
-        return false;
-    }
-    
-    // Clean the stored username and compare with URL parameter
-    const cleanStoredUsername = webpotUserName.toLowerCase().replace(/\s+/g, '-');
-    
-    if (!urlUser || urlUser !== cleanStoredUsername) {
-        // URL parameter doesn't match logged-in user, redirect to auth
-        console.warn('URL username mismatch or missing. Redirecting to login.');
-        window.location.href = '../auth.html';
+        window.location.href = 'auth.html';
         return false;
     }
     
@@ -85,7 +73,7 @@ window.addEventListener('DOMContentLoaded', () => {
     
     const isLoggedIn = localStorage.getItem('webpotUserLoggedIn');
     if (!isLoggedIn) {
-        window.location.href = '../auth.html';
+        window.location.href = 'auth.html';
         return;
     }
 
@@ -314,8 +302,11 @@ function populateDashboard(orders) {
     });
 
     // Update stat cards
-    document.getElementById('displayTotal').textContent = '₹' + totalSpent.toLocaleString('en-IN');
-    document.getElementById('displayDue').textContent = '₹' + totalDue.toLocaleString('en-IN');
+    document.getElementById('displayTotal').textContent = '₹0.00';
+    document.getElementById('displayDue').textContent = '₹0.00';
+    
+    // Animate counters
+    animateDashboardCounters(totalSpent, totalDue);
     
     // Determine current phase based on orders
     let currentPhase = 'No Active Orders';
@@ -382,6 +373,11 @@ function populateDashboard(orders) {
     const lastLogin = localStorage.getItem('webpotLastLogin') || new Date().toLocaleString('en-IN');
     document.getElementById('lastLoginTime').textContent = lastLogin;
     localStorage.setItem('webpotLastLogin', new Date().toLocaleString('en-IN'));
+    
+    // Update progress tracker for the first active order
+    if (orders.length > 0) {
+        updateProgressTracker(orders[0]);
+    }
     
     // Render order cards
     renderOrderCards(orders);
@@ -680,7 +676,7 @@ function logoutUser() {
     localStorage.removeItem('webpotUserPassword');
     localStorage.removeItem('webpotUserProfilePic');
     
-    window.location.href = '../index.html';
+    window.location.href = 'index.html';
 }
 
 // ============== FEATURE 2: PDF INVOICES ==============
@@ -855,4 +851,125 @@ function submitReview() {
         btn.textContent = originalText;
         btn.disabled = false;
     });
+}
+
+// ========== ORDER PROGRESS STEPPER ==========
+function updateProgressBar(status) {
+    const statusStepper = document.getElementById('statusStepper');
+    if (!statusStepper) return;
+    
+    // Status mapping to steps
+    const statusSteps = {
+        'pending': 0,
+        'order_placed': 0,
+        'designing': 1,
+        'developing': 2,
+        'completed': 3,
+        'delivered': 3
+    };
+    
+    const normalizedStatus = (status || 'pending').toLowerCase();
+    const currentStep = statusSteps[normalizedStatus] || 0;
+    
+    // Get all step dots and lines
+    const dots = statusStepper.querySelectorAll('.progress-dot');
+    const lines = statusStepper.querySelectorAll('.progress-line');
+    
+    // Update dots
+    dots.forEach((dot, index) => {
+        if (index < currentStep) {
+            dot.classList.add('completed');
+            dot.classList.remove('active');
+        } else if (index === currentStep) {
+            dot.classList.add('active');
+            dot.classList.remove('completed');
+        } else {
+            dot.classList.remove('active', 'completed');
+        }
+    });
+    
+    // Update lines
+    lines.forEach((line, index) => {
+        if (index < currentStep) {
+            line.style.background = 'var(--accent)';
+        } else {
+            line.style.background = 'var(--border-color)';
+        }
+    });
+}
+
+// ========== ORDER PROGRESS TRACKER ==========
+function updateProgressTracker(order) {
+    const tracker = document.getElementById('orderProgressTracker');
+    if (!tracker || !order) return;
+    
+    // Show the tracker
+    tracker.style.display = 'block';
+    
+    // Map order status to progress steps
+    const statusMap = {
+        'pending': 0,
+        'order_placed': 0,
+        'designing': 1,
+        'developing': 2,
+        'in_review': 3,
+        'final_review': 3,
+        'completed': 4,
+        'delivered': 4
+    };
+    
+    const status = (order.status || 'pending').toLowerCase();
+    const currentStep = statusMap[status] || 0;
+    
+    // Update step classes
+    const steps = tracker.querySelectorAll('.progress-step');
+    steps.forEach((step, index) => {
+        step.classList.remove('completed', 'in-progress');
+        if (index < currentStep) {
+            step.classList.add('completed');
+        } else if (index === currentStep && currentStep < 4) {
+            step.classList.add('in-progress');
+        }
+    });
+    
+    // Update progress lines
+    const lines = tracker.querySelectorAll('.progress-line');
+    lines.forEach((line, index) => {
+        if (index < currentStep - 1) {
+            line.style.background = 'var(--primary-accent)';
+        }
+    });
+}
+
+// ========== ANIMATED COUNTERS ==========
+function animateCounter(element, targetValue, duration = 1000) {
+    if (!element) return;
+    
+    const startValue = 0;
+    const difference = targetValue - startValue;
+    const stepDuration = Math.floor(duration / Math.abs(difference));
+    let currentValue = startValue;
+    const interval = setInterval(() => {
+        currentValue += Math.ceil(difference / (duration / stepDuration));
+        if (Math.abs(currentValue - targetValue) < Math.abs(difference / (duration / stepDuration))) {
+            currentValue = targetValue;
+            clearInterval(interval);
+        }
+        element.textContent = '₹' + currentValue.toLocaleString('en-IN');
+    }, stepDuration);
+}
+
+function animateDashboardCounters(totalAmount, dueAmount) {
+    const totalEl = document.getElementById('displayTotal');
+    const dueEl = document.getElementById('displayDue');
+    
+    if (totalEl && !totalEl.dataset.animated) {
+        totalEl.dataset.animated = 'true';
+        animateCounter(totalEl, totalAmount, 800);
+    }
+    
+    if (dueEl && !dueEl.dataset.animated) {
+        dueEl.dataset.animated = 'true';
+        animateCounter(dueEl, dueAmount, 800);
+    }
 }

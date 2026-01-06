@@ -1,3 +1,6 @@
+// Discord Webhook URL for admin notifications
+const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1458140788058751150/w99BnMQl5buxDKyKi_BZly-dmGIVG1eIz3KUtJ1VPkrU4da6iG9-eE_Fbcbjd_KpEvKt";
+
 const SPREADSHEET = SpreadsheetApp.getActiveSpreadsheet();
 
 // Helper to safely get sheet
@@ -7,7 +10,61 @@ function getSheet(sheetName) {
   return sheet;
 }
 
-// ---------------- MAIN ROUTER ----------------
+// ========== DISCORD WEBHOOK NOTIFICATION ==========
+function sendAdminNotification(type, data) {
+  let message = "";
+  
+  if (type === "REGISTER") {
+    message = `👤 **New User Registered**\n**Name:** ${data.name}\n**Email:** ${data.email}\n**Referral Code:** ${data.referralId}`;
+  } else if (type === "ORDER") {
+    message = `💰 **New Order Received**\n**Client:** ${data.clientName}\n**Service:** ${data.serviceType}\n**Amount:** ₹${data.totalAmount}`;
+  }
+
+  const payload = {
+    content: message,
+    username: "Webpot Admin Bot",
+    avatar_url: "https://webpot.shop/logo.png"
+  };
+
+  const options = {
+    method: "post",
+    contentType: "application/json",
+    payload: JSON.stringify(payload)
+  };
+
+  try {
+    UrlFetchApp.fetch(DISCORD_WEBHOOK_URL, options);
+  } catch (e) {
+    console.error("Webhook failed: " + e);
+  }
+}
+
+// ========== SECURITY LOGGING ==========
+function logSecurityEvent(email, status, ipAddress = "unknown") {
+  try {
+    var sheet = SPREADSHEET.getSheetByName("Security_Logs");
+    
+    // Create sheet if it doesn't exist
+    if (!sheet) {
+      sheet = SPREADSHEET.insertSheet("Security_Logs");
+      sheet.appendRow(["Timestamp", "Email", "Status", "IP Address", "User Agent"]);
+    }
+    
+    // Append log entry
+    var timestamp = new Date();
+    sheet.appendRow([
+      timestamp,
+      email,
+      status, // "SUCCESS" or "FAILURE"
+      ipAddress,
+      getUserAgent()
+    ]);
+  } catch (e) {
+    console.error("Security logging failed: " + e);
+  }
+}
+
+// ------------ MAIN ROUTER ----------------
 
 function doPost(e) {
   var lock = LockService.getScriptLock();
@@ -142,6 +199,14 @@ function handleUserRegistration(data) {
   // Log the registration action
   logAction(data.email, 'NEW_USER', 'New registration - Referral Code: ' + myReferralCode);
   
+  // Send admin notification
+  sendAdminNotification('new_user', {
+    name: data.name,
+    email: data.email,
+    phone: data.phone,
+    referralCode: myReferralCode
+  });
+  
   return { 
     status: 'success', 
     message: 'User registered successfully',
@@ -267,6 +332,15 @@ function handleOrderSubmission(data) {
 
   sendOrderEmails(data, orderId, hasReferralDiscount, dueAmount);
   
+  // Send admin notification
+  sendAdminNotification('new_order', {
+    orderId: orderId,
+    clientName: data.name,
+    clientEmail: data.email,
+    service: data.service,
+    amount: totalAmount
+  });
+  
   return { status: 'success', message: 'Order submitted', orderId: orderId, discountApplied: hasReferralDiscount };
 }
 
@@ -359,7 +433,7 @@ function handlePaymentUpdate(data) {
 function sendOrderEmails(data, orderId, hasReferralDiscount, dueAmount) {
   try {
     var adminEmail = "engagewebpot@gmail.com";
-    var dashboardLink = "https://webpot-store.web.app/dashboard/index.html";
+    var dashboardLink = "https://webpot.shop/dashboard.html";
     
     // Client Confirmation Email - Casual and Friendly
     var firstName = data.name.split(" ")[0];
@@ -775,6 +849,7 @@ function handleUserLoginModified(data) {
   var loginInput = data.loginInput || data.email || data.emailOrPhone;
 
   if (!loginInput) {
+    logSecurityEvent(loginInput, 'Fail', data.userAgent, data.ipAddress);
     return { status: 'error', message: 'Email or Phone is required' };
   }
 
@@ -787,6 +862,7 @@ function handleUserLoginModified(data) {
     if (sheetEmail === inputStr || sheetPhone === inputStr) {
       if (String(values[i][3]) === String(data.password)) {
         if (values[i][5] === 'Banned') {
+          logSecurityEvent(sheetEmail, 'Fail', data.userAgent, data.ipAddress);
           return { status: 'user_banned', message: 'This account has been banned' };
         }
 
@@ -817,17 +893,22 @@ function handleUserLoginModified(data) {
           console.error("Email error: " + e.toString());
         }
 
+        // Log successful password verification (OTP sent)
+        logSecurityEvent(sheetEmail, 'Success', data.userAgent, data.ipAddress);
+
         return {
           status: 'otp_required',
           message: 'OTP sent to your email',
           email: sheetEmail
         };
       } else {
+        logSecurityEvent(sheetEmail, 'Fail', data.userAgent, data.ipAddress);
         return { status: 'invalid_password', message: 'Invalid password' };
       }
     }
   }
 
+  logSecurityEvent(inputStr, 'Fail', data.userAgent, data.ipAddress);
   return { status: 'user_not_found', message: 'User not found' };
 }
 
@@ -982,5 +1063,261 @@ function createDailyBackup() {
     Logger.log('Backup created successfully: ' + backupName);
   } catch (e) {
     Logger.log('Error creating backup: ' + e);
+  }
+}
+
+// ========== SECURITY LOGGING ==========
+function logSecurityEvent(email, loginStatus, userAgent, ipAddress) {
+  try {
+    var sheet = getSheet('Security_Logs');
+    var timestamp = new Date();
+    
+    sheet.appendRow([
+      timestamp,
+      email,
+      loginStatus,          // 'Success' or 'Fail'
+      userAgent || 'N/A',
+      ipAddress || 'N/A'
+    ]);
+    
+    Logger.log('Security event logged: ' + email + ' - ' + loginStatus);
+    
+  } catch (e) {
+    // If sheet doesn't exist, create it
+    if (e.toString().includes('not found')) {
+      var ss = SpreadsheetApp.getActiveSpreadsheet();
+      var newSheet = ss.insertSheet('Security_Logs');
+      newSheet.appendRow([
+        'Timestamp',
+        'Email',
+        'Login_Status',
+        'User_Agent',
+        'IP_Address'
+      ]);
+      
+      // Retry logging the event
+      logSecurityEvent(email, loginStatus, userAgent, ipAddress);
+    } else {
+      Logger.log('Error logging security event: ' + e);
+    }
+  }
+}
+
+// ========== ADMIN WEBHOOK NOTIFICATIONS ==========
+function sendAdminNotification(type, data) {
+  try {
+    // Get webhook URLs from Script Properties (need to be configured)
+    var discordWebhookUrl = PropertiesService.getScriptProperties().getProperty('DISCORD_WEBHOOK_URL');
+    var telegramBotToken = PropertiesService.getScriptProperties().getProperty('TELEGRAM_BOT_TOKEN');
+    var telegramChatId = PropertiesService.getScriptProperties().getProperty('TELEGRAM_CHAT_ID');
+    
+    var message = '';
+    var timestamp = new Date().toLocaleString('en-IN');
+    
+    if (type === 'new_user') {
+      message = `🎉 *NEW USER REGISTRATION*\n\n` +
+        `*Name:* ${data.name}\n` +
+        `*Email:* ${data.email}\n` +
+        `*Phone:* ${data.phone || 'N/A'}\n` +
+        `*Referral Code:* ${data.referralCode}\n` +
+        `*Time:* ${timestamp}`;
+    } else if (type === 'new_order') {
+      message = `📦 *NEW ORDER RECEIVED*\n\n` +
+        `*Order ID:* ${data.orderId}\n` +
+        `*Client:* ${data.clientName} (${data.clientEmail})\n` +
+        `*Service:* ${data.service}\n` +
+        `*Amount:* ₹${data.amount}\n` +
+        `*Time:* ${timestamp}`;
+    }
+    
+    // Send to Discord if webhook URL is configured
+    if (discordWebhookUrl) {
+      try {
+        var discordPayload = {
+          content: message.replace(/\*/g, '**').replace(/\n/g, '\n')
+        };
+        
+        UrlFetchApp.fetch(discordWebhookUrl, {
+          method: 'post',
+          payload: JSON.stringify(discordPayload),
+          headers: { 'Content-Type': 'application/json' },
+          muteHttpExceptions: true
+        });
+      } catch (e) {
+        Logger.log('Discord notification failed: ' + e);
+      }
+    }
+    
+    // Send to Telegram if bot token and chat ID are configured
+    if (telegramBotToken && telegramChatId) {
+      try {
+        var telegramUrl = 'https://api.telegram.org/bot' + telegramBotToken + '/sendMessage';
+        var telegramPayload = {
+          chat_id: telegramChatId,
+          text: message,
+          parse_mode: 'Markdown'
+        };
+        
+        UrlFetchApp.fetch(telegramUrl, {
+          method: 'post',
+          payload: JSON.stringify(telegramPayload),
+          headers: { 'Content-Type': 'application/json' },
+          muteHttpExceptions: true
+        });
+      } catch (e) {
+        Logger.log('Telegram notification failed: ' + e);
+      }
+    }
+    
+    Logger.log('Admin notification sent: ' + type);
+    return true;
+    
+  } catch (e) {
+    Logger.log('Error sending notification: ' + e);
+    return false;
+  }
+}
+
+// ========== PDF INVOICE GENERATION ==========
+function generateInvoicePDF(orderId) {
+  try {
+    var sheet = getSheet('Orders');
+    var values = sheet.getDataRange().getValues();
+    
+    // Find the order
+    var order = null;
+    for (var i = 1; i < values.length; i++) {
+      if (values[i][1] === orderId) { // Column B = Order_ID
+        order = {
+          orderId: values[i][1],
+          date: values[i][0],
+          clientEmail: values[i][2],
+          clientName: values[i][3],
+          service: values[i][4],
+          amount: values[i][5],
+          paid: values[i][6],
+          status: values[i][11]
+        };
+        break;
+      }
+    }
+    
+    if (!order) {
+      return { status: 'error', message: 'Order not found' };
+    }
+    
+    // Create HTML template for invoice
+    var invoiceHTML = `
+    <html>
+    <head>
+      <style>
+        body { font-family: Arial, sans-serif; color: #0f1115; margin: 0; padding: 20px; }
+        .invoice-container { max-width: 800px; margin: 0 auto; border: 2px solid #2563eb; padding: 30px; }
+        .header { text-align: center; border-bottom: 2px solid #2563eb; padding-bottom: 20px; margin-bottom: 20px; }
+        .header h1 { color: #2563eb; margin: 0; }
+        .header p { margin: 5px 0; color: #666; }
+        .invoice-details { display: flex; justify-content: space-between; margin-bottom: 30px; }
+        .invoice-details div { flex: 1; }
+        .invoice-details strong { color: #2563eb; }
+        .items-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .items-table th { background: #2563eb; color: white; padding: 10px; text-align: left; }
+        .items-table td { padding: 10px; border-bottom: 1px solid #e0e0e0; }
+        .summary { text-align: right; margin-top: 20px; }
+        .summary-row { display: flex; justify-content: flex-end; margin: 10px 0; }
+        .summary-row span:first-child { width: 150px; font-weight: bold; }
+        .summary-row span:last-child { width: 100px; text-align: right; }
+        .total { font-size: 1.3em; color: #2563eb; font-weight: bold; border-top: 2px solid #2563eb; padding-top: 10px; }
+        .footer { text-align: center; margin-top: 30px; border-top: 1px solid #e0e0e0; padding-top: 20px; color: #666; font-size: 0.9em; }
+      </style>
+    </head>
+    <body>
+      <div class="invoice-container">
+        <div class="header">
+          <h1>WEBPOT INVOICE</h1>
+          <p>Professional Web Development Services</p>
+        </div>
+        
+        <div class="invoice-details">
+          <div>
+            <p><strong>Invoice Number:</strong> ${order.orderId}</p>
+            <p><strong>Invoice Date:</strong> ${new Date(order.date).toLocaleDateString()}</p>
+          </div>
+          <div>
+            <p><strong>Bill To:</strong></p>
+            <p>${order.clientName}</p>
+            <p>${order.clientEmail}</p>
+          </div>
+        </div>
+        
+        <table class="items-table">
+          <thead>
+            <tr>
+              <th>Description</th>
+              <th>Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>${order.service} - Web Development Service</td>
+              <td>₹${parseFloat(order.amount).toLocaleString()}</td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <div class="summary">
+          <div class="summary-row">
+            <span>Subtotal:</span>
+            <span>₹${parseFloat(order.amount).toLocaleString()}</span>
+          </div>
+          <div class="summary-row">
+            <span>Amount Paid:</span>
+            <span>₹${parseFloat(order.paid).toLocaleString()}</span>
+          </div>
+          <div class="summary-row total">
+            <span>Due Amount:</span>
+            <span>₹${(parseFloat(order.amount) - parseFloat(order.paid)).toLocaleString()}</span>
+          </div>
+        </div>
+        
+        <div class="footer">
+          <p>Thank you for your business!</p>
+          <p>For support, contact us at webpot.in</p>
+          <p>This is an automatically generated invoice</p>
+        </div>
+      </div>
+    </body>
+    </html>
+    `;
+    
+    // Generate PDF blob using HtmlService
+    var htmlOutput = HtmlService.createHtmlOutput(invoiceHTML);
+    var pdfBlob = htmlOutput.getBlob().getAs('application/pdf');
+    pdfBlob.setName('Invoice_' + orderId + '.pdf');
+    
+    // Save to Google Drive
+    var invoiceFolder = null;
+    var folders = DriveApp.getFoldersByName('Webpot Invoices');
+    
+    if (folders.hasNext()) {
+      invoiceFolder = folders.next();
+    } else {
+      invoiceFolder = DriveApp.createFolder('Webpot Invoices');
+    }
+    
+    var file = invoiceFolder.createFile(pdfBlob);
+    
+    // Log the action
+    logAction(order.clientEmail, 'INVOICE_GENERATED', 'Invoice generated for order: ' + orderId);
+    
+    return { 
+      status: 'success', 
+      message: 'Invoice generated successfully',
+      fileId: file.getId(),
+      fileUrl: file.getUrl()
+    };
+    
+  } catch (e) {
+    Logger.log('Error generating invoice: ' + e);
+    return { status: 'error', message: 'Failed to generate invoice: ' + e.toString() };
   }
 }

@@ -6,6 +6,10 @@
     <title>Login & Register - Webpot</title>
     <link rel="stylesheet" href="auth.css">
     <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <div id="g_id_onload"
+         data-client_id="522296612988-phrs7trh1l6ghauk2khm1181s4a5mvl1.apps.googleusercontent.com"
+         data-callback="handleCredentialResponse">
+    </div>
 </head>
 <body class="mobile-optimized">
     <!-- Background Elements -->
@@ -67,7 +71,7 @@
             </div>
 
             <!-- Social Login Buttons -->
-            <div class="social-actions-row">
+            <div class="social-login-grid">
                 <button id="customGoogleLogin" class="social-btn google-btn" type="button">
                     <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -175,7 +179,7 @@
                 <span>or continue with social</span>
             </div>
 
-            <div class="social-actions-row">
+            <div class="social-login-grid">
                 <button id="customGoogleLogin" class="social-btn google-btn" type="button">
                     <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
