@@ -495,6 +495,7 @@ function refreshDashboard(serviceType, currentStatus) {
 function openPaymentModal(orderId, dueAmount) {
     currentOrderID = orderId;
     document.getElementById('paymentModal').style.display = 'block';
+    document.body.style.overflow = 'hidden';
     document.getElementById('paymentForm').reset();
     
     // Generate QR code
@@ -597,6 +598,7 @@ function closePaymentModal() {
     }
     
     document.getElementById('paymentModal').style.display = 'none';
+    document.body.style.overflow = '';
 }
 
 // Verify and Submit Payment (Dashboard Version)

@@ -516,39 +516,51 @@ body {
 .modal {
     display: none;
     position: fixed;
-    z-index: 1000;
+    z-index: 3000;
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(5px);
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(4px);
 }
 
 .modal-content {
-    background: linear-gradient(135deg, var(--secondary-black), var(--tertiary-black));
+    background: #1c1f26;
     margin: 5% auto;
     padding: 2rem;
-    border: 2px solid var(--neon-blue);
-    border-radius: 15px;
+    border: 1px solid #2563eb;
+    border-radius: 12px;
     width: 90%;
     max-width: 500px;
-    box-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+    box-shadow: 0 0 30px rgba(37, 99, 235, 0.2);
     backdrop-filter: blur(10px);
+    position: relative;
 }
 
 .close {
-    color: var(--neon-blue);
-    float: right;
-    font-size: 28px;
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    color: #94a3b8;
+    font-size: 1.8rem;
     font-weight: bold;
     cursor: pointer;
     transition: all 0.3s ease;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    background: transparent;
+    border: none;
+    padding: 0;
 }
 
 .close:hover {
-    color: var(--neon-pink);
-    text-shadow: 0 0 10px rgba(255, 0, 153, 0.5);
+    color: #2563eb;
+    background: rgba(37, 99, 235, 0.1);
 }
 
 .form-group {
@@ -558,7 +570,7 @@ body {
 .form-group label {
     display: block;
     margin-bottom: 0.5rem;
-    color: var(--neon-blue);
+    color: #ffffff;
     font-weight: 600;
 }
 
@@ -586,21 +598,21 @@ body {
 
 /* Buttons */
 .btn-primary {
-    background: linear-gradient(90deg, var(--primary-blue), var(--neon-blue));
-    color: white;
+    background: #2563eb;
+    color: #ffffff;
     border: none;
     padding: 0.8rem 1.5rem;
     border-radius: 8px;
     cursor: pointer;
-    font-weight: 600;
+    font-weight: 700;
     font-size: 1rem;
     transition: all 0.3s ease;
-    box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
+    box-shadow: 0 0 15px rgba(37, 99, 235, 0.2);
 }
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 0 25px rgba(0, 212, 255, 0.4);
+    box-shadow: 0 0 25px rgba(37, 99, 235, 0.4);
 }
 
 .btn-secondary {
@@ -683,7 +695,12 @@ body {
 
     .modal-content {
         width: 95%;
-        margin: 20% auto;
+        max-height: 90vh;
+        overflow-y: auto;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        margin: 0;
     }
 }
 

@@ -200,13 +200,13 @@
     <!-- Payment Modal (Reused from index.html) -->
     <div id="paymentModal" class="modal">
         <div class="modal-content">
-            <span class="close" onclick="closePaymentModal()">&times;</span>
-            <h2 style="color: var(--neon-blue); margin-bottom: 1.5rem;">Scan to Pay</h2>
+            <button class="close" onclick="closePaymentModal()">×</button>
+            <h2 style="color: #ffffff; margin-bottom: 1.5rem;">Scan to Pay</h2>
             <div style="text-align: center;">
                 <div id="qrCodeContainer"></div>
-                <h3 id="payAmount" style="color: var(--neon-blue); margin: 1rem 0;"></h3>
-                <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Scan with any UPI App (GPay, PhonePe, Paytm)</p>
-                <p id="qrTimer" style="color: var(--neon-pink); font-weight: bold;">Time remaining: 05:00</p>
+                <h3 id="payAmount" style="color: #2563eb; margin: 1rem 0;"></h3>
+                <p style="color: #94a3b8; margin-bottom: 1.5rem;">Scan with any UPI App (GPay, PhonePe, Paytm)</p>
+                <p id="qrTimer" style="color: #94a3b8; font-weight: bold;">Time remaining: 05:00</p>
                 <a id="payViaAppBtn" class="btn-primary" style="display: none; margin: 1rem 0; text-decoration: none; padding: 10px 20px; border-radius: 5px; display: inline-block;">📱 Pay via UPI App</a>
                 <button id="regenerateBtn" onclick="regenerateQR()" class="btn-secondary" style="display:none; margin-top: 1rem;">↻ Regenerate QR</button>
             </div>
@@ -224,10 +224,11 @@
     <!-- Success Modal -->
     <div id="successModal" class="modal" style="display: none;">
         <div class="modal-content">
+            <button class="close" onclick="closeSuccessModal()">×</button>
             <div style="text-align: center;">
                 <div style="font-size: 48px; margin-bottom: 1rem;">✓</div>
-                <h2 id="successTitle" style="color: var(--neon-blue); margin-bottom: 1rem;">Success!</h2>
-                <p id="successMessage" style="color: var(--text-light); margin-bottom: 2rem;">Operation completed successfully.</p>
+                <h2 id="successTitle" style="color: #2563eb; margin-bottom: 1rem;">Success!</h2>
+                <p id="successMessage" style="color: #ffffff; margin-bottom: 2rem;">Operation completed successfully.</p>
                 <button onclick="closeSuccessModal()" class="btn-primary">Close</button>
             </div>
         </div>
