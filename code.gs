@@ -3,10 +3,28 @@ const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/145814078805875115
 
 const SPREADSHEET = SpreadsheetApp.getActiveSpreadsheet();
 
-// Helper to safely get sheet
+// Helper to safely get sheet with fallback names
 function getSheet(sheetName) {
   var sheet = SPREADSHEET.getSheetByName(sheetName);
-  if (!sheet) throw new Error("Sheet not found: " + sheetName);
+  
+  // If sheet not found, try common variations
+  if (!sheet) {
+    var allSheets = SPREADSHEET.getSheets();
+    var sheetNames = allSheets.map(function(s) { return s.getName(); });
+    
+    // Try to find similar sheet name (case-insensitive)
+    for (var i = 0; i < sheetNames.length; i++) {
+      if (sheetNames[i].toLowerCase() === sheetName.toLowerCase()) {
+        sheet = SPREADSHEET.getSheetByName(sheetNames[i]);
+        break;
+      }
+    }
+  }
+  
+  if (!sheet) {
+    throw new Error("Sheet not found: " + sheetName + ". Available sheets: " + allSheets.map(function(s) { return s.getName(); }).join(", "));
+  }
+  
   return sheet;
 }
 
@@ -291,7 +309,8 @@ function handleOrderSubmission(data) {
   var userValues = usersSheet.getDataRange().getValues();
   var hasReferralDiscount = false;
   for (var i = 1; i < userValues.length; i++) {
-    if (userValues[i][2] === data.email && userValues[i][8] !== '') { // Column C is email, Column I (index 8) is Referred_By
+    // Column C is email (index 2), Column I (index 8) is Referred_By
+    if (userValues[i][2] && userValues[i][2].toString().toLowerCase() === data.email.toLowerCase() && userValues[i][8]) {
       hasReferralDiscount = true;
       totalAmount = totalAmount * 0.9; // Apply 10% discount
       break;
@@ -306,42 +325,57 @@ function handleOrderSubmission(data) {
   var dueAmount = totalAmount - paidAmount;
   
   // 4. TRANSACTION ID (if provided) - Robust assignment
-  var transactionIds = (data.transactionId || data.utrNumber || 'N/A').toString().trim();
+  var transactionIds = (data.transactionId || data.utrNumber || '').toString().trim();
+  if (!transactionIds) {
+    transactionIds = 'PENDING';
+  }
   
   // 5. PAYMENT STATUS
   // If Due <= 0, Completed. If Paid > 0 but Due > 0, Partial. Else Pending.
   var payStatus = (dueAmount <= 0) ? 'Completed' : (paidAmount > 0 ? 'Partial' : 'Pending');
 
   // Columns Mapping (0-based index for array, matches Sheet Columns A-M):
-  // [Date, Order ID, Name, Email, Phone, Service, Total, Paid, Due, TxnIDs, Status, Details, Updated]
+  // A: Date, B: Order ID, C: Name, D: Email, E: Phone, F: Service, G: Total, H: Paid, I: Due, J: TxnIDs, K: Status, L: Details, M: Updated
+  
+  var details = (hasReferralDiscount ? 'Referral Discount Applied (10%)' : '');
+  if (data.details) {
+    details += (details ? ' | ' : '') + data.details;
+  }
+  
   sheet.appendRow([
-    timestamp, 
-    orderId, 
-    data.name, 
-    data.email, 
-    data.phone, 
-    data.service, 
-    totalAmount,
-    paidAmount,
-    dueAmount,
-    transactionIds, // Column J
-    payStatus,      // Column K
-    (hasReferralDiscount ? 'Referral Discount Applied (10%)' : '') + (data.details ? ' ' + data.details : ''), // Column L
-    timestamp       // Column M
+    timestamp,           // A: Date
+    orderId,             // B: Order ID
+    data.name,           // C: Name
+    data.email,          // D: Email
+    data.phone || '',    // E: Phone
+    data.service,        // F: Service
+    totalAmount,         // G: Total Amount
+    paidAmount,          // H: Paid Amount
+    dueAmount,           // I: Due Amount
+    transactionIds,      // J: Transaction IDs
+    payStatus,           // K: Status
+    details,             // L: Details
+    timestamp            // M: Last Updated
   ]);
 
   sendOrderEmails(data, orderId, hasReferralDiscount, dueAmount);
   
   // Send admin notification
-  sendAdminNotification('new_order', {
-    orderId: orderId,
+  sendAdminNotification('ORDER', {
     clientName: data.name,
     clientEmail: data.email,
-    service: data.service,
-    amount: totalAmount
+    serviceType: data.service,
+    totalAmount: totalAmount
   });
   
-  return { status: 'success', message: 'Order submitted', orderId: orderId, discountApplied: hasReferralDiscount };
+  return { 
+    status: 'success', 
+    message: 'Order submitted successfully', 
+    orderId: orderId, 
+    discountApplied: hasReferralDiscount,
+    totalAmount: totalAmount,
+    dueAmount: dueAmount
+  };
 }
 
 function handleContactInquiry(data) {
@@ -354,79 +388,140 @@ function handleContactInquiry(data) {
 // ---------------- DASHBOARD LOGIC ----------------
 
 function getUserDashboardData(email) {
-  var sheet = getSheet('Orders Sheet');
-  var data = sheet.getDataRange().getValues();
-  var userOrders = [];
-  
-  // Skip header row (start at i=1)
-  for (var i = 1; i < data.length; i++) {
-    // Check if Email column (Index 3) matches
-    if (data[i][3] === email) {
-      userOrders.push({
-        date: data[i][0],
-        orderId: data[i][1],
-        service: data[i][5],
-        amount: data[i][6],     // Total
-        paidAmount: data[i][7], // Paid
-        dueAmount: data[i][8],  // Due
-        status: data[i][10],
-        details: data[i][11]
-      });
+  try {
+    var sheet = getSheet('Orders Sheet');
+    var data = sheet.getDataRange().getValues();
+    var userOrders = [];
+    var referralCode = '';
+    
+    // Get user's referral code from Users Sheet
+    var usersSheet = getSheet('Users Sheet');
+    var usersData = usersSheet.getDataRange().getValues();
+    
+    // Search for referral code in Users Sheet
+    // Columns: Date, Name, Email, Password, Phone, Status, Created, Referral_Code, Referred_By, Wallet_Balance, Profile_Pic
+    for (var u = 1; u < usersData.length; u++) {
+      if (usersData[u][2] === email) { // Column C is Email (index 2)
+        referralCode = usersData[u][7] || ''; // Column H is Referral_Code (index 7)
+        break;
+      }
     }
+    
+    // Process Orders Sheet
+    // Columns: Date, Order ID, Name, Email, Phone, Service, Total Amount, Paid Amount, Due Amount, Transaction IDs, Status, Details, Last Updated
+    for (var i = 1; i < data.length; i++) {
+      // Check if Email column (Index 3) matches
+      if (data[i][3] && data[i][3].toString().toLowerCase() === email.toLowerCase()) {
+        var totalAmount = parseFloat(data[i][6]) || 0;
+        var paidAmount = parseFloat(data[i][7]) || 0;
+        var dueAmount = parseFloat(data[i][8]) || 0;
+        
+        userOrders.push({
+          date: formatDate(data[i][0]),
+          orderId: data[i][1],
+          name: data[i][2],
+          email: data[i][3],
+          phone: data[i][4],
+          service: data[i][5],
+          amount: totalAmount,
+          paidAmount: paidAmount,
+          dueAmount: dueAmount,
+          transactionIds: data[i][9] || '',
+          status: data[i][10],
+          details: data[i][11],
+          lastUpdated: data[i][12]
+        });
+      }
+    }
+    
+    return { 
+      status: 'success', 
+      orders: userOrders,
+      referralCode: referralCode,
+      totalOrders: userOrders.length
+    };
+  } catch (e) {
+    console.error('getUserDashboardData error: ' + e);
+    return { 
+      status: 'error', 
+      message: e.toString(),
+      orders: []
+    };
   }
-  
-  return { status: 'success', orders: userOrders };
+}
+
+// Helper function to format dates
+function formatDate(date) {
+  if (!date) return '';
+  if (typeof date === 'string') return date;
+  if (date instanceof Date) {
+    var day = String(date.getDate()).padStart(2, '0');
+    var month = String(date.getMonth() + 1).padStart(2, '0');
+    var year = date.getFullYear();
+    return day + '/' + month + '/' + year;
+  }
+  return '';
 }
 
 function handlePaymentUpdate(data) {
-  var sheet = getSheet('Orders Sheet');
-  var range = sheet.getDataRange();
-  var values = range.getValues();
-  var rowIndex = -1;
-  
-  // Find the Order by Order ID (Index 1)
-  for (var i = 1; i < values.length; i++) {
-    if (values[i][1] === data.orderId) {
-      rowIndex = i + 1; // 1-based index for Sheet API
-      break;
+  try {
+    var sheet = getSheet('Orders Sheet');
+    var range = sheet.getDataRange();
+    var values = range.getValues();
+    var rowIndex = -1;
+    
+    // Find the Order by Order ID (Index 1, Column B)
+    for (var i = 1; i < values.length; i++) {
+      if (values[i][1] && values[i][1].toString() === data.orderId.toString()) {
+        rowIndex = i + 1; // 1-based index for Sheet API
+        break;
+      }
     }
+    
+    if (rowIndex === -1) {
+      return { status: 'error', message: 'Order ID not found: ' + data.orderId };
+    }
+    
+    // Get Current Data
+    var currentRow = values[rowIndex - 1];
+    var currentTotal = parseFloat(currentRow[6]) || 0;    // Column G (index 6)
+    var currentPaid = parseFloat(currentRow[7]) || 0;    // Column H (index 7)
+    var currentTxns = currentRow[9] ? currentRow[9].toString() : ''; // Column J (index 9)
+    
+    // Calculate New Values
+    var newPayment = parseFloat(data.amount);
+    var newPaidTotal = currentPaid + newPayment;
+    var newDue = currentTotal - newPaidTotal;
+    
+    // Append Transaction ID
+    var newTxns = currentTxns === '' ? data.transactionId : currentTxns + ', ' + data.transactionId;
+    
+    // Determine Status
+    var newStatus = (newDue <= 0) ? 'Completed' : 'Partial';
+    if (newDue < 0) {
+      newDue = 0; // Ensure due amount is not negative
+    }
+    
+    // Update the Row in Sheet (using 1-based column indexes)
+    sheet.getRange(rowIndex, 8).setValue(newPaidTotal);  // Col H: Paid Amount
+    sheet.getRange(rowIndex, 9).setValue(newDue);        // Col I: Due Amount
+    sheet.getRange(rowIndex, 10).setValue(newTxns);      // Col J: Transaction IDs
+    sheet.getRange(rowIndex, 11).setValue(newStatus);    // Col K: Status
+    sheet.getRange(rowIndex, 13).setValue(new Date());   // Col M: Last Updated
+    
+    return { 
+      status: 'success', 
+      message: 'Payment updated successfully', 
+      newDue: newDue, 
+      newStatus: newStatus 
+    };
+  } catch (e) {
+    console.error('handlePaymentUpdate error: ' + e);
+    return { 
+      status: 'error', 
+      message: e.toString()
+    };
   }
-  
-  if (rowIndex === -1) {
-    return { status: 'error', message: 'Order ID not found' };
-  }
-  
-  // Get Current Data
-  var currentRow = values[rowIndex - 1];
-  var currentTotal = parseFloat(currentRow[6]) || 0;
-  var currentPaid = parseFloat(currentRow[7]) || 0;
-  var currentTxns = currentRow[9] ? currentRow[9].toString() : '';
-  
-  // Calculate New Values
-  var newPayment = parseFloat(data.amount);
-  var newPaidTotal = currentPaid + newPayment;
-  var newDue = currentTotal - newPaidTotal;
-  
-  // Append Transaction ID
-  var newTxns = currentTxns === '' ? data.transactionId : currentTxns + ', ' + data.transactionId;
-  
-  // Determine Status
-  var newStatus = (newDue <= 0) ? 'Completed' : 'Partial';
-  if (newDue <= 0 && newPaidTotal > currentTotal) newStatus = 'Overpaid'; // Safety check
-  
-  // Update the Row in Sheet (using 1-based column indexes)
-  sheet.getRange(rowIndex, 8).setValue(newPaidTotal);  // Col H: Paid
-  sheet.getRange(rowIndex, 9).setValue(newDue);        // Col I: Due
-  sheet.getRange(rowIndex, 10).setValue(newTxns);      // Col J: Txn IDs
-  sheet.getRange(rowIndex, 11).setValue(newStatus);    // Col K: Status
-  sheet.getRange(rowIndex, 13).setValue(new Date());   // Col M: Last Updated
-  
-  return { 
-    status: 'success', 
-    message: 'Payment updated', 
-    newDue: newDue, 
-    newStatus: newStatus 
-  };
 }
 
 // ---------------- EMAIL HELPER ----------------

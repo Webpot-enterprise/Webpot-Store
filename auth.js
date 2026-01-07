@@ -9,7 +9,7 @@ function handleCredentialResponse(response) {
     const userData = JSON.parse(jsonPayload);
     
     // Send to Google Apps Script backend
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzcRQLcNbqGqCKP14xzS9rypweuH796gNsbV1sceySj3gDuBUL1rjonmWC6X4MVaov5/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzl4co-7Ov-l46Bd7YXSojDZe_pbX6mq--2fWnmNQ0_t2chRXrMYXFjCAEuk7DTsdL9/exec';
     
     fetch(APPS_SCRIPT_URL, {
         method: 'POST',
@@ -99,7 +99,7 @@ function handleLogin(event) {
 }
 
 function performLogin(emailOrPhone, password, submitBtn, originalText, userAgent, ipAddress) {
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzcRQLcNbqGqCKP14xzS9rypweuH796gNsbV1sceySj3gDuBUL1rjonmWC6X4MVaov5/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzl4co-7Ov-l46Bd7YXSojDZe_pbX6mq--2fWnmNQ0_t2chRXrMYXFjCAEuk7DTsdL9/exec';
     
     fetch(APPS_SCRIPT_URL, {
         method: 'POST',
@@ -182,7 +182,7 @@ function handleRegister(event) {
     submitBtn.textContent = 'Creating account...';
     submitBtn.disabled = true;
     
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzcRQLcNbqGqCKP14xzS9rypweuH796gNsbV1sceySj3gDuBUL1rjonmWC6X4MVaov5/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzl4co-7Ov-l46Bd7YXSojDZe_pbX6mq--2fWnmNQ0_t2chRXrMYXFjCAEuk7DTsdL9/exec';
     
     fetch(APPS_SCRIPT_URL, {
         method: 'POST',
@@ -382,7 +382,7 @@ function submitResetEmail(event) {
     btn.textContent = 'Sending...';
     btn.disabled = true;
 
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzcRQLcNbqGqCKP14xzS9rypweuH796gNsbV1sceySj3gDuBUL1rjonmWC6X4MVaov5/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzl4co-7Ov-l46Bd7YXSojDZe_pbX6mq--2fWnmNQ0_t2chRXrMYXFjCAEuk7DTsdL9/exec';
 
     fetch(APPS_SCRIPT_URL, {
         method: 'POST',
@@ -428,7 +428,7 @@ function submitResetPassword(event) {
     btn.textContent = 'Resetting...';
     btn.disabled = true;
 
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzcRQLcNbqGqCKP14xzS9rypweuH796gNsbV1sceySj3gDuBUL1rjonmWC6X4MVaov5/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzl4co-7Ov-l46Bd7YXSojDZe_pbX6mq--2fWnmNQ0_t2chRXrMYXFjCAEuk7DTsdL9/exec';
 
     fetch(APPS_SCRIPT_URL, {
         method: 'POST',
@@ -509,7 +509,7 @@ function verifyOTP(event) {
     btn.textContent = 'Verifying...';
     btn.disabled = true;
 
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzcRQLcNbqGqCKP14xzS9rypweuH796gNsbV1sceySj3gDuBUL1rjonmWC6X4MVaov5/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzl4co-7Ov-l46Bd7YXSojDZe_pbX6mq--2fWnmNQ0_t2chRXrMYXFjCAEuk7DTsdL9/exec';
 
     fetch(APPS_SCRIPT_URL, {
         method: 'POST',

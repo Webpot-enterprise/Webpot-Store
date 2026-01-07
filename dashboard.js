@@ -1,6 +1,6 @@
 // Dashboard Variables
 let currentOrderID = null;
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzcRQLcNbqGqCKP14xzS9rypweuH796gNsbV1sceySj3gDuBUL1rjonmWC6X4MVaov5/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzl4co-7Ov-l46Bd7YXSojDZe_pbX6mq--2fWnmNQ0_t2chRXrMYXFjCAEuk7DTsdL9/exec';
 const MY_UPI_ID = 'kakadiyasuprince@okhdfcbank';
 
 // Parse URL parameters and verify username
@@ -312,45 +312,74 @@ function populateDashboard(orders) {
         totalOrders++;
         const amount = parseFloat(order.amount) || 0;
         const paid = parseFloat(order.paidAmount) || 0;
-        const due = amount - paid;
+        const due = parseFloat(order.dueAmount) || (amount - paid);
 
         totalSpent += amount;
         totalDue += due;
     });
 
-    // Update stat cards
-    document.getElementById('displayTotal').textContent = '₹0.00';
-    document.getElementById('displayDue').textContent = '₹0.00';
+    // Update stat cards with formatted currency
+    document.getElementById('displayTotal').textContent = '₹' + totalSpent.toLocaleString('en-IN', {maximumFractionDigits: 2});
+    document.getElementById('displayDue').textContent = '₹' + totalDue.toLocaleString('en-IN', {maximumFractionDigits: 2});
     
     // Animate counters
     animateDashboardCounters(totalSpent, totalDue);
     
-    // Determine current phase based on orders
+    // Determine current phase based on latest order
     let currentPhase = 'No Active Orders';
+    let phaseClass = 'status-pending';
     if (orders.length > 0) {
-        const latestOrder = orders[orders.length - 1];
-        currentPhase = latestOrder.status || 'Processing';
+        const latestOrder = orders[0]; // Most recent order (typically first in list)
+        const orderStatus = (latestOrder.status || 'Processing').toLowerCase();
+        
+        if (orderStatus.includes('completed')) {
+            currentPhase = 'Completed';
+            phaseClass = 'status-completed';
+        } else if (orderStatus.includes('partial')) {
+            currentPhase = 'Partial Payment';
+            phaseClass = 'status-partial';
+        } else if (orderStatus.includes('pending')) {
+            currentPhase = 'Pending';
+            phaseClass = 'status-pending';
+        } else {
+            currentPhase = orderStatus.charAt(0).toUpperCase() + orderStatus.slice(1);
+            phaseClass = 'status-pending';
+        }
     }
+    
     document.getElementById('displayStatus').textContent = currentPhase;
-    document.getElementById('displayStatus').className = 'status-pending'; // Default class
+    document.getElementById('displayStatus').className = phaseClass;
     
     // Update action message
     const actionMessage = totalDue > 0 ? 
-        'You have pending payments. Please complete your payments to continue.' : 
-        'All payments are up to date. Your dashboard is ready!';
+        '💰 You have ₹' + totalDue.toLocaleString('en-IN', {maximumFractionDigits: 2}) + ' pending. Complete your payment to continue.' : 
+        '✓ All payments are up to date!';
     document.getElementById('actionMessage').textContent = actionMessage;
 
     // Populate orders table
     const tableBody = document.getElementById('ordersTableBody');
     if (orders.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">No orders found.</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">No orders found. Get started with your first order!</td></tr>';
     } else {
         tableBody.innerHTML = '';
         orders.forEach(order => {
             const amount = parseFloat(order.amount) || 0;
             const paid = parseFloat(order.paidAmount) || 0;
-            const due = amount - paid;
-            const orderDate = new Date(order.date).toLocaleDateString('en-IN');
+            const due = parseFloat(order.dueAmount) || (amount - paid);
+            
+            // Parse date properly
+            let orderDate = 'N/A';
+            if (order.date) {
+                try {
+                    if (typeof order.date === 'string') {
+                        orderDate = order.date;
+                    } else if (order.date instanceof Date) {
+                        orderDate = order.date.toLocaleDateString('en-IN');
+                    }
+                } catch (e) {
+                    orderDate = 'N/A';
+                }
+            }
             
             // Determine status
             let status, statusClass;
@@ -366,8 +395,8 @@ function populateDashboard(orders) {
             }
 
             const actionBtn = due > 0 ? 
-                `<button class="pay-btn" onclick="openPaymentModal('${order.orderId}', ${due})">Pay Now</button>` : 
-                '<span style="color: var(--text-muted);">—</span>';
+                `<button class="pay-btn" onclick="openPaymentModal('${order.orderId}', ${due})">Pay ₹${due.toLocaleString('en-IN', {maximumFractionDigits: 2})}</button>` : 
+                '<span style="color: var(--neon-blue);">✓ Paid</span>';
 
             const invoiceBtn = `<button class="pay-btn" onclick="generateInvoice({orderId: '${order.orderId}', date: '${order.date}', service: '${order.service}', amount: ${amount}, paidAmount: ${paid}, dueAmount: ${due}, status: '${order.status}'})">📄 Invoice</button>`;
 

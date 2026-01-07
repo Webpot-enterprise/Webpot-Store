@@ -1,4 +1,4 @@
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzcRQLcNbqGqCKP14xzS9rypweuH796gNsbV1sceySj3gDuBUL1rjonmWC6X4MVaov5/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzl4co-7Ov-l46Bd7YXSojDZe_pbX6mq--2fWnmNQ0_t2chRXrMYXFjCAEuk7DTsdL9/exec';
 const ADMIN_KEY = 'WebpotAdmin2026';
 
 // Authentication Check
