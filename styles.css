@@ -1,5 +1,7 @@
 html {
     scroll-behavior: smooth;
+    width: 100%;
+    overflow-x: hidden;
 }
 
 * {
@@ -58,6 +60,14 @@ body {
     overflow-x: hidden;
     position: relative;
     transition: background-color 0.3s ease, color 0.3s ease;
+    width: 100%;
+}
+
+@media (max-width: 768px) {
+    body {
+        overflow-x: hidden;
+        width: 100%;
+    }
 }
 
 @keyframes gradientShift {
@@ -519,10 +529,18 @@ nav a:hover {
     cursor: pointer;
     transition: all 0.3s ease;
     z-index: 1001;
+    padding: 0.5rem;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
 }
 
 .menu-toggle:hover {
     text-shadow: 0 0 10px rgba(0, 212, 255, 0.8);
+    background: rgba(37, 99, 235, 0.1);
 }
 
 .nav-menu {
@@ -535,7 +553,7 @@ nav a:hover {
     }
 
     .menu-toggle {
-        display: block;
+        display: flex;
     }
 
     .nav-menu {
@@ -543,7 +561,7 @@ nav a:hover {
         left: -100%;
         top: 70px;
         flex-direction: column;
-        background-color: rgba(2, 5, 17, 0.98);
+        background-color: #0f1115;
         width: 100%;
         text-align: center;
         transition: 0.3s;
@@ -553,15 +571,17 @@ nav a:hover {
         max-height: calc(100vh - 70px);
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
+        z-index: 999;
     }
 
     .nav-menu.active {
         left: 0;
+        background: #0f1115;
     }
 
     .nav-menu li {
         padding: 1rem 0;
-        border-bottom: 1px solid rgba(0, 212, 255, 0.1);
+        border-bottom: 1px solid rgba(37, 99, 235, 0.2);
     }
 
     .nav-menu li:last-child {
@@ -571,6 +591,15 @@ nav a:hover {
     .nav-menu a {
         font-size: 1rem;
         padding: 1rem;
+        color: var(--neon-blue);
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: block;
+    }
+    
+    .nav-menu a:hover {
+        color: #00d4ff;
+        background: rgba(37, 99, 235, 0.1);
     }
 
     .cta-btn {

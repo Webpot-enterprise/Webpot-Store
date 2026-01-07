@@ -42,6 +42,27 @@
     --surface-dark: #f8fafc;
 }
 
+html {
+    width: 100%;
+    overflow-x: hidden;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+    html {
+        overflow-x: hidden;
+        width: 100%;
+    }
+    
+    body {
+        overflow-x: hidden;
+        width: 100%;
+    }
+}
+
 /* Back Button Styling */
 .back-btn {
     position: fixed;
@@ -191,6 +212,10 @@ body {
     display: block;
 }
 
+.active-section {
+    display: block !important;
+}
+
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -240,6 +265,8 @@ body {
     backdrop-filter: blur(10px);
     transition: all 0.3s ease;
     box-shadow: 0 0 20px rgba(0, 212, 255, 0.1), inset 0 0 20px rgba(0, 212, 255, 0.05);
+    transform: translateZ(0);
+    backface-visibility: hidden;
 }
 
 .stat-card:hover {
@@ -868,6 +895,8 @@ body {
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    transform: translateZ(0);
+    backface-visibility: hidden;
 }
 
 .order-card:hover {
@@ -990,12 +1019,14 @@ body {
     background: rgba(0, 0, 0, 0.7);
     backdrop-filter: blur(5px);
     z-index: 80;
+    display: none;
     pointer-events: none;
     opacity: 0;
     transition: opacity 0.3s ease;
 }
 
 .sidebar-overlay.active {
+    display: block;
     pointer-events: auto;
     opacity: 1;
 }
@@ -1058,10 +1089,13 @@ body {
         margin-left: 0;
         width: 100%;
         padding: 1.5rem;
+        overflow-y: visible;
+        max-width: 100%;
     }
     
     .sidebar-toggle {
         display: flex;
+        z-index: 2000;
     }
     
     .sidebar-logo {
@@ -1093,6 +1127,7 @@ body {
     
     .stat-card {
         padding: 1rem;
+        min-height: auto;
     }
     
     .stat-card h3 {
@@ -1111,11 +1146,17 @@ body {
         font-size: 1.2rem;
     }
     
+    .orders-cards-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
     .table-container {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
         margin: 0 -1.5rem;
         padding: 0 1.5rem;
+        overflow-y: visible;
     }
     
     .orders-table {

@@ -7,10 +7,10 @@ function toggleMenu() {
     // Prevent background scrolling when menu is open
     if (navMenu.classList.contains('active')) {
         body.classList.add('menu-open');
-        body.style.overflow = 'hidden';
+        document.body.style.overflow = 'hidden';
     } else {
         body.classList.remove('menu-open');
-        body.style.overflow = '';
+        document.body.style.overflow = '';
     }
 }
 

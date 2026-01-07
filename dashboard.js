@@ -173,6 +173,12 @@ function toggleSidebar() {
     }
     if (overlay) {
         overlay.classList.toggle('active');
+        // Only enable pointer-events when overlay is active
+        if (overlay.classList.contains('active')) {
+            overlay.style.pointerEvents = 'auto';
+        } else {
+            overlay.style.pointerEvents = 'none';
+        }
     }
 }
 
@@ -186,6 +192,7 @@ function closeSidebar() {
     }
     if (overlay) {
         overlay.classList.remove('active');
+        overlay.style.pointerEvents = 'none';
     }
 }
 
@@ -199,6 +206,7 @@ function openSidebar() {
     }
     if (overlay) {
         overlay.classList.add('active');
+        overlay.style.pointerEvents = 'auto';
     }
 }
                 e.preventDefault();
@@ -230,6 +238,15 @@ function switchSection(sectionName) {
                 item.classList.add('active');
             }
         });
+    }
+}
+
+// Switch Dashboard View (alternative name for switchSection)
+function switchDashboardView(viewId) {
+    switchSection(viewId);
+    // Close sidebar on mobile after selecting a section
+    if (window.innerWidth <= 992) {
+        closeSidebar();
     }
 }
 

@@ -4,6 +4,23 @@
     box-sizing: border-box;
 }
 
+html {
+    width: 100%;
+    overflow-x: hidden;
+}
+
+@media (max-width: 768px) {
+    html {
+        overflow-x: hidden;
+        width: 100%;
+    }
+    
+    body {
+        overflow-x: hidden;
+        width: 100%;
+    }
+}
+
 :root {
     /* Main Color Variables */
     --bg: #0f1115;
@@ -1117,6 +1134,13 @@ body {
     margin-top: 1rem;
 }
 
+@media (max-width: 768px) {
+    .social-login-grid {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+
 /* Shared Social Button Style */
 .social-btn {
     flex: 1;
@@ -1135,6 +1159,15 @@ body {
     transition: all 0.3s ease;
     box-sizing: border-box;
     min-height: 44px;
+}
+
+@media (max-width: 768px) {
+    .social-btn {
+        width: 100%;
+        font-size: 16px;
+        min-height: 48px;
+        padding: 0.8rem 1rem;
+    }
 }
 
 .social-icon {
