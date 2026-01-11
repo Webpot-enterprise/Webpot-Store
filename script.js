@@ -7,10 +7,10 @@ function toggleMenu() {
     // Prevent background scrolling when menu is open
     if (navMenu.classList.contains('active')) {
         body.classList.add('menu-open');
-        body.style.overflow = 'hidden';
+        document.body.style.overflow = 'hidden';
     } else {
         body.classList.remove('menu-open');
-        body.style.overflow = '';
+        document.body.style.overflow = '';
     }
 }
 
@@ -30,6 +30,35 @@ document.addEventListener('click', function(event) {
         closeMenu();
     }
 });
+
+// ========== THEME TOGGLE ==========
+function toggleTheme() {
+    const isDarkMode = document.documentElement.classList.contains('light-mode');
+    
+    if (isDarkMode) {
+        // Switch to dark mode
+        document.documentElement.classList.remove('light-mode');
+        localStorage.setItem('theme', 'dark');
+        showToast('Dark mode enabled');
+    } else {
+        // Switch to light mode
+        document.documentElement.classList.add('light-mode');
+        localStorage.setItem('theme', 'light');
+        showToast('Light mode enabled');
+    }
+}
+
+function applyThemePreference() {
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    if (savedTheme === 'light') {
+        document.documentElement.classList.add('light-mode');
+    } else {
+        document.documentElement.classList.remove('light-mode');
+    }
+}
+
+// Initialize theme on page load
+document.addEventListener('DOMContentLoaded', applyThemePreference);
 
 // Close menu when a navigation link is clicked
 document.addEventListener('DOMContentLoaded', function() {
@@ -493,7 +522,7 @@ function verifyAndSubmitPayment(event) {
     console.log('Sending payload:', window.pendingOrderData);
 
     // Send to Backend
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzy7Q-698-wKYvagSqUAWF_TiqKOOdl0hw_nVBSelY9qScQKL80km_nyXNEU08bifPL/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzl4co-7Ov-l46Bd7YXSojDZe_pbX6mq--2fWnmNQ0_t2chRXrMYXFjCAEuk7DTsdL9/exec';
 
     fetch(APPS_SCRIPT_URL, {
         method: 'POST',
@@ -582,7 +611,7 @@ function submitForm(event) {
     }
     
     // Send to Google Apps Script backend
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzy7Q-698-wKYvagSqUAWF_TiqKOOdl0hw_nVBSelY9qScQKL80km_nyXNEU08bifPL/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzl4co-7Ov-l46Bd7YXSojDZe_pbX6mq--2fWnmNQ0_t2chRXrMYXFjCAEuk7DTsdL9/exec';
     
     // Show loading state
     const submitBtn = event.target.querySelector('button[type="submit"]');
@@ -742,7 +771,7 @@ function payLater() {
     window.pendingOrderData.transactionId = 'PAY_LATER';
     
     // Send order with PAY_LATER transaction ID
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzy7Q-698-wKYvagSqUAWF_TiqKOOdl0hw_nVBSelY9qScQKL80km_nyXNEU08bifPL/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzl4co-7Ov-l46Bd7YXSojDZe_pbX6mq--2fWnmNQ0_t2chRXrMYXFjCAEuk7DTsdL9/exec';
     
     fetch(APPS_SCRIPT_URL, {
         method: 'POST',
@@ -764,7 +793,7 @@ function payLater() {
 }
 
 function loadTestimonials() {
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzy7Q-698-wKYvagSqUAWF_TiqKOOdl0hw_nVBSelY9qScQKL80km_nyXNEU08bifPL/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzl4co-7Ov-l46Bd7YXSojDZe_pbX6mq--2fWnmNQ0_t2chRXrMYXFjCAEuk7DTsdL9/exec';
     
     fetch(APPS_SCRIPT_URL + '?action=get_public_reviews', {
         method: 'GET'
@@ -795,4 +824,78 @@ function renderTestimonials(reviews) {
             <div class="testimonial-comment">"${review.comment}"</div>
         </div>
     `).join('');
+}
+
+// ========== DARK/LIGHT MODE TOGGLE ==========
+function initThemePreference() {
+    const savedTheme = localStorage.getItem('theme-preference') || 'dark';
+    if (savedTheme === 'light') {
+        document.documentElement.classList.add('light-mode');
+    } else {
+        document.documentElement.classList.remove('light-mode');
+    }
+}
+
+function toggleDarkLightMode() {
+    const isDarkMode = document.documentElement.classList.contains('light-mode');
+    
+    if (isDarkMode) {
+        // Switch to dark mode
+        document.documentElement.classList.remove('light-mode');
+        localStorage.setItem('theme-preference', 'dark');
+        showToast('Dark mode enabled');
+    } else {
+        // Switch to light mode
+        document.documentElement.classList.add('light-mode');
+        localStorage.setItem('theme-preference', 'light');
+        showToast('Light mode enabled');
+    }
+}
+
+// Initialize theme on page load
+document.addEventListener('DOMContentLoaded', initThemePreference);
+
+// ========== TOAST NOTIFICATION SYSTEM ==========
+function showToast(message, type = 'success', duration = 3000) {
+    // Ensure toast container exists
+    let container = document.getElementById('toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toast-container';
+        container.className = 'toast-container';
+        document.body.appendChild(container);
+    }
+    
+    // Create toast element
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+    
+    // Add to container
+    container.appendChild(toast);
+    
+    // Remove after duration
+    setTimeout(() => {
+        toast.style.animation = 'slideOutToast 0.3s ease-out';
+        setTimeout(() => toast.remove(), 300);
+    }, duration);
+}
+
+// ========== PRICING COMPARISON TOGGLE ==========
+function showPlanComparison(view) {
+    const cardsView = document.getElementById('cards-view');
+    const tableView = document.getElementById('table-view');
+    const toggleBtns = document.querySelectorAll('.toggle-btn');
+    
+    toggleBtns.forEach(btn => btn.classList.remove('active'));
+    
+    if (view === 'cards') {
+        cardsView.style.display = 'flex';
+        tableView.style.display = 'none';
+        event.target.classList.add('active');
+    } else if (view === 'table') {
+        cardsView.style.display = 'none';
+        tableView.style.display = 'block';
+        event.target.classList.add('active');
+    }
 }

@@ -9,13 +9,13 @@
         body {
             display: flex;
             flex-direction: row;
-            background: #0f0f1e;
+            background: #0f1115;
         }
 
         .sidebar {
             width: 250px;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            border-right: 1px solid #00d4ff;
+            background: #0f1115;
+            border-right: 1px solid #2d333f;
             position: fixed;
             height: 100vh;
             overflow-y: auto;
@@ -27,10 +27,10 @@
             align-items: center;
             gap: 15px;
             padding: 20px;
-            color: #00d4ff;
+            color: #2563eb;
             text-decoration: none;
             font-weight: bold;
-            border-bottom: 1px solid #00d4ff;
+            border-bottom: 1px solid #2d333f;
         }
 
         .sidebar-logo {
@@ -50,7 +50,7 @@
             align-items: center;
             gap: 15px;
             padding: 15px 20px;
-            color: #aaa;
+            color: #94a3b8;
             text-decoration: none;
             border-left: 3px solid transparent;
             transition: all 0.3s ease;
@@ -58,9 +58,9 @@
 
         .nav-item:hover,
         .nav-item.active {
-            border-left-color: #00d4ff;
-            color: #00d4ff;
-            background: rgba(0, 212, 255, 0.1);
+            border-left-color: #2563eb;
+            color: #ffffff;
+            background: rgba(37, 99, 235, 0.1);
         }
 
         .nav-icon {
@@ -70,9 +70,31 @@
         .main-content {
             margin-left: 250px;
             padding: 40px;
-            background: #0f0f1e;
+            background: #0f1115;
             min-height: 100vh;
             flex: 1;
+            position: relative;
+        }
+
+        .back-to-home {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: transparent;
+            border: 1px solid #94a3b8;
+            color: #ffffff;
+            padding: 0.6rem 1.2rem;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .back-to-home:hover {
+            background: rgba(37, 99, 235, 0.1);
+            border-color: #2563eb;
+            color: #2563eb;
         }
 
         .admin-section {
@@ -84,14 +106,14 @@
         }
 
         .admin-section h1 {
-            color: #00d4ff;
+            color: #2563eb;
             margin-bottom: 30px;
             font-size: 28px;
         }
 
         .table-container {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            border: 1px solid #00d4ff;
+            background: #1c1f26;
+            border: 1px solid #2d333f;
             border-radius: 10px;
             overflow-x: auto;
             padding: 20px;
@@ -104,31 +126,31 @@
         }
 
         .admin-table thead {
-            background: rgba(0, 212, 255, 0.1);
-            border-bottom: 2px solid #00d4ff;
+            background: rgba(37, 99, 235, 0.1);
+            border-bottom: 2px solid #2563eb;
         }
 
         .admin-table th {
             padding: 15px;
             text-align: left;
-            color: #00d4ff;
+            color: #2563eb;
             font-weight: bold;
         }
 
         .admin-table td {
             padding: 12px 15px;
-            border-bottom: 1px solid #333;
+            border-bottom: 1px solid #2d333f;
         }
 
         .admin-table tbody tr:hover {
-            background: rgba(0, 212, 255, 0.05);
+            background: rgba(37, 99, 235, 0.05);
         }
 
         .action-btn {
             padding: 8px 12px;
-            border: 1px solid #00d4ff;
+            border: 1px solid #2563eb;
             background: transparent;
-            color: #00d4ff;
+            color: #2563eb;
             border-radius: 5px;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -137,15 +159,15 @@
         }
 
         .action-btn:hover {
-            background: #00d4ff;
-            color: #1a1a2e;
+            background: #2563eb;
+            color: #ffffff;
         }
 
         select {
             padding: 6px;
-            background: rgba(0, 212, 255, 0.1);
-            border: 1px solid #00d4ff;
-            color: #00d4ff;
+            background: rgba(37, 99, 235, 0.1);
+            border: 1px solid #2563eb;
+            color: #2563eb;
             border-radius: 3px;
             cursor: pointer;
         }
@@ -198,6 +220,7 @@
 
     <!-- Main Content -->
     <main class="main-content">
+        <a href="../index.html" class="back-to-home">← Back to Home</a>
         <!-- Orders Section -->
         <section id="orders" class="admin-section active">
             <h1>📦 Orders Management</h1>

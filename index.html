@@ -72,56 +72,144 @@
     <!-- Services Section -->
     <section id="services" class="services">
         <h2 class="section-title">Our Services</h2>
-        <div class="services-grid">
-            <!-- Starter -->
-            <div class="service-card">
-                <h3>Starter</h3>
-                <p>Perfect for small businesses and individuals</p>
-                <div class="price">2,999 / month</div>
-                <ul class="features">
-                    <li>Upto 5 pages</li>
-                    <li>Responsive Design (Desktop mode only)</li>
-                    <li>Basic SEO</li>
-                    <li>Normal Support (12 hr)</li>
-                    <li>Delivery: 7 days</li>
-                </ul>
-                <a href="Templates/starter.html" target="_blank" class="btn-template">View Template</a>
-                <button class="btn-primary" onclick="selectService('Starter', 2999)">Choose Plan</button>
+        <div class="services-comparison-container">
+            <div class="comparison-toggle">
+                <button class="toggle-btn active" onclick="showPlanComparison('cards')">Card View</button>
+                <button class="toggle-btn" onclick="showPlanComparison('table')">Compare Plans</button>
             </div>
 
-            <!-- Basic -->
-            <div class="service-card popular-card">
-                <div class="popular-badge">⭐ Most Popular</div>
-                <h3>Basic</h3>
-                <p>Best For growing Businesses</p>
-                <div class="price">5,999 / month</div>
-                <ul class="features">
-                    <li>Upto 7 pages</li>
-                    <li>Modern Responsive Design</li>
-                    <li>Advanced SEO</li>
-                    <li>Innovative Form Integration</li>
-                    <li>Priority Support (18 hr/day)</li>
-                    <li>Delivery: 10 days</li>
-                </ul>
-                <a href="Templates/basic.html" target="_blank" class="btn-template">View Template</a>
-                <button class="btn-primary" onclick="selectService('Basic', 5999)">Choose Plan</button>
+            <!-- Card View -->
+            <div id="cards-view" class="services-grid" style="display: flex;">
+                <!-- Starter -->
+                <div class="service-card">
+                    <h3>Starter</h3>
+                    <p>Perfect for small businesses and individuals</p>
+                    <div class="price">₹2,999 / month</div>
+                    <ul class="features">
+                        <li>Upto 5 pages</li>
+                        <li>Responsive Design (Desktop mode only)</li>
+                        <li>Basic SEO</li>
+                        <li>Normal Support (12 hr)</li>
+                        <li>Delivery: 7 days</li>
+                    </ul>
+                    <a href="Templates/starter.html" target="_blank" class="btn-template">View Template</a>
+                    <button class="btn-primary" onclick="selectService('Starter', 2999)">Choose Plan</button>
+                </div>
+
+                <!-- Basic (Recommended) -->
+                <div class="service-card recommended-card">
+                    <div class="recommended-badge">⭐ Recommended</div>
+                    <h3>Basic</h3>
+                    <p>Best For growing Businesses</p>
+                    <div class="price">₹5,999 / month</div>
+                    <ul class="features">
+                        <li>Upto 7 pages</li>
+                        <li>Modern Responsive Design</li>
+                        <li>Advanced SEO</li>
+                        <li>Innovative Form Integration</li>
+                        <li>Priority Support (18 hr/day)</li>
+                        <li>Delivery: 10 days</li>
+                    </ul>
+                    <a href="Templates/basic.html" target="_blank" class="btn-template">View Template</a>
+                    <button class="btn-primary" onclick="selectService('Basic', 5999)">Choose Plan</button>
+                </div>
+
+                <!-- Premium -->
+                <div class="service-card">
+                    <h3>Premium</h3>
+                    <p>For Enterprise and Large Businesses</p>
+                    <div class="price">₹9,999 / month</div>
+                    <ul class="features">
+                        <li>Pages per user requirement</li>
+                        <li>Custom Design And animations</li>
+                        <li>Full SEO Optimization</li>
+                        <li>E-Commerce / Blog integration</li>
+                        <li>Dedicated Support (24/7)</li>
+                        <li>Delivery: 15 days</li>
+                    </ul>
+                    <a href="Templates/premium.html" target="_blank" class="btn-template">View Template</a>
+                    <button class="btn-primary" onclick="selectService('Premium', 9999)">Choose Plan</button>
+                </div>
             </div>
 
-            <!-- Premium -->
-            <div class="service-card">
-                <h3>Premium</h3>
-                <p>For Enterprise and Large Businesses</p>
-                <div class="price">9,999 / month</div>
-                <ul class="features">
-                    <li>Pages per user requirement</li>
-                    <li>Custom Design And animations</li>
-                    <li>Full SEO Optimization</li>
-                    <li>E-Commerce / Blog integration</li>
-                    <li>Dedicated Support (24/7)</li>
-                    <li>Delivery: 15 days</li>
-                </ul>
-                <a href="Templates/premium.html" target="_blank" class="btn-template">View Template</a>
-                <button class="btn-primary" onclick="selectService('Premium', 9999)">Choose Plan</button>
+            <!-- Comparison Table View -->
+            <div id="table-view" class="comparison-table-wrapper" style="display: none;">
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Features</th>
+                            <th class="starter-col">
+                                <div class="plan-header">
+                                    <h4>Starter</h4>
+                                    <div class="plan-price">₹2,999</div>
+                                </div>
+                            </th>
+                            <th class="basic-col recommended">
+                                <div class="plan-header">
+                                    <span class="rec-badge">RECOMMENDED</span>
+                                    <h4>Basic</h4>
+                                    <div class="plan-price">₹5,999</div>
+                                </div>
+                            </th>
+                            <th class="premium-col">
+                                <div class="plan-header">
+                                    <h4>Premium</h4>
+                                    <div class="plan-price">₹9,999</div>
+                                </div>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Number of Pages</strong></td>
+                            <td>Upto 5 pages</td>
+                            <td>Upto 7 pages</td>
+                            <td>Per requirement</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Responsive Design</strong></td>
+                            <td>Desktop only</td>
+                            <td>Full responsive</td>
+                            <td>Custom + animations</td>
+                        </tr>
+                        <tr>
+                            <td><strong>SEO Optimization</strong></td>
+                            <td><span class="check">✓</span> Basic</td>
+                            <td><span class="check">✓</span> Advanced</td>
+                            <td><span class="check">✓</span> Full</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Form Integration</strong></td>
+                            <td>-</td>
+                            <td><span class="check">✓</span> Innovative</td>
+                            <td><span class="check">✓</span> Custom</td>
+                        </tr>
+                        <tr>
+                            <td><strong>E-Commerce</strong></td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td><span class="check">✓</span> Included</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Support</strong></td>
+                            <td>12 hr/day</td>
+                            <td>18 hr/day</td>
+                            <td><span class="check">✓</span> 24/7</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Delivery Time</strong></td>
+                            <td>7 days</td>
+                            <td>10 days</td>
+                            <td>15 days</td>
+                        </tr>
+                        <tr class="action-row">
+                            <td></td>
+                            <td><button class="btn-primary" onclick="selectService('Starter', 2999)">Get Started</button></td>
+                            <td><button class="btn-primary" onclick="selectService('Basic', 5999)">Get Started</button></td>
+                            <td><button class="btn-primary" onclick="selectService('Premium', 9999)">Get Started</button></td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </section>
@@ -237,6 +325,7 @@
 
         <div class="footer-bottom">
             <p>&copy; 2025 Webpot. All rights reserved.</p>
+            <a href="webpot-admin/admin.html" class="hidden-admin-link">.</a>
         </div>
     </footer>
 

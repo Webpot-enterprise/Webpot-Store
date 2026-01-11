@@ -9,7 +9,7 @@ function handleCredentialResponse(response) {
     const userData = JSON.parse(jsonPayload);
     
     // Send to Google Apps Script backend
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzy7Q-698-wKYvagSqUAWF_TiqKOOdl0hw_nVBSelY9qScQKL80km_nyXNEU08bifPL/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzl4co-7Ov-l46Bd7YXSojDZe_pbX6mq--2fWnmNQ0_t2chRXrMYXFjCAEuk7DTsdL9/exec';
     
     fetch(APPS_SCRIPT_URL, {
         method: 'POST',
@@ -31,7 +31,7 @@ function handleCredentialResponse(response) {
             
             showSuccessModal('Welcome!', `Welcome ${userData.name}!`);
             const cleanUsername = userData.name.toLowerCase().replace(/\s+/g, '-');
-            setTimeout(() => window.location.href = '../dashboard/index.html?u=' + cleanUsername, 2000);
+            setTimeout(() => window.location.href = 'dashboard.html', 2000);
         } else {
             alert('Google Sign-In failed: ' + data.message);
         }
@@ -58,6 +58,18 @@ function togglePasswordVisibility(fieldId) {
     button.textContent = isPassword ? '👁️‍🗨️' : '👁️';
 }
 
+// Handle custom Google login button click
+document.addEventListener('DOMContentLoaded', function() {
+    const customGoogleButtons = document.querySelectorAll('#customGoogleLogin');
+    customGoogleButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            if (window.google && window.google.accounts && window.google.accounts.id) {
+                google.accounts.id.prompt();
+            }
+        });
+    });
+});
+
 // Handle LOGIN
 function handleLogin(event) {
     event.preventDefault();
@@ -76,14 +88,27 @@ function handleLogin(event) {
     submitBtn.textContent = 'Logging in...';
     submitBtn.disabled = true;
     
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzy7Q-698-wKYvagSqUAWF_TiqKOOdl0hw_nVBSelY9qScQKL80km_nyXNEU08bifPL/exec';
+    // Capture device information
+    const userAgent = navigator.userAgent;
+    
+    // Get IP address asynchronously
+    fetch('https://api.ipify.org?format=json')
+        .then(r => r.json())
+        .then(ipData => performLogin(emailOrPhone, password, submitBtn, originalText, userAgent, ipData.ip))
+        .catch(() => performLogin(emailOrPhone, password, submitBtn, originalText, userAgent, 'N/A'));
+}
+
+function performLogin(emailOrPhone, password, submitBtn, originalText, userAgent, ipAddress) {
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzl4co-7Ov-l46Bd7YXSojDZe_pbX6mq--2fWnmNQ0_t2chRXrMYXFjCAEuk7DTsdL9/exec';
     
     fetch(APPS_SCRIPT_URL, {
         method: 'POST',
         body: JSON.stringify({
             action: 'login',
             loginInput: emailOrPhone,
-            password: password
+            password: password,
+            userAgent: userAgent,
+            ipAddress: ipAddress
         })
     })
     .then(res => res.json())
@@ -99,9 +124,21 @@ function handleLogin(event) {
             const profilePic = data.user.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(data.user.name)}&background=0ad4ff&color=fff&rounded=true`;
             localStorage.setItem('webpotUserProfilePic', profilePic);
             
+            // Store admin flag if provided
+            if (data.isAdmin) {
+                localStorage.setItem('webpotUserIsAdmin', 'true');
+            }
+            
             showSuccessModal('Welcome Back!', `Welcome, ${data.user.name}!`);
             const cleanUsername = data.user.name.toLowerCase().replace(/\s+/g, '-');
-            setTimeout(() => window.location.href = '../dashboard/index.html?u=' + cleanUsername, 2000);
+            
+            // If user is admin, show admin access button and redirect to admin panel
+            if (data.isAdmin) {
+                // Add a 2-second delay, then redirect to admin panel
+                setTimeout(() => window.location.href = 'webpot-admin/admin.html', 2000);
+            } else {
+                setTimeout(() => window.location.href = 'dashboard.html', 2000);
+            }
         } else if (data.status === 'user_banned') {
             alert('This account has been banned. Please contact support.');
             submitBtn.textContent = originalText;
@@ -145,7 +182,7 @@ function handleRegister(event) {
     submitBtn.textContent = 'Creating account...';
     submitBtn.disabled = true;
     
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzy7Q-698-wKYvagSqUAWF_TiqKOOdl0hw_nVBSelY9qScQKL80km_nyXNEU08bifPL/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzl4co-7Ov-l46Bd7YXSojDZe_pbX6mq--2fWnmNQ0_t2chRXrMYXFjCAEuk7DTsdL9/exec';
     
     fetch(APPS_SCRIPT_URL, {
         method: 'POST',
@@ -170,7 +207,7 @@ function handleRegister(event) {
             
             showSuccessModal('Account Created!', 'Redirecting to Dashboard...');
             const cleanUsername = name.toLowerCase().replace(/\s+/g, '-');
-            setTimeout(() => window.location.href = '../dashboard/index.html?u=' + cleanUsername, 2000);
+            setTimeout(() => window.location.href = 'dashboard.html', 2000);
             
         } else if (data.status === 'user_already_exists') {
             alert('This email is already registered. Please log in.');
@@ -345,7 +382,7 @@ function submitResetEmail(event) {
     btn.textContent = 'Sending...';
     btn.disabled = true;
 
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzy7Q-698-wKYvagSqUAWF_TiqKOOdl0hw_nVBSelY9qScQKL80km_nyXNEU08bifPL/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzl4co-7Ov-l46Bd7YXSojDZe_pbX6mq--2fWnmNQ0_t2chRXrMYXFjCAEuk7DTsdL9/exec';
 
     fetch(APPS_SCRIPT_URL, {
         method: 'POST',
@@ -391,7 +428,7 @@ function submitResetPassword(event) {
     btn.textContent = 'Resetting...';
     btn.disabled = true;
 
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzy7Q-698-wKYvagSqUAWF_TiqKOOdl0hw_nVBSelY9qScQKL80km_nyXNEU08bifPL/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzl4co-7Ov-l46Bd7YXSojDZe_pbX6mq--2fWnmNQ0_t2chRXrMYXFjCAEuk7DTsdL9/exec';
 
     fetch(APPS_SCRIPT_URL, {
         method: 'POST',
@@ -472,7 +509,7 @@ function verifyOTP(event) {
     btn.textContent = 'Verifying...';
     btn.disabled = true;
 
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbytVOTbt78wKn3TVjypTy4tkGiGUpetyXhw7VB6nJZmnMPsPWoW6xHMr71xNUCTvEq1/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzl4co-7Ov-l46Bd7YXSojDZe_pbX6mq--2fWnmNQ0_t2chRXrMYXFjCAEuk7DTsdL9/exec';
 
     fetch(APPS_SCRIPT_URL, {
         method: 'POST',
@@ -494,7 +531,7 @@ function verifyOTP(event) {
 
             showSuccessModal('Welcome!', `Welcome, ${data.user.name}!`);
             const cleanUsername = data.user.name.toLowerCase().replace(/\s+/g, '-');
-            setTimeout(() => window.location.href = '../dashboard/index.html?u=' + cleanUsername, 2000);
+            setTimeout(() => window.location.href = 'dashboard.html', 2000);
         } else {
             alert('Error: ' + data.message);
             btn.textContent = originalText;
@@ -521,7 +558,7 @@ window.addEventListener('DOMContentLoaded', () => {
     }
     
     // Add click handler to custom Google button
-    const googleBtn = document.getElementById('googleSignInBtn');
+    const googleBtn = document.getElementById('customGoogleLogin');
     if (googleBtn) {
         googleBtn.addEventListener('click', () => {
             if (window.google && window.google.accounts && window.google.accounts.id) {

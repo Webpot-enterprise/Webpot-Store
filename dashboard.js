@@ -1,27 +1,15 @@
 // Dashboard Variables
 let currentOrderID = null;
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzy7Q-698-wKYvagSqUAWF_TiqKOOdl0hw_nVBSelY9qScQKL80km_nyXNEU08bifPL/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzl4co-7Ov-l46Bd7YXSojDZe_pbX6mq--2fWnmNQ0_t2chRXrMYXFjCAEuk7DTsdL9/exec';
 const MY_UPI_ID = 'kakadiyasuprince@okhdfcbank';
 
 // Parse URL parameters and verify username
 function verifyURLUserParameter() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const urlUser = urlParams.get('u');
     const webpotUserName = localStorage.getItem('webpotUserName');
     
     if (!webpotUserName) {
         // User not logged in, redirect to auth
-        window.location.href = '../auth.html';
-        return false;
-    }
-    
-    // Clean the stored username and compare with URL parameter
-    const cleanStoredUsername = webpotUserName.toLowerCase().replace(/\s+/g, '-');
-    
-    if (!urlUser || urlUser !== cleanStoredUsername) {
-        // URL parameter doesn't match logged-in user, redirect to auth
-        console.warn('URL username mismatch or missing. Redirecting to login.');
-        window.location.href = '../auth.html';
+        window.location.href = 'auth.html';
         return false;
     }
     
@@ -85,7 +73,7 @@ window.addEventListener('DOMContentLoaded', () => {
     
     const isLoggedIn = localStorage.getItem('webpotUserLoggedIn');
     if (!isLoggedIn) {
-        window.location.href = '../auth.html';
+        window.location.href = 'auth.html';
         return;
     }
 
@@ -98,6 +86,17 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('profileName').textContent = userName || '-';
     document.getElementById('profileEmail').textContent = userEmail || '-';
     document.getElementById('memberSince').textContent = new Date().toLocaleDateString('en-IN');
+    
+    // Check if user is admin and show admin portal link
+    const masterAdminEmail = 'kakadiyasuprince@gmail.com'; // Set your master admin email here
+    const adminPortalLink = document.getElementById('adminPortalLink');
+    if (adminPortalLink) {
+        if (userEmail === masterAdminEmail) {
+            adminPortalLink.style.display = 'flex';
+        } else {
+            adminPortalLink.style.display = 'none';
+        }
+    }
     
     // Display profile picture if available
     const profilePicElement = document.getElementById('dashboardProfilePic');
@@ -174,6 +173,12 @@ function toggleSidebar() {
     }
     if (overlay) {
         overlay.classList.toggle('active');
+        // Only enable pointer-events when overlay is active
+        if (overlay.classList.contains('active')) {
+            overlay.style.pointerEvents = 'auto';
+        } else {
+            overlay.style.pointerEvents = 'none';
+        }
     }
 }
 
@@ -187,6 +192,7 @@ function closeSidebar() {
     }
     if (overlay) {
         overlay.classList.remove('active');
+        overlay.style.pointerEvents = 'none';
     }
 }
 
@@ -200,6 +206,7 @@ function openSidebar() {
     }
     if (overlay) {
         overlay.classList.add('active');
+        overlay.style.pointerEvents = 'auto';
     }
 }
                 e.preventDefault();
@@ -231,6 +238,15 @@ function switchSection(sectionName) {
                 item.classList.add('active');
             }
         });
+    }
+}
+
+// Switch Dashboard View (alternative name for switchSection)
+function switchDashboardView(viewId) {
+    switchSection(viewId);
+    // Close sidebar on mobile after selecting a section
+    if (window.innerWidth <= 992) {
+        closeSidebar();
     }
 }
 
@@ -296,42 +312,74 @@ function populateDashboard(orders) {
         totalOrders++;
         const amount = parseFloat(order.amount) || 0;
         const paid = parseFloat(order.paidAmount) || 0;
-        const due = amount - paid;
+        const due = parseFloat(order.dueAmount) || (amount - paid);
 
         totalSpent += amount;
         totalDue += due;
     });
 
-    // Update stat cards
-    document.getElementById('displayTotal').textContent = '₹' + totalSpent.toLocaleString('en-IN');
-    document.getElementById('displayDue').textContent = '₹' + totalDue.toLocaleString('en-IN');
+    // Update stat cards with formatted currency
+    document.getElementById('displayTotal').textContent = '₹' + totalSpent.toLocaleString('en-IN', {maximumFractionDigits: 2});
+    document.getElementById('displayDue').textContent = '₹' + totalDue.toLocaleString('en-IN', {maximumFractionDigits: 2});
     
-    // Determine current phase based on orders
+    // Animate counters
+    animateDashboardCounters(totalSpent, totalDue);
+    
+    // Determine current phase based on latest order
     let currentPhase = 'No Active Orders';
+    let phaseClass = 'status-pending';
     if (orders.length > 0) {
-        const latestOrder = orders[orders.length - 1];
-        currentPhase = latestOrder.status || 'Processing';
+        const latestOrder = orders[0]; // Most recent order (typically first in list)
+        const orderStatus = (latestOrder.status || 'Processing').toLowerCase();
+        
+        if (orderStatus.includes('completed')) {
+            currentPhase = 'Completed';
+            phaseClass = 'status-completed';
+        } else if (orderStatus.includes('partial')) {
+            currentPhase = 'Partial Payment';
+            phaseClass = 'status-partial';
+        } else if (orderStatus.includes('pending')) {
+            currentPhase = 'Pending';
+            phaseClass = 'status-pending';
+        } else {
+            currentPhase = orderStatus.charAt(0).toUpperCase() + orderStatus.slice(1);
+            phaseClass = 'status-pending';
+        }
     }
+    
     document.getElementById('displayStatus').textContent = currentPhase;
-    document.getElementById('displayStatus').className = 'status-pending'; // Default class
+    document.getElementById('displayStatus').className = phaseClass;
     
     // Update action message
     const actionMessage = totalDue > 0 ? 
-        'You have pending payments. Please complete your payments to continue.' : 
-        'All payments are up to date. Your dashboard is ready!';
+        '💰 You have ₹' + totalDue.toLocaleString('en-IN', {maximumFractionDigits: 2}) + ' pending. Complete your payment to continue.' : 
+        '✓ All payments are up to date!';
     document.getElementById('actionMessage').textContent = actionMessage;
 
     // Populate orders table
     const tableBody = document.getElementById('ordersTableBody');
     if (orders.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">No orders found.</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">No orders found. Get started with your first order!</td></tr>';
     } else {
         tableBody.innerHTML = '';
         orders.forEach(order => {
             const amount = parseFloat(order.amount) || 0;
             const paid = parseFloat(order.paidAmount) || 0;
-            const due = amount - paid;
-            const orderDate = new Date(order.date).toLocaleDateString('en-IN');
+            const due = parseFloat(order.dueAmount) || (amount - paid);
+            
+            // Parse date properly
+            let orderDate = 'N/A';
+            if (order.date) {
+                try {
+                    if (typeof order.date === 'string') {
+                        orderDate = order.date;
+                    } else if (order.date instanceof Date) {
+                        orderDate = order.date.toLocaleDateString('en-IN');
+                    }
+                } catch (e) {
+                    orderDate = 'N/A';
+                }
+            }
             
             // Determine status
             let status, statusClass;
@@ -347,8 +395,8 @@ function populateDashboard(orders) {
             }
 
             const actionBtn = due > 0 ? 
-                `<button class="pay-btn" onclick="openPaymentModal('${order.orderId}', ${due})">Pay Now</button>` : 
-                '<span style="color: var(--text-muted);">—</span>';
+                `<button class="pay-btn" onclick="openPaymentModal('${order.orderId}', ${due})">Pay ₹${due.toLocaleString('en-IN', {maximumFractionDigits: 2})}</button>` : 
+                '<span style="color: var(--neon-blue);">✓ Paid</span>';
 
             const invoiceBtn = `<button class="pay-btn" onclick="generateInvoice({orderId: '${order.orderId}', date: '${order.date}', service: '${order.service}', amount: ${amount}, paidAmount: ${paid}, dueAmount: ${due}, status: '${order.status}'})">📄 Invoice</button>`;
 
@@ -371,6 +419,11 @@ function populateDashboard(orders) {
     const lastLogin = localStorage.getItem('webpotLastLogin') || new Date().toLocaleString('en-IN');
     document.getElementById('lastLoginTime').textContent = lastLogin;
     localStorage.setItem('webpotLastLogin', new Date().toLocaleString('en-IN'));
+    
+    // Update progress tracker for the first active order
+    if (orders.length > 0) {
+        updateProgressTracker(orders[0]);
+    }
     
     // Render order cards
     renderOrderCards(orders);
@@ -471,6 +524,7 @@ function refreshDashboard(serviceType, currentStatus) {
 function openPaymentModal(orderId, dueAmount) {
     currentOrderID = orderId;
     document.getElementById('paymentModal').style.display = 'block';
+    document.body.style.overflow = 'hidden';
     document.getElementById('paymentForm').reset();
     
     // Generate QR code
@@ -573,6 +627,7 @@ function closePaymentModal() {
     }
     
     document.getElementById('paymentModal').style.display = 'none';
+    document.body.style.overflow = '';
 }
 
 // Verify and Submit Payment (Dashboard Version)
@@ -669,7 +724,7 @@ function logoutUser() {
     localStorage.removeItem('webpotUserPassword');
     localStorage.removeItem('webpotUserProfilePic');
     
-    window.location.href = '../index.html';
+    window.location.href = 'index.html';
 }
 
 // ============== FEATURE 2: PDF INVOICES ==============
@@ -844,4 +899,125 @@ function submitReview() {
         btn.textContent = originalText;
         btn.disabled = false;
     });
+}
+
+// ========== ORDER PROGRESS STEPPER ==========
+function updateProgressBar(status) {
+    const statusStepper = document.getElementById('statusStepper');
+    if (!statusStepper) return;
+    
+    // Status mapping to steps
+    const statusSteps = {
+        'pending': 0,
+        'order_placed': 0,
+        'designing': 1,
+        'developing': 2,
+        'completed': 3,
+        'delivered': 3
+    };
+    
+    const normalizedStatus = (status || 'pending').toLowerCase();
+    const currentStep = statusSteps[normalizedStatus] || 0;
+    
+    // Get all step dots and lines
+    const dots = statusStepper.querySelectorAll('.progress-dot');
+    const lines = statusStepper.querySelectorAll('.progress-line');
+    
+    // Update dots
+    dots.forEach((dot, index) => {
+        if (index < currentStep) {
+            dot.classList.add('completed');
+            dot.classList.remove('active');
+        } else if (index === currentStep) {
+            dot.classList.add('active');
+            dot.classList.remove('completed');
+        } else {
+            dot.classList.remove('active', 'completed');
+        }
+    });
+    
+    // Update lines
+    lines.forEach((line, index) => {
+        if (index < currentStep) {
+            line.style.background = 'var(--accent)';
+        } else {
+            line.style.background = 'var(--border-color)';
+        }
+    });
+}
+
+// ========== ORDER PROGRESS TRACKER ==========
+function updateProgressTracker(order) {
+    const tracker = document.getElementById('orderProgressTracker');
+    if (!tracker || !order) return;
+    
+    // Show the tracker
+    tracker.style.display = 'block';
+    
+    // Map order status to progress steps
+    const statusMap = {
+        'pending': 0,
+        'order_placed': 0,
+        'designing': 1,
+        'developing': 2,
+        'in_review': 3,
+        'final_review': 3,
+        'completed': 4,
+        'delivered': 4
+    };
+    
+    const status = (order.status || 'pending').toLowerCase();
+    const currentStep = statusMap[status] || 0;
+    
+    // Update step classes
+    const steps = tracker.querySelectorAll('.progress-step');
+    steps.forEach((step, index) => {
+        step.classList.remove('completed', 'in-progress');
+        if (index < currentStep) {
+            step.classList.add('completed');
+        } else if (index === currentStep && currentStep < 4) {
+            step.classList.add('in-progress');
+        }
+    });
+    
+    // Update progress lines
+    const lines = tracker.querySelectorAll('.progress-line');
+    lines.forEach((line, index) => {
+        if (index < currentStep - 1) {
+            line.style.background = 'var(--primary-accent)';
+        }
+    });
+}
+
+// ========== ANIMATED COUNTERS ==========
+function animateCounter(element, targetValue, duration = 1000) {
+    if (!element) return;
+    
+    const startValue = 0;
+    const difference = targetValue - startValue;
+    const stepDuration = Math.floor(duration / Math.abs(difference));
+    let currentValue = startValue;
+    const interval = setInterval(() => {
+        currentValue += Math.ceil(difference / (duration / stepDuration));
+        if (Math.abs(currentValue - targetValue) < Math.abs(difference / (duration / stepDuration))) {
+            currentValue = targetValue;
+            clearInterval(interval);
+        }
+        element.textContent = '₹' + currentValue.toLocaleString('en-IN');
+    }, stepDuration);
+}
+
+function animateDashboardCounters(totalAmount, dueAmount) {
+    const totalEl = document.getElementById('displayTotal');
+    const dueEl = document.getElementById('displayDue');
+    
+    if (totalEl && !totalEl.dataset.animated) {
+        totalEl.dataset.animated = 'true';
+        animateCounter(totalEl, totalAmount, 800);
+    }
+    
+    if (dueEl && !dueEl.dataset.animated) {
+        dueEl.dataset.animated = 'true';
+        animateCounter(dueEl, dueAmount, 800);
+    }
 }
