@@ -350,26 +350,39 @@ body {
     animation: slideInUp 0.8s ease 0.7s backwards;
 }
 
+#passwordStrengthMeter {
+    margin-top: 0.75rem;
+    animation: slideInUp 0.8s ease 0.7s backwards;
+}
+
 .strength-bar {
     width: 100%;
-    height: 4px;
-    background: rgba(0, 212, 255, 0.1);
-    border-radius: 2px;
+    height: 6px;
+    background: #2d333f;
+    border-radius: 3px;
     overflow: hidden;
     margin-bottom: 0.5rem;
+    border: 1px solid #2d333f;
 }
 
 .strength-indicator {
     height: 100%;
     width: 20%;
-    background: linear-gradient(90deg, #ff4444, #ffaa00);
-    border-radius: 2px;
+    background: #2563eb;
+    border-radius: 3px;
     transition: all 0.3s ease;
+    box-shadow: 0 0 8px rgba(37, 99, 235, 0.6);
 }
 
 .strength-text {
     font-size: 0.85rem;
-    color: var(--text-muted);
+    color: #94a3b8;
+    font-weight: 500;
+}
+
+.strength-text span {
+    transition: color 0.3s ease;
+    font-weight: 600;
 }
 
 /* Form Options */

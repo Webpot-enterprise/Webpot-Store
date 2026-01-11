@@ -19,23 +19,23 @@
             <span class="sidebar-title">Webpot</span>
         </a>
         <nav class="sidebar-nav">
-            <a href="#dashboard" class="nav-item active" data-section="dashboard" onclick="switchDashboardView('dashboard'); return false;">
+            <a href="#home" class="nav-item active" data-section="home" onclick="switchView('home'); return false;">
                 <span class="nav-icon">📊</span>
                 <span class="nav-label">Dashboard</span>
             </a>
-            <a href="#orders" class="nav-item" data-section="orders" onclick="switchDashboardView('orders'); return false;">
+            <a href="#orders" class="nav-item" data-section="orders" onclick="switchView('orders'); return false;">
                 <span class="nav-icon">📦</span>
                 <span class="nav-label">My Orders</span>
             </a>
-            <a href="#payments" class="nav-item" data-section="payments" onclick="switchDashboardView('payments'); return false;">
+            <a href="#payments" class="nav-item" data-section="payments" onclick="switchView('payments'); return false;">
                 <span class="nav-icon">💰</span>
                 <span class="nav-label">Payments</span>
             </a>
-            <a href="#profile" class="nav-item" data-section="profile" onclick="switchDashboardView('profile'); return false;">
+            <a href="#profile" class="nav-item" data-section="profile" onclick="switchView('profile'); return false;">
                 <span class="nav-icon">👤</span>
                 <span class="nav-label">Profile</span>
             </a>
-            <a href="#reviews" class="nav-item" data-section="reviews" onclick="switchDashboardView('reviews'); return false;">
+            <a href="#reviews" class="nav-item" data-section="reviews" onclick="switchView('reviews'); return false;">
                 <span class="nav-icon">⭐</span>
                 <span class="nav-label">Reviews</span>
             </a>
@@ -58,7 +58,7 @@
         <!-- Mobile Sidebar Toggle Button -->
         <button id="sidebarToggle" class="sidebar-toggle" title="Toggle sidebar">☰</button>
         <!-- Welcome Header -->
-        <section id="dashboard" class="dashboard-section active">
+        <section id="section-home" class="dashboard-section active">
             <div class="welcome-header">
                 <h1>Hello, <span id="welcomeName">User</span>!</h1>
                 <p id="lastLoginText" class="last-login">Last login: <span id="lastLoginTime">Just now</span></p>
@@ -85,29 +85,86 @@
                 <p id="actionMessage">Initializing your dashboard...</p>
             </div>
 
-            <!-- Active Orders Table -->
-            <div class="orders-section">
-                <h2>Active Orders</h2>
-                <div class="table-container">
-                    <table class="orders-table">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Order ID</th>
-                                <th>Service</th>
-                                <th>Amount</th>
-                                <th>Due Amount</th>
-                                <th>Status</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="ordersTableBody">
-                            <tr>
-                                <td colspan="7" style="text-align: center; color: var(--text-muted);">Loading orders...</td>
-                            </tr>
-                        </tbody>
-                    </table>
+            <!-- Order Progress Tracker -->
+            <div id="orderProgressTracker" class="progress-tracker" style="display: none;">
+                <h3>Order Progress</h3>
+                <div class="progress-steps">
+                    <div class="progress-step">
+                        <div class="progress-dot completed" data-tooltip="Order placed">
+                            <div class="step-circle"></div>
+                            <div class="step-label">Placed</div>
+                        </div>
+                        <div class="progress-line"></div>
+                    </div>
+                    <div class="progress-step">
+                        <div class="progress-dot" data-tooltip="We are crafting your UI/UX layout">
+                            <div class="step-circle"></div>
+                            <div class="step-label">Designing</div>
+                        </div>
+                        <div class="progress-line"></div>
+                    </div>
+                    <div class="progress-step">
+                        <div class="progress-dot" data-tooltip="Building functionality and backend">
+                            <div class="step-circle"></div>
+                            <div class="step-label">Developing</div>
+                        </div>
+                        <div class="progress-line"></div>
+                    </div>
+                    <div class="progress-step">
+                        <div class="progress-dot" data-tooltip="Testing and quality assurance">
+                            <div class="step-circle"></div>
+                            <div class="step-label">Review</div>
+                        </div>
+                        <div class="progress-line"></div>
+                    </div>
+                    <div class="progress-step">
+                        <div class="progress-dot" data-tooltip="Your website is ready!">
+                            <div class="step-circle"></div>
+                            <div class="step-label">Delivered</div>
+                        </div>
+                    </div>
                 </div>
+            </div>
+        </section>
+
+        <!-- Active Orders Section -->
+        <section id="section-orders" class="dashboard-section">
+            <h2>Active Orders</h2>
+            
+            <!-- Search and Filter Bar -->
+            <div class="orders-toolbar">
+                <input type="text" id="orderSearchInput" class="search-input" placeholder="Search by Order ID or Service Type..." onkeyup="filterOrders()">
+                <select id="orderStatusFilter" class="status-dropdown" onchange="filterOrders()">
+                    <option value="">All Status</option>
+                    <option value="completed">Completed</option>
+                    <option value="partial">Partial</option>
+                    <option value="pending">Pending</option>
+                </select>
+            </div>
+            
+            <div class="table-container">
+                <table class="orders-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Order ID</th>
+                            <th>Service</th>
+                            <th>Amount</th>
+                            <th>Due Amount</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ordersTableBody">
+                        <tr>
+                            <td colspan="7" style="text-align: center; color: var(--text-muted);">Loading orders...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div id="noOrdersMessage" class="no-orders-message" style="display: none;">
+                <p>No orders found matching your criteria.</p>
             </div>
 
             <!-- Activity Log -->
@@ -120,28 +177,28 @@
         </section>
 
         <!-- My Orders Section -->
-        <section id="orders" class="dashboard-section">
+        <section id="section-orders-cards" class="dashboard-section">
             <h2>My Orders</h2>
             <div id="ordersCardsContainer" class="orders-cards-grid">
                 <!-- Order cards will be rendered here -->
             </div>
             <div class="section-placeholder">
                 <p>No orders yet. Head to the home page to place your first order!</p>
-                <button onclick="switchSection('dashboard')" class="btn-primary">Back to Dashboard</button>
+                <button onclick="switchView('home')" class="btn-primary">Back to Dashboard</button>
             </div>
         </section>
 
         <!-- Payments Section -->
-        <section id="payments" class="dashboard-section">
+        <section id="section-payments" class="dashboard-section">
             <h2>Payment History</h2>
             <div class="section-placeholder">
                 <p>Payment details are shown in the Active Orders table on the Dashboard.</p>
-                <button onclick="switchSection('dashboard')" class="btn-primary">Back to Dashboard</button>
+                <button onclick="switchView('home')" class="btn-primary">Back to Dashboard</button>
             </div>
         </section>
 
         <!-- Profile Section -->
-        <section id="profile" class="dashboard-section">
+        <section id="section-profile" class="dashboard-section">
             <h2>User Profile</h2>
             <div class="profile-card">
                 <div class="profile-image-container">
@@ -151,13 +208,20 @@
                     <p><strong>Name:</strong> <span id="profileName">-</span></p>
                     <p><strong>Email:</strong> <span id="profileEmail">-</span></p>
                     <p><strong>Member Since:</strong> <span id="memberSince">-</span></p>
-                    <p><strong>Referral ID:</strong> <span id="referralId" class="referral-code">-</span></p>
+                    <p><strong>Referral ID:</strong> <span id="referralId" class="referral-code">-</span>
+                        <button class="copy-icon-btn" onclick="copyToClipboard(document.getElementById('referralId').textContent)" title="Copy Referral ID">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                                <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+                            </svg>
+                        </button>
+                    </p>
                 </div>
             </div>
         </section>
 
         <!-- Testimonials/Reviews Section -->
-        <section id="reviews" class="dashboard-section">
+        <section id="section-reviews" class="dashboard-section">
             <h2>Share Your Experience</h2>
             <div class="review-form">
                 <div class="form-group">

@@ -58,6 +58,55 @@ function togglePasswordVisibility(fieldId) {
     button.textContent = isPassword ? '👁️‍🗨️' : '👁️';
 }
 
+// Check Password Strength
+function checkPasswordStrength(password) {
+    let strength = 0;
+    let feedback = 'Weak';
+    
+    // Check length
+    if (password.length >= 8) strength += 1;
+    if (password.length >= 12) strength += 1;
+    
+    // Check for numbers
+    if (/\d/.test(password)) strength += 1;
+    
+    // Check for special characters
+    if (/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) strength += 1;
+    
+    // Determine strength level
+    if (strength <= 1) {
+        feedback = 'Weak';
+    } else if (strength === 2 || strength === 3) {
+        feedback = 'Medium';
+    } else if (strength >= 4) {
+        feedback = 'Strong';
+    }
+    
+    return { strength, feedback };
+}
+
+// Update Password Strength Meter
+function updatePasswordStrengthMeter(password) {
+    const result = checkPasswordStrength(password);
+    const indicator = document.getElementById('strengthIndicator');
+    const strengthText = document.getElementById('strengthText');
+    
+    if (!indicator || !strengthText) return;
+    
+    const widthMap = { 'Weak': 33, 'Medium': 66, 'Strong': 100 };
+    const colorMap = {
+        'Weak': '#ef4444',
+        'Medium': '#f59e0b',
+        'Strong': '#2563eb'
+    };
+    
+    indicator.style.width = widthMap[result.feedback] + '%';
+    indicator.style.background = colorMap[result.feedback];
+    indicator.style.transition = 'all 0.3s ease';
+    strengthText.textContent = result.feedback;
+    strengthText.style.color = colorMap[result.feedback];
+}
+
 // Handle custom Google login button click
 document.addEventListener('DOMContentLoaded', function() {
     const customGoogleButtons = document.querySelectorAll('#customGoogleLogin');
@@ -68,6 +117,14 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+    
+    // Add password strength listener
+    const passwordInput = document.getElementById('register-password');
+    if (passwordInput) {
+        passwordInput.addEventListener('input', function() {
+            updatePasswordStrengthMeter(this.value);
+        });
+    }
 });
 
 // Handle LOGIN

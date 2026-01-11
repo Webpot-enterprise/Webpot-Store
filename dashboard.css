@@ -42,6 +42,28 @@
     --surface-dark: #f8fafc;
 }
 
+/* Section Visibility and Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dashboard-section {
+    display: none;
+    animation: fadeIn 0.4s ease-in-out;
+}
+
+.dashboard-section.active {
+    display: block !important;
+    animation: fadeIn 0.4s ease-in-out;
+}
+
 html {
     width: 100%;
     overflow-x: hidden;
@@ -328,6 +350,76 @@ body {
     text-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
 }
 
+/* Orders Toolbar */
+.orders-toolbar {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.search-input {
+    flex: 1;
+    min-width: 200px;
+    padding: 0.8rem 1rem;
+    background: #1c1f26;
+    border: 1px solid #2d333f;
+    border-radius: 8px;
+    color: #ffffff;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 12px rgba(37, 99, 235, 0.3);
+}
+
+.search-input::placeholder {
+    color: #94a3b8;
+}
+
+.status-dropdown {
+    padding: 0.8rem 1rem;
+    background: #1c1f26;
+    border: 1px solid #2d333f;
+    border-radius: 8px;
+    color: #ffffff;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 150px;
+}
+
+.status-dropdown:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 12px rgba(37, 99, 235, 0.3);
+}
+
+.status-dropdown option {
+    background: #1c1f26;
+    color: #ffffff;
+}
+
+/* No Orders Message */
+.no-orders-message {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 8px;
+    padding: 2rem;
+    text-align: center;
+    color: #94a3b8;
+    margin-top: 1.5rem;
+    display: none;
+}
+
+.no-orders-message p {
+    margin: 0;
+    font-size: 1rem;
+}
+
 .table-container {
     background: rgba(15, 20, 37, 0.8);
     border: 2px solid var(--neon-blue);
@@ -417,6 +509,38 @@ body {
 .pay-btn:hover {
     transform: scale(1.05);
     box-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+}
+
+/* Copy Icon Button */
+.copy-icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.3rem;
+    margin-left: 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    transition: all 0.3s ease;
+    color: #94a3b8;
+    vertical-align: middle;
+}
+
+.copy-icon-btn svg {
+    width: 16px;
+    height: 16px;
+    stroke: currentColor;
+}
+
+.copy-icon-btn:hover {
+    color: #2563eb;
+    transform: scale(1.15);
+}
+
+.copy-icon-btn:active {
+    transform: scale(0.95);
 }
 
 @keyframes pulse {
@@ -831,19 +955,28 @@ body {
 }
 
 /* Skeleton Loader Animation */
-@keyframes shimmer {
+@keyframes skeletonPulse {
     0% {
-        background-position: -1000px 0;
+        background: linear-gradient(90deg, #1c1f26 0%, #2d333f 50%, #1c1f26 100%);
+        background-size: 200% 100%;
+        background-position: 200% 0;
+    }
+    50% {
+        background: linear-gradient(90deg, #2d333f 0%, #3a4151 50%, #2d333f 100%);
+        background-size: 200% 100%;
+        background-position: 0% 0;
     }
     100% {
-        background-position: 1000px 0;
+        background: linear-gradient(90deg, #1c1f26 0%, #2d333f 50%, #1c1f26 100%);
+        background-size: 200% 100%;
+        background-position: 200% 0;
     }
 }
 
 .skeleton {
-    background: linear-gradient(90deg, #1a1a2e 0%, #2a2a4e 50%, #1a1a2e 100%);
-    background-size: 1000px 100%;
-    animation: shimmer 2s infinite;
+    background: linear-gradient(90deg, #1c1f26 0%, #2d333f 50%, #1c1f26 100%);
+    background-size: 200% 100%;
+    animation: skeletonPulse 1.5s ease-in-out infinite;
     border-radius: 4px;
 }
 
@@ -858,14 +991,14 @@ body {
     gap: 15px;
     margin-bottom: 12px;
     padding: 12px 15px;
-    border-bottom: 1px solid #333;
+    border-bottom: 1px solid #2d333f;
 }
 
 .skeleton-cell {
     height: 20px;
-    background: linear-gradient(90deg, #1a1a2e 0%, #2a2a4e 50%, #1a1a2e 100%);
-    background-size: 1000px 100%;
-    animation: shimmer 2s infinite;
+    background: linear-gradient(90deg, #1c1f26 0%, #2d333f 50%, #1c1f26 100%);
+    background-size: 200% 100%;
+    animation: skeletonPulse 1.5s ease-in-out infinite;
     border-radius: 4px;
     flex: 1;
 }
@@ -1298,6 +1431,49 @@ body {
     align-items: center;
     gap: 0.8rem;
     width: 100%;
+    position: relative;
+    cursor: help;
+}
+
+/* Tooltip Styles */
+.progress-dot::before {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(15, 17, 21, 0.9);
+    backdrop-filter: blur(8px);
+    color: #ffffff;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    white-space: nowrap;
+    font-size: 0.85rem;
+    border: 1px solid #2563eb;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    z-index: 1000;
+    margin-bottom: 0.5rem;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.progress-dot:hover::before {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Mobile tooltip toggle */
+@media (max-width: 768px) {
+    .progress-dot::before {
+        position: fixed;
+        bottom: auto;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        left: 50%;
+        white-space: normal;
+        max-width: 200px;
+    }
 }
 
 .step-circle {

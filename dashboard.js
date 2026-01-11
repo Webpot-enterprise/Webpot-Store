@@ -3,6 +3,55 @@ let currentOrderID = null;
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzl4co-7Ov-l46Bd7YXSojDZe_pbX6mq--2fWnmNQ0_t2chRXrMYXFjCAEuk7DTsdL9/exec';
 const MY_UPI_ID = 'kakadiyasuprince@okhdfcbank';
 
+// Copy to Clipboard Function
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        showToast('Copied to Clipboard!');
+    }).catch(err => {
+        console.error('Failed to copy:', err);
+        alert('Failed to copy to clipboard');
+    });
+}
+
+// Filter Orders by Search and Status
+function filterOrders() {
+    const searchInput = document.getElementById('orderSearchInput');
+    const statusFilter = document.getElementById('orderStatusFilter');
+    const tableRows = document.querySelectorAll('#ordersTableBody tr');
+    const noOrdersMessage = document.getElementById('noOrdersMessage');
+    
+    const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+    const statusTerm = statusFilter ? statusFilter.value.toLowerCase() : '';
+    
+    let visibleCount = 0;
+    
+    tableRows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        if (cells.length === 0) return; // Skip header rows
+        
+        // Extract text from relevant cells
+        const orderIdCell = cells[1] ? cells[1].textContent.toLowerCase() : '';
+        const serviceCell = cells[2] ? cells[2].textContent.toLowerCase() : '';
+        const statusCell = cells[5] ? cells[5].textContent.toLowerCase() : '';
+        
+        // Check if row matches search and filter criteria
+        const matchesSearch = !searchTerm || orderIdCell.includes(searchTerm) || serviceCell.includes(searchTerm);
+        const matchesStatus = !statusTerm || statusCell.includes(statusTerm);
+        
+        if (matchesSearch && matchesStatus) {
+            row.style.display = '';
+            visibleCount++;
+        } else {
+            row.style.display = 'none';
+        }
+    });
+    
+    // Show/hide no orders message
+    if (noOrdersMessage) {
+        noOrdersMessage.style.display = visibleCount === 0 ? 'block' : 'none';
+    }
+}
+
 // Parse URL parameters and verify username
 function verifyURLUserParameter() {
     const webpotUserName = localStorage.getItem('webpotUserName');
@@ -138,6 +187,20 @@ window.addEventListener('DOMContentLoaded', () => {
     if (reviewSection) {
         initializeReviewSection();
     }
+    
+    // Handle hash changes for view switching
+    window.addEventListener('hashchange', () => {
+        const hash = window.location.hash.substring(1);
+        if (hash) {
+            switchView(hash);
+        }
+    });
+    
+    // Check for hash on page load
+    const initialHash = window.location.hash.substring(1);
+    if (initialHash) {
+        switchView(initialHash);
+    }
 });
 
 // Setup Sidebar Navigation
@@ -250,13 +313,70 @@ function switchDashboardView(viewId) {
     }
 }
 
+// Switch View with New Section Structure
+function switchView(viewId) {
+    // Map view IDs to section IDs
+    const sectionMap = {
+        'home': 'section-home',
+        'orders': 'section-orders',
+        'payments': 'section-payments',
+        'profile': 'section-profile',
+        'reviews': 'section-reviews'
+    };
+    
+    const sectionId = sectionMap[viewId] || 'section-home';
+    
+    // Hide all sections
+    document.querySelectorAll('.dashboard-section').forEach(section => {
+        section.classList.remove('active');
+    });
+    
+    // Show active section
+    const activeSection = document.getElementById(sectionId);
+    if (activeSection) {
+        activeSection.classList.add('active');
+    }
+    
+    // Update nav item active state
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('active');
+        const dataSection = item.getAttribute('data-section');
+        if (dataSection === viewId) {
+            item.classList.add('active');
+        }
+    });
+    
+    // Close sidebar on mobile after selecting a section
+    if (window.innerWidth <= 992) {
+        closeSidebar();
+    }
+}
+
 // Load Dashboard Data from Google Apps Script
 function loadDashboardData() {
     const userEmail = localStorage.getItem('webpotUserEmail');
     const tbody = document.getElementById('ordersTableBody');
     
-    // Show skeleton loaders before fetch
+    // Show skeleton loaders for table
     showSkeletonLoaders(tbody, 3);
+    
+    // Show skeleton loaders for stat cards
+    const totalCard = document.getElementById('displayTotal');
+    const dueCard = document.getElementById('displayDue');
+    const statusCard = document.getElementById('displayStatus');
+    
+    if (totalCard) {
+        totalCard.style.opacity = '0.5';
+        totalCard.style.pointerEvents = 'none';
+    }
+    if (dueCard) {
+        dueCard.style.opacity = '0.5';
+        dueCard.style.pointerEvents = 'none';
+    }
+    if (statusCard) {
+        statusCard.style.opacity = '0.5';
+        statusCard.style.pointerEvents = 'none';
+    }
     
     fetch(APPS_SCRIPT_URL + '?action=get_user_data&email=' + encodeURIComponent(userEmail))
         .then(res => res.json())
@@ -318,9 +438,25 @@ function populateDashboard(orders) {
         totalDue += due;
     });
 
+    // Update stat cards with fade-in animation
+    const totalCardEl = document.getElementById('displayTotal');
+    const dueCardEl = document.getElementById('displayDue');
+    const statusCardEl = document.getElementById('displayStatus');
+    
+    // Fade in effect
+    const fadeInStyle = (element) => {
+        if (element) {
+            element.style.transition = 'opacity 0.5s ease-in';
+            element.style.opacity = '1';
+        }
+    };
+    
     // Update stat cards with formatted currency
     document.getElementById('displayTotal').textContent = '₹' + totalSpent.toLocaleString('en-IN', {maximumFractionDigits: 2});
     document.getElementById('displayDue').textContent = '₹' + totalDue.toLocaleString('en-IN', {maximumFractionDigits: 2});
+    
+    fadeInStyle(totalCardEl);
+    fadeInStyle(dueCardEl);
     
     // Animate counters
     animateDashboardCounters(totalSpent, totalDue);
@@ -349,6 +485,7 @@ function populateDashboard(orders) {
     
     document.getElementById('displayStatus').textContent = currentPhase;
     document.getElementById('displayStatus').className = phaseClass;
+    fadeInStyle(statusCardEl);
     
     // Update action message
     const actionMessage = totalDue > 0 ? 
@@ -400,10 +537,17 @@ function populateDashboard(orders) {
 
             const invoiceBtn = `<button class="pay-btn" onclick="generateInvoice({orderId: '${order.orderId}', date: '${order.date}', service: '${order.service}', amount: ${amount}, paidAmount: ${paid}, dueAmount: ${due}, status: '${order.status}'})">📄 Invoice</button>`;
 
+            const copyIcon = `<button class="copy-icon-btn" onclick="copyToClipboard('${order.orderId}')" title="Copy Order ID">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                    <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+                </svg>
+            </button>`;
+
             const row = `
                 <tr>
                     <td>${orderDate}</td>
-                    <td><strong>${order.orderId}</strong></td>
+                    <td><strong>${order.orderId}</strong> ${copyIcon}</td>
                     <td>${order.service}</td>
                     <td>₹${amount.toLocaleString('en-IN')}</td>
                     <td>₹${Math.max(0, due).toLocaleString('en-IN')}</td>

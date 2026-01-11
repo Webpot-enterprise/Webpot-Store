@@ -139,6 +139,12 @@
                         <button type="button" class="toggle-password" onclick="togglePasswordVisibility('register-password')">👁️</button>
                         <span class="input-icon">🔒</span>
                     </div>
+                    <div id="passwordStrengthMeter">
+                        <div class="strength-bar">
+                            <div class="strength-indicator" id="strengthIndicator"></div>
+                        </div>
+                        <p class="strength-text">Password strength: <span id="strengthText">Weak</span></p>
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -156,13 +162,6 @@
                         <input type="text" id="register-referral" name="referralCode" placeholder="Enter referral code (e.g., WEBPOT-ABC123)">
                         <span class="input-icon">🎁</span>
                     </div>
-                </div>
-
-                <div class="password-strength">
-                    <div class="strength-bar">
-                        <div class="strength-indicator" id="strengthIndicator"></div>
-                    </div>
-                    <p class="strength-text">Password strength: <span id="strengthText">Weak</span></p>
                 </div>
 
                 <div class="form-options">
