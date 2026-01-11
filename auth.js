@@ -9,7 +9,7 @@ function handleCredentialResponse(response) {
     const userData = JSON.parse(jsonPayload);
     
     // Send to Google Apps Script backend
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzl4co-7Ov-l46Bd7YXSojDZe_pbX6mq--2fWnmNQ0_t2chRXrMYXFjCAEuk7DTsdL9/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyU1wfah__RUdCWmW4mBf1kvCgThl_wwEsqeQhXmtzPq50BSyWjjqph8rpd0ARU5TIx/exec';
     
     fetch(APPS_SCRIPT_URL, {
         method: 'POST',
@@ -31,7 +31,7 @@ function handleCredentialResponse(response) {
             
             showSuccessModal('Welcome!', `Welcome ${userData.name}!`);
             const cleanUsername = userData.name.toLowerCase().replace(/\s+/g, '-');
-            setTimeout(() => window.location.href = 'dashboard.html', 2000);
+            setTimeout(() => window.location.href = 'index.html', 2000);
         } else {
             alert('Google Sign-In failed: ' + data.message);
         }
@@ -156,7 +156,7 @@ function handleLogin(event) {
 }
 
 function performLogin(emailOrPhone, password, submitBtn, originalText, userAgent, ipAddress) {
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzl4co-7Ov-l46Bd7YXSojDZe_pbX6mq--2fWnmNQ0_t2chRXrMYXFjCAEuk7DTsdL9/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyU1wfah__RUdCWmW4mBf1kvCgThl_wwEsqeQhXmtzPq50BSyWjjqph8rpd0ARU5TIx/exec';
     
     fetch(APPS_SCRIPT_URL, {
         method: 'POST',
@@ -194,7 +194,7 @@ function performLogin(emailOrPhone, password, submitBtn, originalText, userAgent
                 // Add a 2-second delay, then redirect to admin panel
                 setTimeout(() => window.location.href = 'webpot-admin/admin.html', 2000);
             } else {
-                setTimeout(() => window.location.href = 'dashboard.html', 2000);
+                setTimeout(() => window.location.href = 'index.html', 2000);
             }
         } else if (data.status === 'user_banned') {
             alert('This account has been banned. Please contact support.');
@@ -239,7 +239,7 @@ function handleRegister(event) {
     submitBtn.textContent = 'Creating account...';
     submitBtn.disabled = true;
     
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzl4co-7Ov-l46Bd7YXSojDZe_pbX6mq--2fWnmNQ0_t2chRXrMYXFjCAEuk7DTsdL9/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyU1wfah__RUdCWmW4mBf1kvCgThl_wwEsqeQhXmtzPq50BSyWjjqph8rpd0ARU5TIx/exec';
     
     fetch(APPS_SCRIPT_URL, {
         method: 'POST',
@@ -262,9 +262,9 @@ function handleRegister(event) {
             const defaultPicUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=0ad4ff&color=fff&rounded=true`;
             localStorage.setItem('webpotUserProfilePic', defaultPicUrl);
             
-            showSuccessModal('Account Created!', 'Redirecting to Dashboard...');
+            showSuccessModal('Account Created!', 'Redirecting to home page...');
             const cleanUsername = name.toLowerCase().replace(/\s+/g, '-');
-            setTimeout(() => window.location.href = 'dashboard.html', 2000);
+            setTimeout(() => window.location.href = 'index.html', 2000);
             
         } else if (data.status === 'user_already_exists') {
             alert('This email is already registered. Please log in.');
@@ -439,7 +439,7 @@ function submitResetEmail(event) {
     btn.textContent = 'Sending...';
     btn.disabled = true;
 
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzl4co-7Ov-l46Bd7YXSojDZe_pbX6mq--2fWnmNQ0_t2chRXrMYXFjCAEuk7DTsdL9/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyU1wfah__RUdCWmW4mBf1kvCgThl_wwEsqeQhXmtzPq50BSyWjjqph8rpd0ARU5TIx/exec';
 
     fetch(APPS_SCRIPT_URL, {
         method: 'POST',
@@ -485,7 +485,7 @@ function submitResetPassword(event) {
     btn.textContent = 'Resetting...';
     btn.disabled = true;
 
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzl4co-7Ov-l46Bd7YXSojDZe_pbX6mq--2fWnmNQ0_t2chRXrMYXFjCAEuk7DTsdL9/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyU1wfah__RUdCWmW4mBf1kvCgThl_wwEsqeQhXmtzPq50BSyWjjqph8rpd0ARU5TIx/exec';
 
     fetch(APPS_SCRIPT_URL, {
         method: 'POST',
@@ -566,7 +566,7 @@ function verifyOTP(event) {
     btn.textContent = 'Verifying...';
     btn.disabled = true;
 
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzl4co-7Ov-l46Bd7YXSojDZe_pbX6mq--2fWnmNQ0_t2chRXrMYXFjCAEuk7DTsdL9/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyU1wfah__RUdCWmW4mBf1kvCgThl_wwEsqeQhXmtzPq50BSyWjjqph8rpd0ARU5TIx/exec';
 
     fetch(APPS_SCRIPT_URL, {
         method: 'POST',
@@ -588,7 +588,7 @@ function verifyOTP(event) {
 
             showSuccessModal('Welcome!', `Welcome, ${data.user.name}!`);
             const cleanUsername = data.user.name.toLowerCase().replace(/\s+/g, '-');
-            setTimeout(() => window.location.href = 'dashboard.html', 2000);
+            setTimeout(() => window.location.href = 'index.html', 2000);
         } else {
             alert('Error: ' + data.message);
             btn.textContent = originalText;

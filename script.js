@@ -522,7 +522,7 @@ function verifyAndSubmitPayment(event) {
     console.log('Sending payload:', window.pendingOrderData);
 
     // Send to Backend
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzl4co-7Ov-l46Bd7YXSojDZe_pbX6mq--2fWnmNQ0_t2chRXrMYXFjCAEuk7DTsdL9/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyU1wfah__RUdCWmW4mBf1kvCgThl_wwEsqeQhXmtzPq50BSyWjjqph8rpd0ARU5TIx/exec';
 
     fetch(APPS_SCRIPT_URL, {
         method: 'POST',
@@ -611,7 +611,7 @@ function submitForm(event) {
     }
     
     // Send to Google Apps Script backend
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzl4co-7Ov-l46Bd7YXSojDZe_pbX6mq--2fWnmNQ0_t2chRXrMYXFjCAEuk7DTsdL9/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyU1wfah__RUdCWmW4mBf1kvCgThl_wwEsqeQhXmtzPq50BSyWjjqph8rpd0ARU5TIx/exec';
     
     // Show loading state
     const submitBtn = event.target.querySelector('button[type="submit"]');
@@ -771,7 +771,7 @@ function payLater() {
     window.pendingOrderData.transactionId = 'PAY_LATER';
     
     // Send order with PAY_LATER transaction ID
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzl4co-7Ov-l46Bd7YXSojDZe_pbX6mq--2fWnmNQ0_t2chRXrMYXFjCAEuk7DTsdL9/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyU1wfah__RUdCWmW4mBf1kvCgThl_wwEsqeQhXmtzPq50BSyWjjqph8rpd0ARU5TIx/exec';
     
     fetch(APPS_SCRIPT_URL, {
         method: 'POST',
@@ -780,8 +780,8 @@ function payLater() {
     .then(res => res.json())
     .then(data => {
         if (data.status === 'success') {
-            alert('Order Placed! You can pay later from your Dashboard.');
-            window.location.href = 'dashboard.html';
+            alert('Order Placed! Thank you for your business.');
+            window.location.href = 'index.html';
         } else {
             alert('Error: ' + data.message);
         }
@@ -793,7 +793,7 @@ function payLater() {
 }
 
 function loadTestimonials() {
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzl4co-7Ov-l46Bd7YXSojDZe_pbX6mq--2fWnmNQ0_t2chRXrMYXFjCAEuk7DTsdL9/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyU1wfah__RUdCWmW4mBf1kvCgThl_wwEsqeQhXmtzPq50BSyWjjqph8rpd0ARU5TIx/exec';
     
     fetch(APPS_SCRIPT_URL + '?action=get_public_reviews', {
         method: 'GET'
