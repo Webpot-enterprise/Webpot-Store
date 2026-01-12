@@ -9,15 +9,11 @@ const SPREADSHEET = SpreadsheetApp.getActiveSpreadsheet();
 // ========== OPTIONS REQUEST HANDLER ==========
 // Handle preflight requests from browsers
 function doOptions(e) {
-  var output = ContentService.createTextOutput('');
-  
-  // Set CORS headers for preflight
-  output.addHeader('Access-Control-Allow-Origin', '*');
-  output.addHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  output.addHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  output.addHeader('Access-Control-Max-Age', '86400');
-  
-  return output;
+  return HtmlService.createHtmlOutput('')
+    .setHeader('Access-Control-Allow-Origin', '*')
+    .setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+    .setHeader('Access-Control-Allow-Headers', 'Content-Type')
+    .setHeader('Cache-Control', 'public, max-age=300');
 }
 
 // ========== MAIN ENTRY POINT - DOGET ONLY ==========
@@ -121,13 +117,11 @@ function doGet(e) {
 
     // Return JSON response with CORS headers
     var output = ContentService.createTextOutput(JSON.stringify(response))
-      .setMimeType(ContentService.MimeType.JSON);
-    
-    // Add CORS headers to allow cross-origin requests
-    output.addHeader('Access-Control-Allow-Origin', '*');
-    output.addHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    output.addHeader('Access-Control-Allow-Headers', 'Content-Type');
-    output.addHeader('Access-Control-Max-Age', '86400');
+      .setMimeType(ContentService.MimeType.JSON)
+      .setHeader('Access-Control-Allow-Origin', '*')
+      .setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+      .setHeader('Access-Control-Allow-Headers', 'Content-Type')
+      .setHeader('Cache-Control', 'public, max-age=300');
     
     return output;
 
@@ -136,13 +130,12 @@ function doGet(e) {
     var errorOutput = ContentService.createTextOutput(JSON.stringify({
       status: 'error',
       message: 'Server error: ' + error.toString()
-    })).setMimeType(ContentService.MimeType.JSON);
-    
-    // Add CORS headers
-    errorOutput.addHeader('Access-Control-Allow-Origin', '*');
-    errorOutput.addHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    errorOutput.addHeader('Access-Control-Allow-Headers', 'Content-Type');
-    errorOutput.addHeader('Access-Control-Max-Age', '86400');
+    }))
+    .setMimeType(ContentService.MimeType.JSON)
+    .setHeader('Access-Control-Allow-Origin', '*')
+    .setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+    .setHeader('Access-Control-Allow-Headers', 'Content-Type')
+    .setHeader('Cache-Control', 'public, max-age=300');
     
     return errorOutput;
 
