@@ -12,6 +12,14 @@ No pending changes at this time.
 
 ## Completed Changes
 
+✅ **January 12, 2026 - Removed Old Customer Dashboard Files**
+- **Deleted** `/dashboard/customer.html`
+- **Deleted** `/dashboard/customer.js`
+- **Deleted** `/dashboard/customer.css`
+- **Updated** `index.html` - Changed dashboard link from `/dashboard/customer.html` to `/dashboard/html/index.html`
+- **Result**: Users now access the modern new dashboard instead of the old one
+- **Status**: ✅ Fixed - No more "User data not found" errors
+
 ✅ **January 12, 2026 - Dashboard Migration: Unified Customer Dashboard**
 - **Replaced old customer dashboard** - Removed `/dashboard/customer.html`, `/dashboard/customer.js`, and `/dashboard/customer.css`
 - **Migrated dashboard-webpot** - Copied all files from `/dashboard-webpot/` folder to `/dashboard/` folder
