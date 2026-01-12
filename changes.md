@@ -4,7 +4,55 @@ Tracking all completed and pending changes to the Webpot Store website.
 
 ---
 
+## ⏳ PENDING CHANGES (Awaiting Implementation)
+
+---
+
 ## ✅ COMPLETED CHANGES
+
+### Payment & CORS Fixes - January 12, 2026
+
+#### ✅ Issue 1: CORS Error on "Pay Later & Go to Dashboard" - FIXED
+**Problem:** CORS error when clicking payment buttons
+**Solution Applied:** 
+- Added CORS headers to `code.gs` doGet() function responses
+- All responses now include:
+  - `Access-Control-Allow-Origin: *`
+  - `Access-Control-Allow-Methods: GET, POST, OPTIONS`
+  - `Access-Control-Allow-Headers: Content-Type`
+  - `Access-Control-Max-Age: 86400`
+- Applied to both success and error response paths
+
+**Files Modified:**
+- `code.gs`: Lines 108-119 (success) and Lines 121-135 (error)
+
+---
+
+#### ✅ Issue 2: Payment UTR Submission Not Working - FIXED
+**Problems Solved:**
+1. ✅ Changed from POST to GET requests to avoid CORS preflight
+2. ✅ Fixed parameter encoding using URLSearchParams
+3. ✅ Ensured transactionId properly passed to backend
+4. ✅ Backend correctly stores UTR in Orders Sheet column J
+
+**Solution Applied:**
+1. **Frontend (script.js):**
+   - `verifyAndSubmitPayment()`: Now uses GET request with URLSearchParams
+   - `payLater()`: Now uses GET request with URLSearchParams  
+   - Proper parameter mapping (action, transactionId, clientName, email, phone, service, totalAmount)
+   - Enhanced error logging for debugging
+
+2. **Backend (code.gs):**
+   - `handleOrderSubmission()` already correctly receives and stores transactionId
+   - Column J in Orders Sheet receives the UTR value
+
+**Files Modified:**
+- `script.js`: Lines 461-508 (verifyAndSubmitPayment) and Lines 716-755 (payLater)
+- `code.gs`: Lines 108-119 (success response) and 121-135 (error response)
+
+**Expected Result:** Payments now submit successfully with UTR appearing in Google Sheets
+
+---
 
 ### Latest Session - January 12, 2026
 

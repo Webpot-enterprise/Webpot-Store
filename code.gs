@@ -105,18 +105,32 @@ function doGet(e) {
         };
     }
 
-    // Return JSON response with proper content type
-    // Note: CORS headers are NOT added as Google Apps Script ignores them anyway
-    // The solution is using GET requests which don't trigger preflight
-    return ContentService.createTextOutput(JSON.stringify(response))
+    // Return JSON response with CORS headers
+    var output = ContentService.createTextOutput(JSON.stringify(response))
       .setMimeType(ContentService.MimeType.JSON);
+    
+    // Add CORS headers to allow cross-origin requests
+    output.addHeader('Access-Control-Allow-Origin', '*');
+    output.addHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    output.addHeader('Access-Control-Allow-Headers', 'Content-Type');
+    output.addHeader('Access-Control-Max-Age', '86400');
+    
+    return output;
 
   } catch(error) {
-    // Return error response in JSON format
-    return ContentService.createTextOutput(JSON.stringify({
+    // Return error response in JSON format with CORS headers
+    var errorOutput = ContentService.createTextOutput(JSON.stringify({
       status: 'error',
       message: 'Server error: ' + error.toString()
     })).setMimeType(ContentService.MimeType.JSON);
+    
+    // Add CORS headers
+    errorOutput.addHeader('Access-Control-Allow-Origin', '*');
+    errorOutput.addHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    errorOutput.addHeader('Access-Control-Allow-Headers', 'Content-Type');
+    errorOutput.addHeader('Access-Control-Max-Age', '86400');
+    
+    return errorOutput;
 
   } finally {
     lock.releaseLock();

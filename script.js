@@ -469,22 +469,28 @@ function verifyAndSubmitPayment(event) {
         return;
     }
 
-    // Add UTR to payload using explicit bracket notation
-    window.pendingOrderData['transactionId'] = utrValue;
-
     // Show loading text
     const verifyBtn = event.target.querySelector('button[type="submit"]');
     const originalText = verifyBtn.textContent;
     verifyBtn.textContent = "Verifying...";
     verifyBtn.disabled = true;
 
-    // Verify payload before sending
-    console.log('Sending payload:', window.pendingOrderData);
+    // Build query parameters for GET request
+    const params = new URLSearchParams();
+    params.append('action', 'placeOrder');
+    params.append('transactionId', utrValue);
+    params.append('clientName', window.pendingOrderData.clientName || '');
+    params.append('email', window.pendingOrderData.email || '');
+    params.append('phone', window.pendingOrderData.phone || '');
+    params.append('service', window.pendingOrderData.service || '');
+    params.append('totalAmount', window.pendingOrderData.totalAmount || 0);
 
-    // Send to Backend
-    fetch(WEBPOT_CONFIG.API_URL, {
-        method: 'POST',
-        body: JSON.stringify(window.pendingOrderData)
+    // Log for debugging
+    console.log('Sending payment verification:', params.toString());
+
+    // Send to Backend using GET to avoid CORS preflight
+    fetch(WEBPOT_CONFIG.API_URL + '?' + params.toString(), {
+        method: 'GET'
     })
     .then(res => res.json())
     .then(data => {
@@ -501,7 +507,7 @@ function verifyAndSubmitPayment(event) {
         }
     })
     .catch(err => {
-        console.error('Error:', err);
+        console.error('Payment Error:', err);
         alert('Network error. Please try again.');
     })
     .finally(() => {
@@ -723,13 +729,22 @@ function payLater() {
         submitBtn.disabled = true;
     }
     
-    // Mark as Pay Later order for distinguishing from incomplete UTR submissions
-    window.pendingOrderData.transactionId = 'PAY_LATER';
+    // Build query parameters for GET request
+    const params = new URLSearchParams();
+    params.append('action', 'placeOrder');
+    params.append('transactionId', 'PAY_LATER');
+    params.append('clientName', window.pendingOrderData.clientName || '');
+    params.append('email', window.pendingOrderData.email || '');
+    params.append('phone', window.pendingOrderData.phone || '');
+    params.append('service', window.pendingOrderData.service || '');
+    params.append('totalAmount', window.pendingOrderData.totalAmount || 0);
     
-    // Send order with PAY_LATER transaction ID
-    fetch(WEBPOT_CONFIG.API_URL, {
-        method: 'POST',
-        body: JSON.stringify(window.pendingOrderData)
+    // Log for debugging
+    console.log('Sending Pay Later order:', params.toString());
+    
+    // Send order with PAY_LATER transaction ID using GET to avoid CORS preflight
+    fetch(WEBPOT_CONFIG.API_URL + '?' + params.toString(), {
+        method: 'GET'
     })
     .then(res => res.json())
     .then(data => {
@@ -741,8 +756,14 @@ function payLater() {
         }
     })
     .catch(err => {
-        console.error('Error:', err);
+        console.error('Pay Later Error:', err);
         alert('Network error. Please try again.');
+    })
+    .finally(() => {
+        if (submitBtn) {
+            submitBtn.textContent = 'Pay Later & Go to Dashboard';
+            submitBtn.disabled = false;
+        }
     });
 }
 
