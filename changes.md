@@ -6,6 +6,23 @@ This document tracks completed changes and improvements to the Webpot Store webs
 
 ## Pending Changes
 
+### Separate Customer Dashboard from Admin Files
+
+1. **Move Customer Dashboard to Dedicated Folder**
+   - **Created new `/dashboard/` folder** with customer-facing dashboard files
+   - **Folder structure**:
+     - `/dashboard/html/` - All customer dashboard HTML files (index.html, orders.html, settings.html, etc.)
+     - `/dashboard/css/` - Customer dashboard stylesheets (style.css, orders.css, settings.css, terms-conditions.css)
+     - `/dashboard/js/` - Customer dashboard JavaScript files (script.js, orders.js, settings.js, config.js)
+     - `/dashboard/txt files/` - Documentation and guides (README.md, PROJECT_OVERVIEW.txt, SETUP.txt, etc.)
+   - **Removed customer dashboard files from `/admin-dashboard/`** - Admin folder now contains only admin panel files (admin.html, admin.js, admin.css, assets)
+   - **Updated all backend references**:
+     - `index.html`: Dashboard link changed from `admin-dashboard/html/index.html` to `dashboard/html/index.html`
+     - `script.js`: Dashboard redirect updated from `admin-dashboard/html/index.html` to `dashboard/html/index.html`
+     - `updates.html`: Documentation URLs updated to reference `/dashboard/` instead of `/admin-dashboard/`
+   - **File locations**: `index.html`, `script.js`, `updates.html`, `changes.md`
+   - **Status**: ✅ Complete - Clean separation of admin and customer dashboard folders
+
 ### Dashboard Visual Enhancements
 
 1. **Add Dashboard Analytics Cards with Trends**
@@ -76,6 +93,28 @@ This document tracks completed changes and improvements to the Webpot Store webs
 ---
 
 ## Completed Changes
+
+✅ **January 12, 2026 - Separated Customer Dashboard from Admin Files**
+- **Created new `/dashboard/` folder** - Dedicated folder for customer-facing dashboard with organized subfolders (html/, css/, js/, txt files/)
+- **Cleaned up `/admin-dashboard/`** - Now contains only admin panel files (admin.html, admin.js, admin.css, assets/)
+- **Updated all path references**:
+  - `index.html`: Dashboard link from `admin-dashboard/html/index.html` to `dashboard/html/index.html`
+  - `script.js`: Dashboard redirect from `admin-dashboard/html/index.html` to `dashboard/html/index.html`
+  - `updates.html`: Documentation URL from `/admin-dashboard/` to `/dashboard/`
+- **Result**: Clear separation between customer dashboard (`/dashboard/`) and admin panel (`/admin-dashboard/`)
+- **Status**: ✅ Complete - All links updated, no broken references
+
+✅ **January 12, 2026 - Admin Folder Reorganization & Delink webpot-admin**
+- **Renamed folder** - Changed `/dashboard/` to `/admin-dashboard/` to consolidate all admin and customer dashboard functionality
+- **Deleted `/webpot-admin/` folder** - Removed the separate admin folder as admin.html, admin.js, and admin.css are already present in `/admin-dashboard/`
+- **Deleted `/dashboard-webpot/` folder** - Removed redundant folder after migration content was already in admin-dashboard
+- **Updated all path references**:
+  - `index.html`: Updated admin link from `webpot-admin/admin.html` to `admin-dashboard/admin.html`
+  - `index.html`: Updated dashboard link from `dashboard/html/index.html` to `admin-dashboard/html/index.html`
+  - `script.js`: Updated dashboard redirect from `dashboard/customer.html` to `admin-dashboard/html/index.html`
+  - `updates.html`: Updated documentation URL reference from `/dashboard/` to `/admin-dashboard/`
+- **Result**: Clean, unified folder structure with all admin and user dashboard files in single `/admin-dashboard/` directory
+- **Status**: ✅ Complete - No breaking links, all paths updated
 
 ✅ **January 12, 2026 - CSS Animation Fixes: Contact Form & Service Cards**
 - **Removed contact form animations** - Deleted `fadeInUp` animations from `.form-group input`, `.form-group textarea`, `.form-group select` elements

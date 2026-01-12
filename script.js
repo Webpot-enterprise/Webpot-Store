@@ -735,7 +735,7 @@ function payLater() {
     .then(data => {
         if (data.status === 'success') {
             alert('Order Placed! Redirecting to dashboard...');
-            window.location.href = 'dashboard/customer.html';
+            window.location.href = 'dashboard/html/index.html';
         } else {
             alert('Error: ' + data.message);
         }
