@@ -1,12 +1,10 @@
 // ========== REUSABLE BACKEND COMMUNICATION ==========
 // Central function for all backend API calls
 function callBackend(action, payload = {}) {
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyU1wfah__RUdCWmW4mBf1kvCgThl_wwEsqeQhXmtzPq50BSyWjjqph8rpd0ARU5TIx/exec';
-    
     // Add action to payload
     const requestData = { action, ...payload };
     
-    return fetch(APPS_SCRIPT_URL, {
+    return fetch(WEBPOT_CONFIG.API_URL, {
         method: 'POST',
         body: JSON.stringify(requestData),
         headers: {
@@ -558,9 +556,7 @@ function verifyAndSubmitPayment(event) {
     console.log('Sending payload:', window.pendingOrderData);
 
     // Send to Backend
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyU1wfah__RUdCWmW4mBf1kvCgThl_wwEsqeQhXmtzPq50BSyWjjqph8rpd0ARU5TIx/exec';
-
-    fetch(APPS_SCRIPT_URL, {
+    fetch(WEBPOT_CONFIG.API_URL, {
         method: 'POST',
         body: JSON.stringify(window.pendingOrderData)
     })
@@ -647,15 +643,13 @@ function submitForm(event) {
     }
     
     // Send to Google Apps Script backend
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyU1wfah__RUdCWmW4mBf1kvCgThl_wwEsqeQhXmtzPq50BSyWjjqph8rpd0ARU5TIx/exec';
-    
     // Show loading state
     const submitBtn = event.target.querySelector('button[type="submit"]');
     const originalText = submitBtn.textContent;
     submitBtn.textContent = 'Sending...';
     submitBtn.disabled = true;
     
-    fetch(APPS_SCRIPT_URL, {
+    fetch(WEBPOT_CONFIG.API_URL, {
         method: 'POST',
         body: JSON.stringify({
             formType: 'contact',
@@ -807,9 +801,7 @@ function payLater() {
     window.pendingOrderData.transactionId = 'PAY_LATER';
     
     // Send order with PAY_LATER transaction ID
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyU1wfah__RUdCWmW4mBf1kvCgThl_wwEsqeQhXmtzPq50BSyWjjqph8rpd0ARU5TIx/exec';
-    
-    fetch(APPS_SCRIPT_URL, {
+    fetch(WEBPOT_CONFIG.API_URL, {
         method: 'POST',
         body: JSON.stringify(window.pendingOrderData)
     })
@@ -829,9 +821,7 @@ function payLater() {
 }
 
 function loadTestimonials() {
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyU1wfah__RUdCWmW4mBf1kvCgThl_wwEsqeQhXmtzPq50BSyWjjqph8rpd0ARU5TIx/exec';
-    
-    fetch(APPS_SCRIPT_URL + '?action=get_public_reviews', {
+    fetch(WEBPOT_CONFIG.API_URL + '?action=get_public_reviews', {
         method: 'GET'
     })
     .then(res => res.json())

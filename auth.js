@@ -9,9 +9,7 @@ function handleCredentialResponse(response) {
     const userData = JSON.parse(jsonPayload);
     
     // Send to Google Apps Script backend
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyU1wfah__RUdCWmW4mBf1kvCgThl_wwEsqeQhXmtzPq50BSyWjjqph8rpd0ARU5TIx/exec';
-    
-    fetch(APPS_SCRIPT_URL, {
+    fetch(WEBPOT_CONFIG.API_URL, {
         method: 'POST',
         body: JSON.stringify({
             action: 'register',
@@ -427,9 +425,7 @@ function submitResetEmail(event) {
     btn.textContent = 'Sending...';
     btn.disabled = true;
 
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyU1wfah__RUdCWmW4mBf1kvCgThl_wwEsqeQhXmtzPq50BSyWjjqph8rpd0ARU5TIx/exec';
-
-    fetch(APPS_SCRIPT_URL, {
+    fetch(WEBPOT_CONFIG.API_URL, {
         method: 'POST',
         body: JSON.stringify({
             action: 'request_reset',
@@ -473,9 +469,7 @@ function submitResetPassword(event) {
     btn.textContent = 'Resetting...';
     btn.disabled = true;
 
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyU1wfah__RUdCWmW4mBf1kvCgThl_wwEsqeQhXmtzPq50BSyWjjqph8rpd0ARU5TIx/exec';
-
-    fetch(APPS_SCRIPT_URL, {
+    fetch(WEBPOT_CONFIG.API_URL, {
         method: 'POST',
         body: JSON.stringify({
             action: 'verify_reset',
@@ -554,9 +548,7 @@ function verifyOTP(event) {
     btn.textContent = 'Verifying...';
     btn.disabled = true;
 
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyU1wfah__RUdCWmW4mBf1kvCgThl_wwEsqeQhXmtzPq50BSyWjjqph8rpd0ARU5TIx/exec';
-
-    fetch(APPS_SCRIPT_URL, {
+    fetch(WEBPOT_CONFIG.API_URL, {
         method: 'POST',
         body: JSON.stringify({
             action: 'verify_login_otp',

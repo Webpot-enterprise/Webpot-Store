@@ -1,6 +1,4 @@
 // Admin Dashboard JavaScript
-const API_URL = 'https://script.google.com/macros/s/AKfycbyU1wfah__RUdCWmW4mBf1kvCgThl_wwEsqeQhXmtzPq50BSyWjjqph8rpd0ARU5TIx/exec';
-
 // Global data storage
 let allUsers = [];
 let allOrders = [];
@@ -8,53 +6,61 @@ let allOrders = [];
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
     checkAuth();
+    setupNavigation();
     setupEventListeners();
     loadDashboardData();
-    
-    // Robust Sidebar Navigation Logic
-    const navLinks = document.querySelectorAll('.nav-item');
-    const sections = document.querySelectorAll('.dashboard-section');
-
-    navLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
-            if (link.id === 'logoutBtn' || link.classList.contains('logout-btn')) return;
-            e.preventDefault();
-
-            navLinks.forEach(nav => nav.classList.remove('active'));
-            link.classList.add('active');
-
-            const targetId = link.getAttribute('data-section');
-
-            sections.forEach(section => {
-                section.style.display = 'none';
-                section.classList.remove('active');
-            });
-
-            const targetSection = document.getElementById(targetId);
-            if (targetSection) {
-                targetSection.style.display = 'block';
-                targetSection.classList.add('active');
-            } else {
-                console.error('Target section not found:', targetId);
-            }
-        });
-    });
-
-    const activeLink = document.querySelector('.nav-item.active');
-    if (activeLink) {
-        activeLink.click();
-    }
 });
 
 // Check authentication
 function checkAuth() {
     const authToken = localStorage.getItem('webpotAdminAuth');
-    if (!authToken) {
+    if (!authToken || authToken !== 'WebpotAdmin2026') {
         alert('Unauthorized access. Please login.');
         window.location.href = '../auth.html';
         return false;
     }
     return true;
+}
+
+// Setup robust navigation
+function setupNavigation() {
+    document.querySelectorAll('.nav-item').forEach(link => {
+        link.addEventListener('click', (e) => {
+            if (link.id === 'logoutBtn') {
+                e.preventDefault();
+                logout();
+                return;
+            }
+            e.preventDefault();
+            
+            // Remove active class from all items
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            
+            // Hide all sections
+            document.querySelectorAll('.dashboard-section').forEach(s => s.style.display = 'none');
+            
+            // Add active class to clicked item
+            link.classList.add('active');
+            
+            // Show target section
+            const target = document.getElementById(link.getAttribute('data-section'));
+            if (target) {
+                target.style.display = 'block';
+                updatePageTitle(link.getAttribute('data-section'));
+            }
+        });
+    });
+}
+
+// Update page title based on section
+function updatePageTitle(section) {
+    const titles = {
+        'dashboard': 'Dashboard',
+        'orders': 'Orders Management',
+        'users': 'Users Management',
+        'reviews': 'Reviews'
+    };
+    document.getElementById('pageTitle').textContent = titles[section] || 'Dashboard';
 }
 
 // Setup event listeners
@@ -80,24 +86,18 @@ function setupEventListeners() {
 
     // Modal handling
     setupModalListeners();
-
-    // Logout button
-    document.getElementById('logoutBtn').addEventListener('click', function(e) {
-        e.preventDefault();
-        logout();
-    });
 }
 
 // Load all dashboard data
 async function loadDashboardData() {
     try {
         // Fetch users
-        const usersResponse = await fetch(API_URL + '?action=get_users');
+        const usersResponse = await fetch(WEBPOT_CONFIG.API_URL + '?action=get_users');
         const usersData = await usersResponse.json();
         allUsers = usersData.data || [];
 
         // Fetch orders
-        const ordersResponse = await fetch(API_URL + '?action=get_orders');
+        const ordersResponse = await fetch(WEBPOT_CONFIG.API_URL + '?action=get_orders');
         const ordersData = await ordersResponse.json();
         allOrders = ordersData.data || [];
 
@@ -289,7 +289,7 @@ async function handleStatusUpdate(e) {
     }
 
     try {
-        const response = await fetch(API_URL, {
+        const response = await fetch(WEBPOT_CONFIG.API_URL, {
             method: 'POST',
             body: JSON.stringify({
                 action: 'update_status',
@@ -317,7 +317,7 @@ async function handleBanUser(e) {
     const email = document.getElementById('userEmailInput').value;
 
     try {
-        const response = await fetch(API_URL, {
+        const response = await fetch(WEBPOT_CONFIG.API_URL, {
             method: 'POST',
             body: JSON.stringify({
                 action: 'ban_user',

@@ -1,4 +1,3 @@
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyU1wfah__RUdCWmW4mBf1kvCgThl_wwEsqeQhXmtzPq50BSyWjjqph8rpd0ARU5TIx/exec';
 const ADMIN_KEY = 'WebpotAdmin2026';
 
 // Authentication Check
@@ -57,7 +56,7 @@ function logoutAdmin() {
 // ============== ORDERS MANAGEMENT ==============
 
 function loadAllOrders() {
-    fetch(APPS_SCRIPT_URL, {
+    fetch(WEBPOT_CONFIG.API_URL, {
         method: 'POST',
         body: JSON.stringify({
             action: 'get_all_orders',
@@ -110,7 +109,7 @@ function populateOrdersTable(orders) {
 }
 
 function updateOrderStatus(orderId, newStatus) {
-    fetch(APPS_SCRIPT_URL, {
+    fetch(WEBPOT_CONFIG.API_URL, {
         method: 'POST',
         body: JSON.stringify({
             action: 'update_status',
@@ -138,7 +137,7 @@ function viewOrderDetails(orderId) {
 // ============== USER MANAGEMENT ==============
 
 function loadAllUsers() {
-    fetch(APPS_SCRIPT_URL, {
+    fetch(WEBPOT_CONFIG.API_URL, {
         method: 'POST',
         body: JSON.stringify({
             action: 'get_all_users',
@@ -186,7 +185,7 @@ function populateUsersTable(users) {
 
 function banUser(email) {
     if (confirm(`Are you sure you want to ban ${email}?`)) {
-        fetch(APPS_SCRIPT_URL, {
+        fetch(WEBPOT_CONFIG.API_URL, {
             method: 'POST',
             body: JSON.stringify({
                 action: 'ban_user',
@@ -210,7 +209,7 @@ function banUser(email) {
 // ============== REVIEW MODERATION ==============
 
 function loadAllReviews() {
-    fetch(APPS_SCRIPT_URL, {
+    fetch(WEBPOT_CONFIG.API_URL, {
         method: 'POST',
         body: JSON.stringify({
             action: 'get_public_reviews'
