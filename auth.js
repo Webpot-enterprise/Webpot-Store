@@ -157,7 +157,27 @@ async function handleLogin(event) {
         return;
     }
 
-    // Basic email validation
+    // Check for hardcoded admin credentials FIRST
+    const adminUsername = 'Webpot-Admin';
+    const adminPassword = 'webpot.2026!!';
+    
+    if (emailInput.value.trim() === adminUsername && passwordInput.value === adminPassword) {
+        // Admin credentials detected - redirect to admin dashboard
+        isLoading = true;
+        setButtonLoading(true);
+        
+        // Set admin session
+        localStorage.setItem('webpotAdminAuth', 'true');
+        localStorage.setItem('webpotAdminLoginTime', new Date().toISOString());
+        
+        showAlert('Admin login successful! Redirecting to admin dashboard...', 'success');
+        setTimeout(() => {
+            window.location.href = 'admin-dashboard/admin.html';
+        }, 1500);
+        return;
+    }
+
+    // Basic email validation for customer login
     if (!isValidEmail(emailInput.value)) {
         showAlert('Please enter a valid email address', 'error');
         return;

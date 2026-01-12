@@ -591,25 +591,30 @@ function handleGetAllOrders(data) {
     var values = sheet.getDataRange().getValues();
     var orders = [];
     
+    // Headers: Date, Order ID, Name, Email, Phone, Service, Total Amount, Paid Amount, Due Amount, Transaction IDs, Status, Details, Last Updated
     for (var i = 1; i < values.length; i++) {
-      orders.push({
-        timestamp: values[i][0],
-        orderId: values[i][1],
-        clientName: values[i][2],
-        email: values[i][3],
-        phone: values[i][4],
-        serviceType: values[i][5],
-        totalAmount: values[i][6],
-        paidAmount: values[i][7],
-        dueAmount: values[i][8],
-        transactionId: values[i][9],
-        status: values[i][10]
-      });
+      if (values[i][1]) { // Check if Order ID exists
+        orders.push({
+          timestamp: values[i][0],
+          orderId: values[i][1],
+          clientName: values[i][2],
+          email: values[i][3],
+          phone: values[i][4],
+          serviceType: values[i][5],
+          totalAmount: values[i][6],
+          paidAmount: values[i][7],
+          dueAmount: values[i][8],
+          transactionId: values[i][9],
+          status: values[i][10],
+          details: values[i][11],
+          lastUpdated: values[i][12]
+        });
+      }
     }
     
-    return { status: 'success', orders: orders };
+    return { status: 'success', data: orders, count: orders.length };
   } catch (error) {
-    return { status: 'error', message: error.toString() };
+    return { status: 'error', message: error.toString(), data: [] };
   }
 }
 
@@ -619,20 +624,27 @@ function handleGetAllUsers(data) {
     var values = sheet.getDataRange().getValues();
     var users = [];
     
+    // Headers: Timestamp, Name, Email, Password, Phone, Status, Created, My_Referral_Code, Referred_By, Wallet_Balance, Profile_Pic
     for (var i = 1; i < values.length; i++) {
-      users.push({
-        timestamp: values[i][0],
-        name: values[i][1],
-        email: values[i][2],
-        phone: values[i][4],
-        status: values[i][5],
-        referralCode: values[i][7]
-      });
+      if (values[i][2]) { // Check if Email exists
+        users.push({
+          timestamp: values[i][0],
+          name: values[i][1],
+          email: values[i][2],
+          phone: values[i][4],
+          status: values[i][5],
+          created: values[i][6],
+          referralCode: values[i][7],
+          referredBy: values[i][8],
+          walletBalance: values[i][9],
+          profilePic: values[i][10]
+        });
+      }
     }
     
-    return { status: 'success', users: users };
+    return { status: 'success', data: users, count: users.length };
   } catch (error) {
-    return { status: 'error', message: error.toString() };
+    return { status: 'error', message: error.toString(), data: [] };
   }
 }
 

@@ -1,22 +1,81 @@
 // Admin Dashboard JavaScript
+// Hardcoded credentials
+const ADMIN_CREDENTIALS = {
+    username: 'Webpot-Admin',
+    password: 'webpot.2026!!'
+};
+
 // Global data storage
 let allUsers = [];
 let allOrders = [];
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
-    checkAuth();
+    // Check if user is already logged in
+    const isAuthenticated = localStorage.getItem('webpotAdminAuth') === 'true';
+    
+    if (isAuthenticated) {
+        // User is logged in, show dashboard
+        showDashboard();
+    } else {
+        // User is not logged in, setup login form
+        setupLoginForm();
+    }
+});
+
+// Setup login form
+function setupLoginForm() {
+    const loginForm = document.getElementById('loginForm');
+    const errorMessage = document.getElementById('errorMessage');
+    
+    loginForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        
+        // Validate credentials
+        if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
+            // Credentials are correct
+            localStorage.setItem('webpotAdminAuth', 'true');
+            localStorage.setItem('webpotAdminLoginTime', new Date().toISOString());
+            
+            // Hide login page and show dashboard
+            showDashboard();
+        } else {
+            // Invalid credentials
+            errorMessage.textContent = 'Invalid username or password. Please try again.';
+            errorMessage.classList.add('show');
+            
+            // Clear password field
+            document.getElementById('password').value = '';
+        }
+    });
+}
+
+// Show dashboard after login
+function showDashboard() {
+    // Hide login page
+    document.getElementById('loginPage').style.display = 'none';
+    
+    // Show dashboard content
+    const dashboardContent = document.getElementById('dashboardContent');
+    dashboardContent.classList.add('show');
+    dashboardContent.style.display = 'block';
+    
+    // Initialize dashboard
     setupNavigation();
     setupEventListeners();
     loadDashboardData();
-});
+}
 
 // Check authentication
 function checkAuth() {
     const authToken = localStorage.getItem('webpotAdminAuth');
-    if (!authToken || authToken !== 'WebpotAdmin2026') {
-        alert('Unauthorized access. Please login.');
-        window.location.href = '../auth.html';
+    if (!authToken || authToken !== 'true') {
+        // Redirect to login
+        document.getElementById('loginPage').style.display = 'flex';
+        document.getElementById('dashboardContent').style.display = 'none';
         return false;
     }
     return true;
@@ -91,13 +150,16 @@ function setupEventListeners() {
 // Load all dashboard data
 async function loadDashboardData() {
     try {
+        // Show loading state
+        document.getElementById('pageTitle').textContent = 'Loading...';
+        
         // Fetch users
-        const usersResponse = await fetch(WEBPOT_CONFIG.API_URL + '?action=get_users');
+        const usersResponse = await fetch(WEBPOT_CONFIG.API_URL + '?action=get_all_users');
         const usersData = await usersResponse.json();
         allUsers = usersData.data || [];
 
         // Fetch orders
-        const ordersResponse = await fetch(WEBPOT_CONFIG.API_URL + '?action=get_orders');
+        const ordersResponse = await fetch(WEBPOT_CONFIG.API_URL + '?action=get_all_orders');
         const ordersData = await ordersResponse.json();
         allOrders = ordersData.data || [];
 
@@ -105,6 +167,9 @@ async function loadDashboardData() {
         updateDashboardStats();
         renderUsersTable();
         renderOrdersTable();
+        
+        // Update page title back
+        updatePageTitle('dashboard');
     } catch (error) {
         console.error('Error loading dashboard data:', error);
         alert('Failed to load data. Please refresh the page.');
@@ -115,8 +180,8 @@ async function loadDashboardData() {
 function updateDashboardStats() {
     const totalUsers = allUsers.length;
     const totalOrders = allOrders.length;
-    const activeUsers = allUsers.filter(u => u[5] && u[5].toLowerCase() !== 'banned').length;
-    const pendingOrders = allOrders.filter(o => o[6] && o[6].toLowerCase() === 'pending').length;
+    const activeUsers = allUsers.filter(u => u.status && u.status.toLowerCase() !== 'banned').length;
+    const pendingOrders = allOrders.filter(o => o.status && o.status.toLowerCase() === 'pending').length;
 
     document.getElementById('totalUsers').textContent = totalUsers;
     document.getElementById('totalOrders').textContent = totalOrders;
@@ -136,21 +201,21 @@ function renderUsersTable() {
 
     allUsers.forEach((user, index) => {
         const row = document.createElement('tr');
-        const profilePic = user[10] || 'https://via.placeholder.com/32';
-        const status = user[5] || 'inactive';
+        const profilePic = user.profilePic || 'https://via.placeholder.com/32';
+        const status = user.status || 'inactive';
         const statusClass = status.toLowerCase() === 'banned' ? 'banned' : (status.toLowerCase() === 'active' ? 'active' : 'inactive');
 
         row.innerHTML = `
             <td><img src="${profilePic}" alt="Profile" class="profile-pic" onerror="this.src='https://via.placeholder.com/32'"></td>
-            <td>${user[1] || '-'}</td>
-            <td>${user[2] || '-'}</td>
-            <td>${user[4] || '-'}</td>
+            <td>${user.name || '-'}</td>
+            <td>${user.email || '-'}</td>
+            <td>${user.phone || '-'}</td>
             <td><span class="status-badge ${statusClass}"></span><span class="status-text">${status}</span></td>
-            <td><code>${user[7] || '-'}</code></td>
-            <td>$${user[9] || '0'}</td>
+            <td><code>${user.referralCode || '-'}</code></td>
+            <td>₹${user.walletBalance || '0'}</td>
             <td>
                 <div class="action-buttons">
-                    <button class="btn-secondary" onclick="openBanModal('${user[2]}', '${user[1]}')">Ban</button>
+                    <button class="btn-secondary" onclick="openBanModal('${user.email}', '${user.name}')">Ban</button>
                 </div>
             </td>
         `;
@@ -170,26 +235,36 @@ function renderOrdersTable() {
 
     allOrders.forEach((order, index) => {
         const row = document.createElement('tr');
-        // Order structure: 0=ID, 1=ClientName, 2=Service, 3=TotalAmount, 4=Paid, 5=Due, 6=PaymentStatus, 7=TransactionID
-        const status = order[6] || 'pending';
+        const status = order.status || 'pending';
+        const statusClass = getStatusClass(status);
         
         row.innerHTML = `
-            <td><strong>${order[0] || '-'}</strong></td>
-            <td>${order[1] || '-'}</td>
-            <td>${order[2] || '-'}</td>
-            <td>$${order[3] || '0'}</td>
-            <td>$${order[4] || '0'}</td>
-            <td>$${order[5] || '0'}</td>
-            <td><span class="status-text">${status}</span></td>
-            <td><code>${order[7] || '-'}</code></td>
+            <td><strong>${order.orderId || '-'}</strong></td>
+            <td>${order.clientName || '-'}</td>
+            <td>${order.serviceType || '-'}</td>
+            <td>₹${order.totalAmount || '0'}</td>
+            <td>₹${order.paidAmount || '0'}</td>
+            <td>₹${order.dueAmount || '0'}</td>
+            <td><span class="status-badge ${statusClass}">${status}</span></td>
+            <td><code>${order.transactionId || '-'}</code></td>
             <td>
                 <div class="action-buttons">
-                    <button class="btn-primary" onclick="openStatusModal('${order[0]}')">Update</button>
+                    <button class="btn-primary" onclick="openStatusModal('${order.orderId}')">Update</button>
                 </div>
             </td>
         `;
         tbody.appendChild(row);
     });
+}
+
+// Get status class for styling
+function getStatusClass(status) {
+    const statusLower = status.toLowerCase();
+    if (statusLower === 'completed' || statusLower === 'success') return 'success';
+    if (statusLower === 'pending') return 'pending';
+    if (statusLower === 'processing') return 'processing';
+    if (statusLower === 'failed' || statusLower === 'cancelled') return 'error';
+    return 'pending';
 }
 
 // Filter users table
@@ -243,39 +318,47 @@ function showSection(sectionName) {
 
 // Modal functions
 function setupModalListeners() {
-    // Status modal
+    // Status modal - Click outside to close
     const statusModal = document.getElementById('statusModal');
-    const statusForm = document.getElementById('statusForm');
-    const statusClose = statusModal.querySelector('.close');
+    if (statusModal) {
+        window.addEventListener('click', function(e) {
+            if (e.target === statusModal) statusModal.style.display = 'none';
+        });
+    }
 
-    statusClose.addEventListener('click', () => statusModal.style.display = 'none');
-    statusForm.addEventListener('submit', handleStatusUpdate);
-
-    // Ban modal
+    // Ban modal - Click outside to close
     const banModal = document.getElementById('banModal');
+    if (banModal) {
+        window.addEventListener('click', function(e) {
+            if (e.target === banModal) banModal.style.display = 'none';
+        });
+    }
+
+    // Status form submission
+    const statusForm = document.getElementById('statusForm');
+    if (statusForm) {
+        statusForm.addEventListener('submit', handleStatusUpdate);
+    }
+
+    // Ban form submission
     const banForm = document.getElementById('banForm');
-    const banClose = banModal.querySelector('.close');
-
-    banClose.addEventListener('click', () => banModal.style.display = 'none');
-    banForm.addEventListener('submit', handleBanUser);
-
-    // Close modal when clicking outside
-    window.addEventListener('click', function(e) {
-        if (e.target === statusModal) statusModal.style.display = 'none';
-        if (e.target === banModal) banModal.style.display = 'none';
-    });
+    if (banForm) {
+        banForm.addEventListener('submit', handleBanUser);
+    }
 }
 
 function openStatusModal(orderId) {
+    const modal = document.getElementById('statusModal');
     document.getElementById('orderIdInput').value = orderId;
     document.getElementById('statusSelect').value = '';
-    document.getElementById('statusModal').style.display = 'flex';
+    modal.style.display = 'flex';
 }
 
 function openBanModal(email, name) {
+    const modal = document.getElementById('banModal');
     document.getElementById('userEmailInput').value = email;
     document.getElementById('banConfirmText').textContent = `Are you sure you want to ban the user "${name}" (${email})?`;
-    document.getElementById('banModal').style.display = 'flex';
+    modal.style.display = 'flex';
 }
 
 async function handleStatusUpdate(e) {
@@ -289,17 +372,16 @@ async function handleStatusUpdate(e) {
     }
 
     try {
-        const response = await fetch(WEBPOT_CONFIG.API_URL, {
-            method: 'POST',
-            body: JSON.stringify({
-                action: 'update_status',
-                orderId: orderId,
-                newStatus: newStatus
-            })
-        });
+        const url = new URL(WEBPOT_CONFIG.API_URL);
+        url.searchParams.append('action', 'update_status');
+        url.searchParams.append('type', 'order');
+        url.searchParams.append('id', orderId);
+        url.searchParams.append('status', newStatus);
 
+        const response = await fetch(url.toString());
         const result = await response.json();
-        if (result.success) {
+        
+        if (result.status === 'success') {
             alert('Order status updated successfully');
             document.getElementById('statusModal').style.display = 'none';
             loadDashboardData();
@@ -317,16 +399,14 @@ async function handleBanUser(e) {
     const email = document.getElementById('userEmailInput').value;
 
     try {
-        const response = await fetch(WEBPOT_CONFIG.API_URL, {
-            method: 'POST',
-            body: JSON.stringify({
-                action: 'ban_user',
-                email: email
-            })
-        });
+        const url = new URL(WEBPOT_CONFIG.API_URL);
+        url.searchParams.append('action', 'ban_user');
+        url.searchParams.append('email', email);
 
+        const response = await fetch(url.toString());
         const result = await response.json();
-        if (result.success) {
+        
+        if (result.status === 'success') {
             alert('User banned successfully');
             document.getElementById('banModal').style.display = 'none';
             loadDashboardData();
@@ -343,6 +423,8 @@ async function handleBanUser(e) {
 function logout() {
     if (confirm('Are you sure you want to logout?')) {
         localStorage.removeItem('webpotAdminAuth');
-        window.location.href = '../auth.html';
+        localStorage.removeItem('webpotAdminLoginTime');
+        // Reload the page to show login form
+        location.reload();
     }
 }
