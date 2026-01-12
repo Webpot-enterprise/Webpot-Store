@@ -12,6 +12,69 @@ No pending changes at this time.
 
 ## Completed Changes
 
+✅ **January 12, 2026 - Dashboard Migration: Unified Customer Dashboard**
+- **Replaced old customer dashboard** - Removed `/dashboard/customer.html`, `/dashboard/customer.js`, and `/dashboard/customer.css`
+- **Migrated dashboard-webpot** - Copied all files from `/dashboard-webpot/` folder to `/dashboard/` folder
+  - HTML files: `index.html`, `orders.html`, `settings.html`, `privacy.html`, `terms-conditions.html`, `terms.html`, `QUICKSTART.html`
+  - CSS files: `style.css`, `orders.css`, `settings.css`, `terms-conditions.css` (organized in `/dashboard/css/`)
+  - JS files: `script.js`, `orders.js`, `settings.js`, `terms-conditions.js`, `config.js` (organized in `/dashboard/js/`)
+  - Assets: Documentation files and guides (organized in `/dashboard/txt files/`)
+- **Preserved admin dashboard** - Kept `/dashboard/admin.html`, `/dashboard/admin.js`, and `/dashboard/admin.css` unchanged
+- **Directory structure optimized** - Dashboard now has organized subdirectories for HTML, CSS, JS, and assets
+
+**Features Integrated from dashboard-webpot:**
+
+1. ✅ **Modern Dashboard Overview**
+   - Welcome message with personalized greeting ("Welcome Back!")
+   - Animated stat cards showing Total Orders, Total Earnings, and Referrals
+   - Professional header layout with user-friendly interface
+
+2. ✅ **Enhanced Orders Management**
+   - Complete order history with detailed status tracking (pending, processing, shipped, delivered, cancelled)
+   - Status indicators with visual color coding
+   - Filter orders by status functionality
+   - Order timeline and descriptions
+   - Summary statistics showing total orders by status
+
+3. ✅ **User Profile & Settings**
+   - Enhanced profile section with name, avatar, contact info, and wallet balance
+   - Referral code with one-click copy functionality
+   - Account Info settings page with editable profile details
+   - Privacy & Security settings with password change option
+   - Terms & Conditions and Privacy Policy integrated links
+   - Profile modal with photo upload/camera capture functionality
+
+4. ✅ **Improved Navigation**
+   - Fixed navbar with notification bell (badge count: 3)
+   - Responsive sidebar menu with active state indicators
+   - User avatar with dropdown in navbar
+   - Quick navigation between Dashboard, Orders, and Settings sections
+
+5. ✅ **Modern UI/UX**
+   - Professional black & white color scheme with gray accents (#0a0a0a, #ffffff, #1a1a1a)
+   - Smooth animations and transitions throughout
+   - Fully responsive design for desktop, tablet, and mobile devices
+   - Glassmorphism design elements with backdrop filters
+   - Font Awesome 6.4.0 icons for visual consistency
+   - Clean typography with 'Segoe UI' font family
+
+**Status**: ✅ Migration Complete - Dashboard ready for use
+
+---
+
+## Completed Changes
+
+✅ **January 12, 2026 - CORS Refactoring: POST to GET API Migration**
+- Converted all frontend API requests from POST with JSON to GET with URLSearchParams to eliminate CORS preflight errors
+- **auth.js**: Refactored `handleLogin()`, `handleRegister()`, and `handleGoogleResponse()` to use GET requests
+- **script.js**: Updated `callBackend()` function to use GET with query parameters instead of POST with JSON body
+- **webpot-admin/admin.js**: Converted 5 admin endpoints (loadAllOrders, updateOrderStatus, loadAllUsers, banUser, loadAllReviews) from POST to GET
+- **code.gs**: Removed `doPost()` and `doOptions()` functions; unified all routing into single `doGet()` endpoint
+- Removed all CORS headers from Apps Script (Google Apps Script ignores them; real fix is avoiding preflight)
+- Updated handleGoogleLogin() to accept idToken parameter for optional server-side verification
+- All endpoints now accessible without triggering OPTIONS preflight requests
+- **Status**: ✅ Ready for deployment
+
 ✅ **January 12, 2026 - Google Apps Script Deployment & API URL Update**
 - Deployed updated Google Apps Script with `google_login` handler to fix CORS errors.
 - Added `handleGoogleLogin()` function to handle Google OAuth user login and auto-signup.
