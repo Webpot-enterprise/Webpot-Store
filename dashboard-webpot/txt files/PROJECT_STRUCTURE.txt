@@ -1,0 +1,268 @@
+PROJECT STRUCTURE - WebPot Dashboard
+====================================
+
+📦 PROJECT ROOT: e:\dashboard-webpot\
+│
+├── 📄 HTML FILES (User Pages)
+│   ├── index.html                    ↔ js/script.js          ↔ css/style.css
+│   ├── orders.html                   ↔ js/orders.js          ↔ css/orders.css
+│   ├── settings.html                 ↔ js/settings.js        ↔ css/settings.css
+│   └── terms-conditions.html         ↔ js/terms-conditions.js ↔ css/terms-conditions.css
+│
+├── 📁 js/ - JavaScript Files
+│   ├── script.js                 (Dashboard & Profile Management)
+│   ├── config.js                 (Configuration & Constants)
+│   ├── orders.js                 (Orders Page Functionality)
+│   ├── settings.js               (Settings Page Functionality)
+│   └── terms-conditions.js       (Terms & Conditions Tab Switching)
+│
+├── 📁 css/ - Stylesheet Files
+│   ├── style.css                 (Main Dashboard Styling + Profile Modal)
+│   ├── orders.css                (Orders Page Styling)
+│   ├── settings.css              (Settings Page Styling + T&C Tab Styling)
+│   └── terms-conditions.css      (Terms & Conditions Page Styling)
+│
+├── 📁 assets/ - Media & Resources
+│   └── (Images, Icons, etc.)
+│
+└── 📄 Configuration & Documentation Files
+    ├── README.md
+    ├── PROJECT_OVERVIEW.txt
+    ├── QUICKSTART.html
+    ├── SETUP.txt
+    ├── START_HERE.txt
+    ├── QUICKREF.txt
+    ├── privacy.html              (Legacy - Replaced by terms-conditions.html)
+    └── terms.html                (Legacy - Replaced by terms-conditions.html)
+
+
+FILE MAPPING & RELATIONSHIPS
+============================
+
+1. DASHBOARD PAGE
+   File: index.html
+   Linked Files:
+   ├── CSS: css/style.css
+   ├── JS: js/script.js
+   └── JS: js/config.js (optional)
+   Features:
+   - Dashboard overview with stats
+   - User profile section with photo management
+   - Orders preview
+   - Profile modal with image upload/camera/remove options
+
+2. ORDERS PAGE
+   File: orders.html
+   Linked Files:
+   ├── CSS: css/style.css (base) + css/orders.css
+   ├── JS: js/orders.js
+   └── JS: js/config.js (optional)
+   Features:
+   - Orders table with filtering
+   - Search functionality
+   - Order details modal
+   - Summary statistics
+
+3. SETTINGS PAGE
+   File: settings.html
+   Linked Files:
+   ├── CSS: css/style.css (base) + css/settings.css
+   ├── JS: js/settings.js
+   └── JS: js/config.js (optional)
+   Features:
+   - Account Information Tab
+   - Privacy & Security Tab
+   - Terms & Conditions Tab
+   - Profile editing
+   - Password management
+   - OTP verification modal
+
+4. TERMS & CONDITIONS PAGE
+   File: terms-conditions.html
+   Linked Files:
+   ├── CSS: css/style.css (base) + css/terms-conditions.css
+   ├── JS: js/terms-conditions.js
+   └── JS: js/config.js (optional)
+   Features:
+   - Terms of Service
+   - Privacy Policy
+   - Tab switching between sections
+
+
+CSS HIERARCHY
+=============
+
+Global Base Styles:
+└── css/style.css
+    ├── Color variables (--primary-dark, --secondary-light, etc.)
+    ├── Base HTML element styling
+    ├── Navbar styling
+    ├── Sidebar styling
+    ├── Main container & layout
+    ├── Common component styles (buttons, cards, etc.)
+    ├── Profile modal styles (NEW)
+    ├── Camera modal styles (NEW)
+    └── Responsive design (all breakpoints)
+
+Page-Specific Styles:
+├── css/orders.css
+│   ├── Orders page header
+│   ├── Filters section
+│   ├── Table styling
+│   ├── Status badges
+│   ├── Summary statistics
+│   └── Responsive design (orders-specific)
+│
+├── css/settings.css
+│   ├── Settings page header
+│   ├── Settings container layout
+│   ├── Sidebar navigation
+│   ├── Form groups & inputs
+│   ├── Password strength indicator
+│   ├── Modal styles (forgot password)
+│   ├── Terms & Conditions tab styling
+│   └── Responsive design (settings-specific)
+│
+└── css/terms-conditions.css
+    ├── Terms page header
+    ├── Tab navigation
+    ├── Content styling
+    ├── Section styling
+    └── Responsive design (terms-specific)
+
+
+JAVASCRIPT STRUCTURE
+====================
+
+Global Core Functionality:
+└── js/script.js
+    ├── User data object
+    ├── Orders data array
+    ├── DOM initialization
+    ├── User profile loading
+    ├── Orders loading & display
+    ├── Notifications system
+    ├── Scroll animations
+    ├── Profile modal functionality (NEW)
+    ├── Camera access & capture (NEW)
+    ├── Photo upload & management (NEW)
+    └── Event listeners
+
+Configuration:
+└── js/config.js
+    ├── API endpoints
+    ├── Constants
+    ├── Configuration variables
+
+Page-Specific Scripts:
+├── js/orders.js
+│   ├── Orders data
+│   ├── Filter functionality
+│   ├── Search functionality
+│   ├── Modal interactions
+│   ├── Statistics calculation
+│   └── Event setup
+│
+├── js/settings.js
+│   ├── User data management
+│   ├── Tab switching
+│   ├── Form editing
+│   ├── Password changes
+│   ├── OTP verification flow
+│   ├── Password strength checker
+│   ├── Referral code copying
+│   └── Modal controls
+│
+└── js/terms-conditions.js
+    ├── Tab switching (T&C sections)
+    └── Content navigation
+
+
+RESPONSIVE BREAKPOINTS
+======================
+
+All CSS files include responsive design for:
+- Desktop: > 1024px
+- Tablet: 768px - 1024px
+- Mobile: < 768px
+- Extra Small: < 480px
+
+Media Query Targets:
+- Navbar adjustments
+- Sidebar collapse/transform
+- Grid layouts
+- Font sizes
+- Padding/Margins
+- Modal sizes
+
+
+FEATURE SUMMARY BY PAGE
+========================
+
+DASHBOARD (index.html)
+✓ Welcome section with stats
+✓ User profile card
+✓ Profile photo management:
+  - Upload from local storage
+  - Capture via camera
+  - Remove photo
+✓ Orders preview section
+
+ORDERS (orders.html)
+✓ Orders management table
+✓ Status filtering
+✓ Search functionality
+✓ Order details modal
+✓ Invoice download
+✓ Summary statistics
+
+SETTINGS (settings.html)
+✓ Account Information:
+  - Edit name
+  - Edit phone
+  - Edit email
+  - Referral code (copy)
+✓ Privacy & Security:
+  - Change password
+  - Forgot password (with OTP verification)
+  - Email & SMS OTP validation
+  - Password strength indicator
+✓ Terms & Conditions:
+  - Quick overview cards
+  - Link to full T&C page
+
+TERMS & CONDITIONS (terms-conditions.html)
+✓ Terms of Service section
+✓ Privacy Policy section
+✓ Tab switching
+✓ Full content display
+✓ Professional styling
+
+
+DEPENDENCIES
+=============
+
+External Libraries:
+- Font Awesome Icons: https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css
+
+Browser APIs Used:
+- Geolocation API (for camera)
+- File API (for upload)
+- Canvas API (for photo capture)
+- Local Storage (for saving preferences)
+- Clipboard API (for copying referral code)
+
+No external JavaScript libraries required - Pure vanilla JavaScript
+
+
+NOTES
+=====
+
+1. The legacy files (privacy.html, terms.html) are now replaced by the combined terms-conditions.html
+2. All pages inherit base styling from css/style.css
+3. Each page has its own dedicated CSS file for page-specific styling
+4. Profile photo management is handled in js/script.js (main dashboard script)
+5. All modals use a consistent modal styling from css/style.css
+6. Responsive design is implemented at all breakpoints
+7. Animations use CSS transitions with smooth easing
+8. All user interactions provide visual feedback through notifications

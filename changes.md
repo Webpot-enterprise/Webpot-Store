@@ -15,31 +15,211 @@ This document tracks all requested changes, modifications, and fixes that are aw
 
 ## Current Pending Changes
 
-*None. All changes completed.*
+### CORS Fix: Add google_login Handler to Google Apps Script
+
+**Problem:** 
+- Google OAuth requests fail because `google_login` action case is missing from doPost switch statement
+- CORS headers are correctly configured but handler doesn't exist
+
+**Solution:**
+Add `google_login` case to switch statement and create `handleGoogleLogin` function that:
+1. Checks if user exists by email
+2. If exists → logs them in and returns user data
+3. If not exists → creates new user with Google data
+4. Returns user with profile picture from Google
+
+**Changes to code.gs:**
+1. Add to switch statement in doPost (around line 89):
+```javascript
+case 'google_login':
+  response = handleGoogleLogin(data);
+  break;
+```
+
+2. Add new function before utility functions section:
+```javascript
+function handleGoogleLogin(data) {
+  try {
+    var sheet = getSheet('Users Sheet');
+    var values = sheet.getDataRange().getValues();
+    
+    // Check if user already exists by email
+    for (var i = 1; i < values.length; i++) {
+      if (values[i][2] === data.email) {
+        // User exists - return their data
+        return {
+          status: 'success',
+          message: 'Google login successful',
+          user: {
+            name: values[i][1],
+            email: values[i][2],
+            phone: values[i][4],
+            profilePic: data.profilePic || values[i][10] || `https://ui-avatars.com/api/?name=${encodeURIComponent(values[i][1])}&background=0ad4ff&color=fff&rounded=true`
+          }
+        };
+      }
+    }
+    
+    // User doesn't exist - create new account via Google
+    var referralCode = generateReferralCode(data.name);
+    var timestamp = new Date();
+    
+    sheet.appendRow([
+      timestamp,
+      data.name,
+      data.email,
+      Math.random().toString(36).substring(2, 15), // Random password for OAuth users
+      '', // Phone (empty for Google signup)
+      'active',
+      timestamp,
+      referralCode,
+      '', // Referred by
+      0, // Wallet balance
+      data.profilePic || '' // Google profile picture
+    ]);
+    
+    // Send notification
+    sendAdminNotification('REGISTER', {
+      name: data.name,
+      email: data.email,
+      referralCode: referralCode
+    });
+    
+    logSecurityEvent(data.email, 'GOOGLE_LOGIN_NEW_USER', data.ipAddress);
+    
+    return {
+      status: 'success',
+      message: 'Google login successful - account created',
+      user: {
+        name: data.name,
+        email: data.email,
+        phone: '',
+        profilePic: data.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(data.name)}&background=0ad4ff&color=fff&rounded=true`
+      }
+    };
+  } catch (error) {
+    return { status: 'error', message: error.toString() };
+  }
+}
+```
 
 ---
 
 ## Temporary References & Workarounds
 
-### CORS Policy Error - Fetch Reference (Temporary)
+### CORS Policy Error - Solution Strategy (Node.js Proxy Server)
+
+**Problem:** 
+Browser CORS policy blocks direct requests from frontend (https://webpot.shop/) to Google Apps Script backend.
+
+**Solution:**
+Create a Node.js/Express proxy server with CORS enabled to forward requests between frontend and Google Apps Script.
+
+**How it works:**
+```
+Client (webpot.shop) 
+    ↓ (HTTP request with CORS)
+Express Proxy Server (CORS enabled)
+    ↓ (Server-to-server, no CORS issues)
+Google Apps Script Backend
+    ↓ (Response)
+Express Proxy Server
+    ↓ (Response with CORS headers)
+Client (webpot.shop)
+```
+
+**Implementation Steps:**
+1. Deploy a Node.js/Express server with CORS middleware
+2. Create proxy endpoints that forward requests to Google Apps Script
+3. Update `config.js` to point `API_URL` to proxy server instead of direct Google Apps Script URL
+4. Example proxy configuration:
+   ```javascript
+   const express = require("express");
+   const cors = require("cors");
+   const app = express();
+   
+   app.use(cors({
+     origin: ["https://webpot.shop", "http://localhost:5500"],
+     methods: ["GET", "POST", "OPTIONS"],
+     credentials: true
+   }));
+   
+   app.post("/api/auth", async (req, res) => {
+     const gasResponse = await fetch("https://script.google.com/macros/s/AKfycbzsTMQqugs2egDgh_xTvpExdGNOmbLB2rOMW0LtkqY2Nr4gl3UWi4kZhFpDtdsSPiQd/exec", {
+       method: "POST",
+       headers: { "Content-Type": "application/json" },
+       body: JSON.stringify(req.body)
+     });
+     const data = await gasResponse.json();
+     res.json(data);
+   });
+   
+   app.listen(5000, () => console.log("Proxy server listening on 5000"));
+   ```
+
+5. Update `config.js`:
+   ```javascript
+   const WEBPOT_CONFIG = {
+     OAUTH_CLIENT_ID: '522296612988-...',
+     API_URL: 'https://proxy-server-domain.com/api/auth' // Instead of direct GAS URL
+   };
+   ```
+
+**Benefits:**
+- Solves CORS issues without modifying Google Apps Script
+- Adds security layer between frontend and backend
+- Can add middleware for validation, logging, rate limiting
+- No code changes needed in auth.js or auth.html
+
+**Deployment Options:**
+- Vercel (Free tier available)
+- Heroku (Simple deployment)
+- AWS Lambda + API Gateway
+- Google Cloud Run
+- Custom VPS
+
+---
+
+### CORS Policy Error - Google Apps Script OPTIONS Request (Temporary)
 ```javascript
-fetch("http://127.0.0.1:5500/auth.css?_cacheOverride=1768215495298", {
+fetch("https://script.google.com/macros/s/AKfycbzsTMQqugs2egDgh_xTvpExdGNOmbLB2rOMW0LtkqY2Nr4gl3UWi4kZhFpDtdsSPiQd/exec", {
   "headers": {
-    "if-modified-since": "Mon, 12 Jan 2026 10:58:15 GMT",
-    "if-none-match": "W/\"3b00-19bb1db4208\"",
-    "sec-ch-ua": "\"Opera GX\";v=\"125\", \"Not?A_Brand\";v=\"8\", \"Chromium\";v=\"141\"",
-    "sec-ch-ua-mobile": "?0",
-    "sec-ch-ua-platform": "\"Windows\""
+    "accept": "*/*",
+    "accept-language": "en-GB,en-US;q=0.9,en;q=0.8",
+    "priority": "u=1, i",
+    "sec-fetch-dest": "empty",
+    "sec-fetch-mode": "cors",
+    "sec-fetch-site": "cross-site"
   },
-  "referrer": "http://127.0.0.1:5500/auth.html",
+  "referrer": "https://webpot.shop/",
   "body": null,
-  "method": "GET",
+  "method": "OPTIONS",
   "mode": "cors",
   "credentials": "omit"
 });
 ```
-**Purpose:** Temporary workaround for CORS policy errors during local development.
-**Status:** Temporary reference only.
+**Purpose:** OPTIONS preflight request for CORS validation with Google Apps Script backend.
+**Status:** Temporary reference for debugging cross-origin requests.
+
+### Google Login API Call - Production Request (Temporary)
+```javascript
+fetch("https://script.google.com/macros/s/AKfycbzsTMQqugs2egDgh_xTvpExdGNOmbLB2rOMW0LtkqY2Nr4gl3UWi4kZhFpDtdsSPiQd/exec", {
+  "headers": {
+    "content-type": "application/json",
+    "sec-ch-ua": "\"Google Chrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+    "sec-ch-ua-mobile": "?0",
+    "sec-ch-ua-platform": "\"Windows\""
+  },
+  "referrer": "https://webpot.shop/",
+  "body": "{\"action\":\"google_login\",\"name\":\"Versannon\",\"email\":\"skninja128@gmail.com\",\"profilePic\":\"https://lh3.googleusercontent.com/a/ACg8ocLxGvA9LVjlCLv8hl8YfuvDAiSlyXbMkIuT610_EEq_D0apiQ_7=s96-c\"}",
+  "method": "POST",
+  "mode": "cors",
+  "credentials": "omit"
+});
+```
+**Purpose:** Production Google login API call with user data.
+**Payload:** Google OAuth user info (name, email, profile picture)
+**Status:** Temporary reference for API testing.
 
 ---
 
