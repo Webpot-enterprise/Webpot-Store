@@ -1,40 +1,57 @@
 // Handle Google Sign-In callback
 function handleCredentialResponse(response) {
-    const base64Url = response.credential.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-    }).join(''));
-    
-    const userData = JSON.parse(jsonPayload);
-    
-    // Send to Google Apps Script backend
-    fetch(WEBPOT_CONFIG.API_URL, {
-        method: 'POST',
-        body: JSON.stringify({
-            action: 'register',
-            name: userData.name,
-            email: userData.email,
-            password: 'google_oauth_' + userData.sub,
-            profilePic: userData.picture || ''
-        })
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.status === 'success' || data.status === 'user_already_exists') {
-            localStorage.setItem('webpotUserLoggedIn', 'true');
-            localStorage.setItem('webpotUserEmail', userData.email);
-            localStorage.setItem('webpotUserName', userData.name);
-            if (userData.picture) localStorage.setItem('webpotUserProfilePic', userData.picture);
-            
-            showSuccessModal('Welcome!', `Welcome ${userData.name}!`);
-            const cleanUsername = userData.name.toLowerCase().replace(/\s+/g, '-');
-            setTimeout(() => window.location.href = 'index.html', 2000);
-        } else {
-            alert('Google Sign-In failed: ' + data.message);
+    try {
+        // Step 1: Decode the JWT to extract user data
+        const base64Url = response.credential.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        
+        const userData = JSON.parse(jsonPayload);
+        
+        // Validate required fields
+        if (!userData.email || !userData.name) {
+            console.error('Missing required user data from Google');
+            alert('Failed to get required information from Google. Please try again.');
+            return;
         }
-    })
-    .catch(err => console.error('Error:', err));
+
+        // Step 2: Send user data to backend
+        fetch(WEBPOT_CONFIG.API_URL, {
+            method: 'POST',
+            body: JSON.stringify({
+                action: 'register',
+                name: userData.name,
+                email: userData.email,
+                password: 'google_oauth_' + userData.sub,
+                profilePic: userData.picture || ''
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            // Step 3: On success, save to localStorage
+            if (data.status === 'success' || data.status === 'user_already_exists') {
+                localStorage.setItem('webpotUserLoggedIn', 'true');
+                localStorage.setItem('webpotUserName', userData.name);
+                localStorage.setItem('webpotUserEmail', userData.email);
+                localStorage.setItem('webpotUserProfilePic', userData.picture || '');
+                
+                // Step 4: Redirect immediately to index.html
+                window.location.href = '../index.html';
+            } else {
+                console.error('Backend error:', data);
+                alert('Login failed: ' + (data.message || 'Unknown error'));
+            }
+        })
+        .catch(err => {
+            console.error('Fetch error during Google login:', err);
+            alert('Network error: Unable to complete login. Please check your connection and try again.');
+        });
+    } catch (error) {
+        console.error('Error in handleCredentialResponse:', error);
+        alert('An error occurred during login. Please try again.');
+    }
 }
 
 // Toggle between login and registration forms
