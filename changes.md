@@ -6,11 +6,84 @@ This document tracks completed changes and improvements to the Webpot Store webs
 
 ## Pending Changes
 
-No pending changes at this time.
+### Dashboard Visual Enhancements
+
+1. **Add Dashboard Analytics Cards with Trends**
+   - Add trend indicators (↑/↓) to stat cards showing percentage changes (e.g., "+12% from last month")
+   - Add mini sparkline charts inside each stat card (orders, earnings, referrals)
+   - Visual color indicators for positive (green) and negative (red) trends
+   - File: `dashboard/html/index.html` (stat-card section), `dashboard/css/style.css` (new styles)
+
+2. **Recent Activity Timeline**
+   - Add new section below orders showing "Recent Activity" with timeline items (order placed, order shipped, refund issued, new referral)
+   - Timeline connector lines with circular checkpoints for each event
+   - Activity dates, icons, and descriptions
+   - Collapse older activities with "View More" button
+   - File: `dashboard/html/index.html`, `dashboard/css/style.css`
+
+3. **Order Status Progress Indicators**
+   - Replace simple status badges with progress bars showing order completion stages
+   - Visual step indicators: Pending → Processing → Shipped → Delivered
+   - Current step highlighted with smooth animations
+   - Estimated delivery date display
+   - File: `dashboard/html/orders.html`, `dashboard/css/orders.css`, `dashboard/js/orders.js`
+
+4. **Earnings/Revenue Chart**
+   - Add simple bar chart in dashboard header showing last 7 days of earnings
+   - Monthly earnings summary with visual comparison
+   - Can use canvas or simple div-based chart (no external charting libraries)
+   - File: `dashboard/html/index.html`, `dashboard/css/style.css`, `dashboard/js/script.js`
+
+5. **Empty State Illustrations**
+   - Add friendly empty state when there are no orders with relevant icon/illustration
+   - "No orders yet" message with link to store/shop page
+   - Add empty state for notifications, referrals if none exist
+   - File: `dashboard/html/index.html`, `dashboard/html/orders.html`, `dashboard/css/style.css`
+
+6. **Notification Panel Dropdown**
+   - Convert notification bell to interactive dropdown showing last 5 notifications
+   - Notification items with icons, descriptions, timestamps
+   - "Mark as read", "Clear all" actions
+   - Different notification types: order updates, referral rewards, system messages
+   - File: `dashboard/html/index.html`, `dashboard/css/style.css`, `dashboard/js/script.js`
+
+7. **Performance Metrics Dashboard Card**
+   - Add section showing "Performance Metrics" on main dashboard
+   - Average order value, conversion rate (if referral tracking), customer satisfaction rating
+   - Comparison with previous period
+   - Visual gauges or percentage indicators
+   - File: `dashboard/html/index.html`, `dashboard/css/style.css`
+
+8. **Dark Mode Toggle Button**
+   - Add theme toggle in navbar settings for dark/light mode preference
+   - Save preference to localStorage
+   - Create corresponding dark theme CSS variables
+   - Visual toggle switch (moon/sun icons)
+   - File: `dashboard/html/settings.html`, `dashboard/css/style.css`, `dashboard/js/settings.js`
+
+9. **Quick Action Buttons**
+   - Add "Quick Actions" card in dashboard with frequently used actions
+   - Buttons: Download Receipts, Contact Support, Invite Friend (referral), View Rewards
+   - Stylized with icons and hover effects
+   - File: `dashboard/html/index.html`, `dashboard/css/style.css`
+
+10. **Stats Animation Enhancement**
+    - Add number counter animation when dashboard loads (count from 0 to final value)
+    - Smooth transitions when stats update
+    - Subtle glow effect on stat cards on hover
+    - File: `dashboard/css/style.css`, `dashboard/js/script.js`
 
 ---
 
 ## Completed Changes
+
+✅ **January 12, 2026 - CSS Animation Fixes: Contact Form & Service Cards**
+- **Removed contact form animations** - Deleted `fadeInUp` animations from `.form-group input`, `.form-group textarea`, `.form-group select` elements
+- **Removed animation delays** - Deleted all `animation-delay` rules for form fields (nth-child:1-5 selectors)
+- **Fixed service card animation** - Replaced glitchy `fadeInCenter` (scale 0.9→1) with smoother `fadeInUp` animation (translateY)
+- **File**: `styles.css` (lines 1101-1103 and 1616-1644)
+- **Result**: Contact form now displays instantly without staggered animations; service cards animate smoothly with slide-up effect instead of scale transform
+- **Status**: ✅ Complete
 
 ✅ **January 12, 2026 - Removed Old Customer Dashboard Files**
 - **Deleted** `/dashboard/customer.html`
