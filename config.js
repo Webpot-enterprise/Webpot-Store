@@ -1,4 +1,5 @@
 // Webpot Global Configuration
 const WEBPOT_CONFIG = {
-    API_URL: 'https://script.google.com/macros/s/AKfycby3ZqWmR-3eoGfb-aKG-ahsi_Jy2dOwZ6LxZhCkVCmCec9Ppps6i7uE5MEbgnA3gDMV/exec'
+    API_URL: 'https://script.google.com/macros/s/AKfycbzsTMQqugs2egDgh_xTvpExdGNOmbLB2rOMW0LtkqY2Nr4gl3UWi4kZhFpDtdsSPiQd/exec',
+    OAUTH_CLIENT_ID: '522296612988-phrs7trh1l6ghauk2khm1181s4a5mvl1.apps.googleusercontent.com'
 };

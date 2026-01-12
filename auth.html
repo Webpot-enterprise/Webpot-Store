@@ -5,10 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>Login & Register - Webpot</title>
     <link rel="stylesheet" href="auth.css">
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="config.js"></script>
+    <script>
+        // Set up Google Sign-In config before library loads
+        window.onload = function() {
+            const clientIdDiv = document.getElementById('g_id_onload');
+            if (clientIdDiv && WEBPOT_CONFIG.OAUTH_CLIENT_ID) {
+                clientIdDiv.setAttribute('data-client_id', WEBPOT_CONFIG.OAUTH_CLIENT_ID);
+                // Reinitialize Google Sign-In after setting client ID
+                if (window.google && window.google.accounts && window.google.accounts.id) {
+                    window.google.accounts.id.initialize({
+                        client_id: WEBPOT_CONFIG.OAUTH_CLIENT_ID,
+                        callback: handleCredentialResponse
+                    });
+                    window.google.accounts.id.renderButton(
+                        document.getElementById('g_id_onload'),
+                        { theme: 'outline', size: 'large' }
+                    );
+                }
+            }
+        };
+    </script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <div id="g_id_onload"
-         data-client_id="522296612988-phrs7trh1l6ghauk2khm1181s4a5mvl1.apps.googleusercontent.com"
          data-callback="handleCredentialResponse">
     </div>
 </head>

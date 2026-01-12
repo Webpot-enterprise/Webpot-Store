@@ -1,3 +1,21 @@
+// Direct API call function for auth.js (doesn't depend on script.js)
+function callAuthAPI(action, data) {
+    return fetch(WEBPOT_CONFIG.API_URL, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            action: action,
+            ...data
+        })
+    })
+    .then(res => res.json())
+    .catch(err => {
+        throw new Error('Network error: ' + err.message);
+    });
+}
+
 // Handle Google Sign-In callback
 function handleCredentialResponse(response) {
     try {
@@ -17,26 +35,29 @@ function handleCredentialResponse(response) {
             return;
         }
 
-        // Step 2: Send user data to backend
-        fetch(WEBPOT_CONFIG.API_URL, {
-            method: 'POST',
-            body: JSON.stringify({
-                action: 'register',
-                name: userData.name,
-                email: userData.email,
-                password: 'google_oauth_' + userData.sub,
-                profilePic: userData.picture || ''
-            })
+        console.log('Google user data decoded:', { email: userData.email, name: userData.name });
+        console.log('Sending to API URL:', WEBPOT_CONFIG.API_URL);
+
+        // Step 2: Send user data to backend (Google doesn't provide phone, so we send empty)
+        callAuthAPI('register', {
+            name: userData.name,
+            email: userData.email,
+            phone: '', // Google doesn't provide phone number
+            password: 'google_oauth_' + userData.sub,
+            profilePic: userData.picture || ''
         })
-        .then(res => res.json())
         .then(data => {
+            console.log('Backend response data:', data);
+            
             // Step 3: On success, save to localStorage
             if (data.status === 'success' || data.status === 'user_already_exists') {
+                console.log('Login successful, saving to localStorage...');
                 localStorage.setItem('webpotUserLoggedIn', 'true');
                 localStorage.setItem('webpotUserName', userData.name);
                 localStorage.setItem('webpotUserEmail', userData.email);
                 localStorage.setItem('webpotUserProfilePic', userData.picture || '');
                 
+                console.log('localStorage saved, redirecting to index.html');
                 // Step 4: Redirect immediately to index.html
                 window.location.href = '../index.html';
             } else {
@@ -45,12 +66,12 @@ function handleCredentialResponse(response) {
             }
         })
         .catch(err => {
-            console.error('Fetch error during Google login:', err);
-            alert('Network error: Unable to complete login. Please check your connection and try again.');
+            console.error('Error during Google login:', err);
+            alert('Network error: ' + err.message + '\n\nPlease check your connection and try again.');
         });
     } catch (error) {
         console.error('Error in handleCredentialResponse:', error);
-        alert('An error occurred during login. Please try again.');
+        alert('An error occurred during login: ' + error.message);
     }
 }
 
@@ -171,7 +192,7 @@ function handleLogin(event) {
 }
 
 function performLogin(emailOrPhone, password, submitBtn, originalText, userAgent, ipAddress) {
-    callBackend('login', {
+    callAuthAPI('login', {
         email: emailOrPhone,
         password: password,
         userAgent: userAgent,
@@ -248,7 +269,7 @@ function handleRegister(event) {
     submitBtn.textContent = 'Creating account...';
     submitBtn.disabled = true;
     
-    callBackend('signup', {
+    callAuthAPI('signup', {
         name: name,
         email: email,
         phone: phone,
@@ -283,7 +304,7 @@ function handleRegister(event) {
     })
     .catch(err => {
         console.error('Error:', err);
-        alert('Registration failed due to network error.');
+        alert('Registration failed due to network error: ' + err.message);
         submitBtn.textContent = originalText;
         submitBtn.disabled = false;
     });
