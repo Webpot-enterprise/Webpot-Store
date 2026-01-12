@@ -2,127 +2,78 @@
 // ORDERS PAGE - JAVASCRIPT FUNCTIONALITY
 // =============================================
 
-// Sample orders data with user details
-const userOrders = [
-    {
-        id: 'ORD-001',
-        userName: 'John Doe',
-        email: 'john.doe@webpot.com',
-        servicePlan: 'Premium',
-        totalAmount: 299.99,
-        dueAmount: 0,
-        status: 'delivered',
-        date: 'Jan 10, 2024',
-        description: 'Successfully delivered on Jan 11, 2024'
-    },
-    {
-        id: 'ORD-002',
-        userName: 'Sarah Johnson',
-        email: 'sarah.j@webpot.com',
-        servicePlan: 'Standard',
-        totalAmount: 149.99,
-        dueAmount: 0,
-        status: 'shipped',
-        date: 'Jan 09, 2024',
-        description: 'In transit to the customer'
-    },
-    {
-        id: 'ORD-003',
-        userName: 'Michael Chen',
-        email: 'michael.chen@webpot.com',
-        servicePlan: 'Basic',
-        totalAmount: 49.99,
-        dueAmount: 49.99,
-        status: 'processing',
-        date: 'Jan 08, 2024',
-        description: 'Being prepared for shipment'
-    },
-    {
-        id: 'ORD-004',
-        userName: 'Emily Rodriguez',
-        email: 'emily.r@webpot.com',
-        servicePlan: 'Premium',
-        totalAmount: 299.99,
-        dueAmount: 150,
-        status: 'pending',
-        date: 'Jan 07, 2024',
-        description: 'Awaiting payment confirmation'
-    },
-    {
-        id: 'ORD-005',
-        userName: 'David Wilson',
-        email: 'david.w@webpot.com',
-        servicePlan: 'Standard',
-        totalAmount: 149.99,
-        dueAmount: 0,
-        status: 'delivered',
-        date: 'Jan 05, 2024',
-        description: 'Delivered on Jan 06, 2024'
-    },
-    {
-        id: 'ORD-006',
-        userName: 'Lisa Anderson',
-        email: 'lisa.a@webpot.com',
-        servicePlan: 'Basic',
-        totalAmount: 49.99,
-        dueAmount: 0,
-        status: 'delivered',
-        date: 'Jan 03, 2024',
-        description: 'Delivered on Jan 04, 2024'
-    },
-    {
-        id: 'ORD-007',
-        userName: 'Robert Brown',
-        email: 'robert.b@webpot.com',
-        servicePlan: 'Premium',
-        totalAmount: 299.99,
-        dueAmount: 299.99,
-        status: 'cancelled',
-        date: 'Jan 01, 2024',
-        description: 'Cancelled by customer'
-    },
-    {
-        id: 'ORD-008',
-        userName: 'Jennifer Lee',
-        email: 'jennifer.lee@webpot.com',
-        servicePlan: 'Standard',
-        totalAmount: 149.99,
-        dueAmount: 75,
-        status: 'pending',
-        date: 'Dec 30, 2023',
-        description: 'Awaiting payment'
-    },
-    {
-        id: 'ORD-009',
-        userName: 'Thomas Martinez',
-        email: 'thomas.m@webpot.com',
-        servicePlan: 'Basic',
-        totalAmount: 49.99,
-        dueAmount: 0,
-        status: 'delivered',
-        date: 'Dec 28, 2023',
-        description: 'Delivered on Dec 29, 2023'
-    },
-    {
-        id: 'ORD-010',
-        userName: 'Amanda Taylor',
-        email: 'amanda.t@webpot.com',
-        servicePlan: 'Premium',
-        totalAmount: 299.99,
-        dueAmount: 0,
-        status: 'shipped',
-        date: 'Dec 25, 2023',
-        description: 'Out for delivery'
-    }
-];
+// Orders data (will be populated from backend)
+let userOrders = [];
 
 // Initialize page
 document.addEventListener('DOMContentLoaded', function() {
-    loadOrders();
+    fetchCustomerOrders();
     setupEventListeners();
-    updateSummaryStats();
     setupSidebarNavigation();
 });
+
+// Fetch customer orders from backend
+function fetchCustomerOrders() {
+    const userEmail = localStorage.getItem('userEmail');
+    
+    if (!userEmail) {
+        console.error('User email not found. Please log in.');
+        window.location.href = '../auth.html';
+        return;
+    }
+
+    const apiUrl = `${WEBPOT_CONFIG.API_URL}?action=get_customer_orders&email=${encodeURIComponent(userEmail)}`;
+    
+    fetch(apiUrl)
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                // Transform backend orders to format expected by UI
+                userOrders = data.data.map(order => ({
+                    id: order.orderId,
+                    userName: order.customerName || 'N/A',
+                    email: userEmail,
+                    servicePlan: order.service || 'Standard',
+                    totalAmount: parseFloat(order.amount) || 0,
+                    dueAmount: 0, // All amounts are paid in current system
+                    status: order.status.toLowerCase(),
+                    date: new Date(order.date).toLocaleDateString('en-US', { 
+                        month: 'short', 
+                        day: 'numeric', 
+                        year: 'numeric' 
+                    }),
+                    description: `Order processed on ${new Date(order.date).toLocaleDateString()}`
+                }));
+
+                loadOrders();
+                updateSummaryStats();
+            } else {
+                console.error('Failed to fetch orders:', data.message);
+                showErrorMessage('Failed to load orders. Please refresh the page.');
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching orders:', error);
+            showErrorMessage('Failed to load orders. Please check your connection.');
+        });
+}
+
+// Show error message in table
+function showErrorMessage(message) {
+    const tableBody = document.getElementById('ordersTableBody');
+    if (tableBody) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="8" style="text-align: center; padding: 2rem;">
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <p>${message}</p>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }
+}
 
 // Load and display orders
 function loadOrders(filter = 'all', searchTerm = '') {

@@ -2,104 +2,16 @@
 // WEBPOT DASHBOARD - JAVASCRIPT FUNCTIONALITY
 // =============================================
 
-// Sample user data
-const userData = {
-    name: 'John Doe',
-    phone: '+1 (555) 123-4567',
-    email: 'john.doe@webpot.com',
-    wallet: '$2,450.00',
-    referralCode: 'WP-JD-2024-A1B2C3'
-};
+// Global user data (will be fetched from backend)
+let userData = {};
 
-// Sample orders data
-const ordersData = [
-    {
-        id: 'ORD-001',
-        date: 'Jan 10, 2024',
-        status: 'delivered',
-        items: [
-            { name: 'Premium Package', quantity: 1, price: 99.99 }
-        ],
-        total: 99.99,
-        description: 'Successfully delivered'
-    },
-    {
-        id: 'ORD-002',
-        date: 'Jan 09, 2024',
-        status: 'shipped',
-        items: [
-            { name: 'Basic Package', quantity: 2, price: 49.99 }
-        ],
-        total: 99.98,
-        description: 'In transit to your location'
-    },
-    {
-        id: 'ORD-003',
-        date: 'Jan 08, 2024',
-        status: 'processing',
-        items: [
-            { name: 'Pro Package', quantity: 1, price: 149.99 }
-        ],
-        total: 149.99,
-        description: 'Being prepared for shipment'
-    },
-    {
-        id: 'ORD-004',
-        date: 'Jan 07, 2024',
-        status: 'pending',
-        items: [
-            { name: 'Standard Package', quantity: 1, price: 79.99 }
-        ],
-        total: 79.99,
-        description: 'Awaiting confirmation'
-    },
-    {
-        id: 'ORD-005',
-        date: 'Jan 05, 2024',
-        status: 'delivered',
-        items: [
-            { name: 'Starter Package', quantity: 3, price: 29.99 }
-        ],
-        total: 89.97,
-        description: 'Delivered on Jan 06, 2024'
-    },
-    {
-        id: 'ORD-006',
-        date: 'Jan 03, 2024',
-        status: 'cancelled',
-        items: [
-            { name: 'Enterprise Package', quantity: 1, price: 299.99 }
-        ],
-        total: 299.99,
-        description: 'Cancelled by user'
-    },
-    {
-        id: 'ORD-007',
-        date: 'Jan 01, 2024',
-        status: 'delivered',
-        items: [
-            { name: 'Premium Package', quantity: 1, price: 99.99 }
-        ],
-        total: 99.99,
-        description: 'Delivered on Jan 02, 2024'
-    },
-    {
-        id: 'ORD-008',
-        date: 'Dec 30, 2023',
-        status: 'shipped',
-        items: [
-            { name: 'Pro Package', quantity: 2, price: 149.99 }
-        ],
-        total: 299.98,
-        description: 'Out for delivery'
-    }
-];
+// Global orders data (will be fetched from backend)
+let ordersData = [];
 
 // Initialize dashboard
 document.addEventListener('DOMContentLoaded', function() {
     initializeProfileImage();
-    loadUserProfile();
-    loadOrders();
+    loadDashboardData(); // Fetch from backend
     setupEventListeners();
     animateOnScroll();
 });
@@ -109,7 +21,7 @@ function loadUserProfile() {
     document.getElementById('userName').textContent = userData.name;
     document.getElementById('userPhone').textContent = userData.phone;
     document.getElementById('userEmail').textContent = userData.email;
-    document.getElementById('userWallet').textContent = userData.wallet;
+    document.getElementById('userWallet').textContent = `$${parseFloat(userData.wallet).toFixed(2)}`;
     document.getElementById('referralCode').textContent = userData.referralCode;
 }
 
@@ -201,6 +113,79 @@ function setupEventListeners() {
     if (editBtn) {
         editBtn.addEventListener('click', openEditModal);
     }
+}
+
+// Load dashboard data from backend
+function loadDashboardData() {
+    // Get user email from localStorage
+    const userEmail = localStorage.getItem('userEmail');
+    
+    if (!userEmail) {
+        showNotification('Please log in to view your dashboard', 'error');
+        setTimeout(() => {
+            window.location.href = '../auth.html';
+        }, 2000);
+        return;
+    }
+
+    // Show loading indicator
+    const ordersContainer = document.getElementById('ordersContainer');
+    const originalContent = ordersContainer.innerHTML;
+    ordersContainer.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading dashboard...</div>';
+
+    // Fetch dashboard data from backend
+    const apiUrl = `${WEBPOT_CONFIG.API_URL}?action=get_customer_dashboard&email=${encodeURIComponent(userEmail)}`;
+    
+    fetch(apiUrl)
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                // Populate global userData object
+                userData = {
+                    name: data.data.profile.name,
+                    email: data.data.profile.email,
+                    phone: data.data.profile.phone,
+                    wallet: data.data.profile.walletBalance,
+                    referralCode: data.data.profile.referralCode,
+                    profilePic: data.data.profile.profilePic
+                };
+
+                // Transform backend orders to format expected by loadOrders
+                ordersData = data.data.recentOrders.map(order => ({
+                    id: order.orderId,
+                    date: new Date(order.date).toLocaleDateString('en-US', { 
+                        month: 'short', 
+                        day: 'numeric', 
+                        year: 'numeric' 
+                    }),
+                    status: order.status.toLowerCase(),
+                    total: order.amount,
+                    items: [{
+                        name: order.service || 'Service',
+                        quantity: 1
+                    }],
+                    description: `Order processed on ${new Date(order.date).toLocaleDateString()}`
+                }));
+
+                // Update dashboard stats
+                document.getElementById('totalOrdersValue').textContent = data.data.stats.totalOrders;
+                document.getElementById('totalEarningsValue').textContent = `$${data.data.stats.totalEarnings.toFixed(2)}`;
+                document.getElementById('totalReferralsValue').textContent = data.data.stats.referrals;
+
+                // Populate UI with fetched data
+                loadUserProfile();
+                loadOrders();
+                
+                showNotification('Dashboard loaded successfully', 'success');
+            } else {
+                throw new Error(data.message || 'Failed to load dashboard data');
+            }
+        })
+        .catch(error => {
+            console.error('Error loading dashboard:', error);
+            ordersContainer.innerHTML = originalContent;
+            showNotification('Failed to load dashboard data: ' + error.message, 'error');
+        });
 }
 
 // Copy referral code to clipboard

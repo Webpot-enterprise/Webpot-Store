@@ -69,6 +69,15 @@ function doGet(e) {
       case 'update_status':
         response = handleUpdateStatus(data);
         break;
+      case 'get_customer_dashboard':
+        response = handleGetCustomerDashboard(data);
+        break;
+      case 'get_customer_orders':
+        response = handleGetCustomerOrders(data);
+        break;
+      case 'get_customer_profile':
+        response = handleGetCustomerProfile(data);
+        break;
       default:
         // Return API status/documentation if no action specified
         response = {
@@ -745,6 +754,161 @@ function handleUpdateStatus(data) {
     }
     
     return { status: 'error', message: 'Item not found' };
+  } catch (error) {
+    return { status: 'error', message: error.toString() };
+  }
+}
+
+// ========== CUSTOMER DASHBOARD ENDPOINTS ==========
+
+function handleGetCustomerProfile(data) {
+  try {
+    // Require email parameter to identify user
+    if (!data.email) {
+      return { status: 'error', message: 'Email parameter required' };
+    }
+    
+    var usersSheet = getSheet('Users Sheet');
+    var values = usersSheet.getDataRange().getValues();
+    
+    for (var i = 1; i < values.length; i++) {
+      if (values[i][2] === data.email) {
+        // Found matching user
+        return {
+          status: 'success',
+          data: {
+            name: values[i][1],
+            email: values[i][2],
+            phone: values[i][4],
+            walletBalance: values[i][9],
+            referralCode: values[i][7],
+            profilePic: values[i][10],
+            createdDate: values[i][6]
+          }
+        };
+      }
+    }
+    
+    return { status: 'error', message: 'User not found' };
+  } catch (error) {
+    return { status: 'error', message: error.toString() };
+  }
+}
+
+function handleGetCustomerOrders(data) {
+  try {
+    // Require email parameter to get user's orders
+    if (!data.email) {
+      return { status: 'error', message: 'Email parameter required' };
+    }
+    
+    var ordersSheet = getSheet('Orders Sheet');
+    var values = ordersSheet.getDataRange().getValues();
+    var userOrders = [];
+    
+    for (var i = 1; i < values.length; i++) {
+      // Match orders by email (column D = index 3)
+      if (values[i][3] === data.email && values[i][1]) { // Check if email matches and Order ID exists
+        userOrders.push({
+          orderId: values[i][1],
+          date: values[i][0],
+          clientName: values[i][2],
+          email: values[i][3],
+          phone: values[i][4],
+          serviceType: values[i][5],
+          totalAmount: values[i][6],
+          paidAmount: values[i][7],
+          dueAmount: values[i][8],
+          transactionId: values[i][9],
+          status: values[i][10],
+          details: values[i][11],
+          lastUpdated: values[i][12]
+        });
+      }
+    }
+    
+    return {
+      status: 'success',
+      data: userOrders,
+      count: userOrders.length
+    };
+  } catch (error) {
+    return { status: 'error', message: error.toString(), data: [] };
+  }
+}
+
+function handleGetCustomerDashboard(data) {
+  try {
+    // Require email parameter
+    if (!data.email) {
+      return { status: 'error', message: 'Email parameter required' };
+    }
+    
+    // Get user profile
+    var usersSheet = getSheet('Users Sheet');
+    var userValues = usersSheet.getDataRange().getValues();
+    var userProfile = null;
+    
+    for (var i = 1; i < userValues.length; i++) {
+      if (userValues[i][2] === data.email) {
+        userProfile = {
+          name: userValues[i][1],
+          email: userValues[i][2],
+          phone: userValues[i][4],
+          walletBalance: userValues[i][9],
+          referralCode: userValues[i][7],
+          profilePic: userValues[i][10]
+        };
+        break;
+      }
+    }
+    
+    if (!userProfile) {
+      return { status: 'error', message: 'User not found' };
+    }
+    
+    // Get user's orders for dashboard stats
+    var ordersSheet = getSheet('Orders Sheet');
+    var orderValues = ordersSheet.getDataRange().getValues();
+    var userOrders = [];
+    var totalEarnings = 0;
+    var totalOrders = 0;
+    
+    for (var j = 1; j < orderValues.length; j++) {
+      if (orderValues[j][3] === data.email && orderValues[j][1]) {
+        totalOrders++;
+        var paidAmount = parseFloat(orderValues[j][7]) || 0;
+        totalEarnings += paidAmount;
+        
+        userOrders.push({
+          orderId: orderValues[j][1],
+          date: orderValues[j][0],
+          status: orderValues[j][10],
+          amount: parseFloat(orderValues[j][6]) || 0
+        });
+      }
+    }
+    
+    // Count referrals (users who have this user's referral code in "Referred_By" field)
+    var referralCount = 0;
+    for (var k = 1; k < userValues.length; k++) {
+      if (userValues[k][8] === userProfile.referralCode) {
+        referralCount++;
+      }
+    }
+    
+    return {
+      status: 'success',
+      data: {
+        profile: userProfile,
+        stats: {
+          totalOrders: totalOrders,
+          totalEarnings: totalEarnings,
+          referrals: referralCount
+        },
+        recentOrders: userOrders.slice(-5) // Last 5 orders
+      }
+    };
   } catch (error) {
     return { status: 'error', message: error.toString() };
   }
