@@ -780,6 +780,166 @@ nav a:hover::after {
     }
 }
 
+/* ========== AUTHENTICATION NAVIGATION ========== */
+
+.nav-auth {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-left: auto;
+    margin-right: 10px;
+}
+
+.login-btn {
+    padding: 8px 20px;
+    background: linear-gradient(135deg, #a0a0a0, #606060);
+    color: white;
+    border-radius: 20px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: none;
+    display: inline-block;
+}
+
+.login-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(176, 176, 176, 0.4);
+}
+
+.user-menu {
+    position: relative;
+}
+
+.user-profile-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    border: 2px solid rgba(176, 176, 176, 0.3);
+    border-radius: 25px;
+    padding: 5px 10px;
+    cursor: pointer;
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.user-profile-btn:hover {
+    border-color: #b0b0b0;
+    box-shadow: 0 0 15px rgba(176, 176, 176, 0.3);
+}
+
+.user-profile-pic {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #b0b0b0;
+}
+
+.dropdown-arrow {
+    font-size: 10px;
+    transition: transform 0.3s ease;
+}
+
+.user-profile-btn:hover .dropdown-arrow {
+    transform: rotate(180deg);
+}
+
+.user-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: rgba(20, 25, 35, 0.95);
+    border: 1px solid rgba(176, 176, 176, 0.3);
+    border-radius: 10px;
+    min-width: 200px;
+    margin-top: 10px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    z-index: 1000;
+    backdrop-filter: blur(10px);
+}
+
+.user-dropdown.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.dropdown-item {
+    display: block;
+    padding: 12px 20px;
+    color: white;
+    text-decoration: none;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.dropdown-item:hover {
+    background: rgba(176, 176, 176, 0.1);
+    color: #b0b0b0;
+    border-left: 3px solid #b0b0b0;
+    padding-left: 17px;
+}
+
+.logout-btn {
+    border-top: 1px solid rgba(0, 212, 255, 0.2);
+}
+
+.logout-btn:hover {
+    background: rgba(255, 0, 0, 0.1);
+    color: #ff6b6b;
+    border-left-color: #ff6b6b;
+}
+
+/* Mobile responsive */
+@media (max-width: 600px) {
+    .nav-auth {
+        margin-right: 0;
+        margin-left: 10px;
+    }
+    
+    .login-btn {
+        padding: 6px 16px;
+        font-size: 13px;
+    }
+    
+    .user-profile-btn {
+        padding: 4px 8px;
+        font-size: 12px;
+    }
+    
+    .user-profile-pic {
+        width: 28px;
+        height: 28px;
+    }
+    
+    .user-dropdown {
+        right: -10px;
+        min-width: 180px;
+    }
+    
+    .user-name {
+        max-width: 80px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
+
 .hero-content {
     max-width: 800px;
     text-align: center;

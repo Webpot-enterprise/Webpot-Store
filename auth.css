@@ -1,16 +1,16 @@
 /* ========== CSS VARIABLES & ROOT ========== */
 
 :root {
-    --neon-blue: #00d4ff;
-    --neon-purple: #b000ff;
-    --neon-pink: #ff0099;
+    --neon-blue: #b0b0b0;
+    --neon-purple: #808080;
+    --neon-pink: #707070;
     --dark-bg: #0a0e27;
     --dark-card: #1a1f3a;
     --dark-input: #16213e;
     --text-primary: #e0e6ff;
     --text-secondary: #a8b0d8;
     --text-muted: #6b7280;
-    --border-color: rgba(0, 212, 255, 0.1);
+    --border-color: rgba(176, 176, 176, 0.1);
     --shadow-sm: 0 4px 6px rgba(0, 0, 0, 0.1);
     --shadow-md: 0 10px 25px rgba(0, 0, 0, 0.2);
     --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.3);
@@ -216,7 +216,7 @@ body.auth-page {
 
 .tab-btn.active {
     color: var(--neon-blue);
-    background: rgba(0, 212, 255, 0.1);
+    background: rgba(176, 176, 176, 0.1);
 }
 
 .tab-indicator {
@@ -286,7 +286,7 @@ body.auth-page {
     outline: none;
     border-color: var(--neon-blue);
     background: rgba(22, 33, 62, 0.9);
-    box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+    box-shadow: 0 0 0 3px rgba(176, 176, 176, 0.1);
 }
 
 .form-input:not(:placeholder-shown) ~ .form-label {
@@ -426,7 +426,7 @@ body.auth-page {
 
 .btn-submit:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(0, 212, 255, 0.3);
+    box-shadow: 0 10px 25px rgba(176, 176, 176, 0.3);
 }
 
 .btn-submit:active:not(:disabled) {
@@ -521,7 +521,7 @@ body.auth-page {
 
 .btn-social:hover {
     border-color: var(--neon-blue);
-    background: rgba(0, 212, 255, 0.05);
+    background: rgba(176, 176, 176, 0.05);
 }
 
 .social-icon {
@@ -578,7 +578,7 @@ body.auth-page {
 
 .back-link:hover {
     color: var(--neon-blue);
-    background: rgba(0, 212, 255, 0.1);
+    background: rgba(176, 176, 176, 0.1);
 }
 
 /* ========== ALERTS & MESSAGES ========== */
@@ -742,7 +742,7 @@ body.light-mode .form-input {
 body.light-mode .form-input:focus {
     border-color: var(--neon-blue);
     background: rgba(249, 250, 251, 1);
-    box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+    box-shadow: 0 0 0 3px rgba(176, 176, 176, 0.1);
 }
 
 body.light-mode .btn-social {

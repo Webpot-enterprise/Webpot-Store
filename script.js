@@ -18,6 +18,82 @@ function callBackend(action, payload = {}) {
     });
 }
 
+// ========== AUTHENTICATION STATE MANAGEMENT ==========
+
+// Check if user is logged in and update nav accordingly
+function initAuthState() {
+    const isLoggedIn = localStorage.getItem('webpotUserLoggedIn') === 'true';
+    
+    if (isLoggedIn) {
+        displayUserMenu();
+    } else {
+        displayLoginButton();
+    }
+}
+
+// Show login button (when not logged in)
+function displayLoginButton() {
+    const loginBtn = document.getElementById('loginBtn');
+    const userMenu = document.getElementById('userMenu');
+    
+    if (loginBtn) loginBtn.style.display = 'inline-block';
+    if (userMenu) userMenu.style.display = 'none';
+}
+
+// Show user menu with profile (when logged in)
+function displayUserMenu() {
+    const loginBtn = document.getElementById('loginBtn');
+    const userMenu = document.getElementById('userMenu');
+    const userProfilePic = document.getElementById('userProfilePic');
+    const userName = document.getElementById('userName');
+    
+    const name = localStorage.getItem('webpotUserName') || 'User';
+    const profilePic = localStorage.getItem('webpotUserProfilePic') || '';
+    
+    if (loginBtn) loginBtn.style.display = 'none';
+    if (userMenu) userMenu.style.display = 'flex';
+    if (userName) userName.textContent = name;
+    if (userProfilePic && profilePic) {
+        userProfilePic.src = profilePic;
+    } else {
+        // Fallback: Use initials or default avatar
+        userProfilePic.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="50" fill="%23cccccc"/%3E%3Ctext x="50" y="60" font-size="50" text-anchor="middle" fill="white" font-weight="bold"%3E' + (name.charAt(0).toUpperCase()) + '%3C/text%3E%3C/svg%3E';
+    }
+}
+
+// Toggle user dropdown menu
+function toggleUserMenu(event) {
+    event.stopPropagation();
+    const dropdown = document.getElementById('userDropdown');
+    if (dropdown) {
+        dropdown.classList.toggle('active');
+    }
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(e) {
+    const userMenu = document.getElementById('userMenu');
+    const dropdown = document.getElementById('userDropdown');
+    
+    if (userMenu && !userMenu.contains(e.target)) {
+        if (dropdown) dropdown.classList.remove('active');
+    }
+});
+
+// Logout user
+function logoutUser() {
+    if (confirm('Are you sure you want to logout?')) {
+        localStorage.removeItem('webpotUserLoggedIn');
+        localStorage.removeItem('webpotUserName');
+        localStorage.removeItem('webpotUserEmail');
+        localStorage.removeItem('webpotUserProfilePic');
+        
+        displayLoginButton();
+        alert('You have been logged out successfully.');
+        window.location.href = 'index.html';
+    }
+}
+
 // Mobile Menu Toggle Functions
 function toggleMenu() {
     const navMenu = document.getElementById('navMenu');
@@ -79,6 +155,9 @@ function applyThemePreference() {
 
 // Initialize theme on page load
 document.addEventListener('DOMContentLoaded', applyThemePreference);
+
+// Initialize authentication state
+document.addEventListener('DOMContentLoaded', initAuthState);
 
 // Close menu when a navigation link is clicked
 document.addEventListener('DOMContentLoaded', function() {

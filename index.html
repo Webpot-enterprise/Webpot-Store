@@ -23,6 +23,26 @@
                 <li><a href="#services" onclick="closeMenu()">Services</a></li>
                 <li><a href="#contact" onclick="closeMenu()">Contact</a></li>
             </ul>
+            
+            <!-- Authentication Navigation -->
+            <div class="nav-auth" id="navAuth">
+                <!-- Login Button (shown when NOT logged in) -->
+                <a href="auth.html" class="login-btn" id="loginBtn">Login</a>
+                
+                <!-- User Profile Dropdown (shown when logged in) -->
+                <div class="user-menu" id="userMenu" style="display: none;">
+                    <button class="user-profile-btn" onclick="toggleUserMenu(event)">
+                        <img class="user-profile-pic" id="userProfilePic" src="" alt="Profile">
+                        <span class="user-name" id="userName"></span>
+                        <span class="dropdown-arrow">▼</span>
+                    </button>
+                    <div class="user-dropdown" id="userDropdown">
+                        <a href="dashboard/customer.html" class="dropdown-item">Go To Dashboard</a>
+                        <button class="dropdown-item logout-btn" onclick="logoutUser()">Logout</button>
+                    </div>
+                </div>
+            </div>
+            
             <div class="notification-wrapper">
                 <button class="notification-btn" onclick="toggleNotifications()" title="Updates & Notifications">
                     <svg class="bell-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
