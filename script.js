@@ -102,139 +102,10 @@ const observer = new IntersectionObserver((entries) => {
     });
 }, observerOptions);
 
-// Display user profile when logged in
-// Update navigation state based on login status
-function updateNavState() {
-    const isLoggedIn = localStorage.getItem('webpotUserLoggedIn');
-    const userName = localStorage.getItem('webpotUserName');
-    const dashboardLink = document.getElementById('dashboardLink');
-    const adminAuth = localStorage.getItem('webpotAdminAuth');
-    const userAuth = localStorage.getItem('webpotUserLoggedIn');
-    
-    // Set up dashboard link based on auth state
-    if (adminAuth === 'WebpotAdmin2026') {
-        dashboardLink.textContent = 'Admin Panel';
-        dashboardLink.href = 'dashboard/admin.html';
-        dashboardLink.style.display = 'block';
-    } else if (userAuth === 'true') {
-        dashboardLink.textContent = 'Dashboard';
-        dashboardLink.href = 'dashboard/customer.html';
-        dashboardLink.style.display = 'block';
-    }
-    
-    const navUserName = document.getElementById('navUserName');
-    const userNavInfo = document.getElementById('userNavInfo');
-    const loginLink = document.querySelector('a[href="auth.html"]');
-    
-    if (isLoggedIn && userName) {
-        // Show user nav info
-        if (userNavInfo) {
-            userNavInfo.style.display = 'flex';
-        }
-
-        // Set user name
-        if (navUserName) {
-            navUserName.textContent = userName.split(' ')[0]; // First name
-        }
-
-        // Populate profile pic in nav if available
-        const navProfilePic = document.getElementById('navProfilePic');
-        const storedPic = localStorage.getItem('webpotUserProfilePic');
-        if (navProfilePic && storedPic) {
-            navProfilePic.src = storedPic;
-            navProfilePic.style.display = 'inline-block';
-        } else if (navProfilePic) {
-            navProfilePic.style.display = 'none';
-        }
-
-        // Hide login link
-        if (loginLink) {
-            loginLink.parentElement.style.display = 'none';
-        }
-    } else {
-        // Hide user nav info
-        if (userNavInfo) {
-            userNavInfo.style.display = 'none';
-        }
-
-        // Hide nav profile pic if exists
-        const navProfilePic = document.getElementById('navProfilePic');
-        if (navProfilePic) navProfilePic.style.display = 'none';
-
-        // Show login link
-        if (loginLink) {
-            loginLink.parentElement.style.display = 'block';
-        }
-    }
-}
-
-// Logout from navigation
-function navLogout() {
-    localStorage.removeItem('webpotUserLoggedIn');
-    localStorage.removeItem('webpotUserEmail');
-    localStorage.removeItem('webpotUserName');
-    localStorage.removeItem('webpotUserProfilePic');
-    window.location.reload();
-}
-
-// Logout user
-function logoutUser() {
-    localStorage.removeItem('webpotUserLoggedIn');
-    localStorage.removeItem('webpotUserEmail');
-    localStorage.removeItem('webpotUserName');
-    localStorage.removeItem('webpotUserProfilePic');
-    
-    displayUserProfile();
-    window.location.href = 'index.html';
-}
-
-// Session Timeout Handler (30 minutes of inactivity)
-let sessionTimeoutInterval;
-const SESSION_TIMEOUT_DURATION = 30 * 60 * 1000; // 30 minutes in milliseconds
-
-function initSessionTimeout() {
-    // Only initialize for logged-in users
-    const isLoggedIn = localStorage.getItem('webpotUserLoggedIn');
-    if (!isLoggedIn) {
-        return;
-    }
-    
-    // Function to reset the timeout
-    function resetSessionTimeout() {
-        // Clear existing timeout
-        if (sessionTimeoutInterval) {
-            clearTimeout(sessionTimeoutInterval);
-        }
-        
-        // Set new timeout
-        sessionTimeoutInterval = setTimeout(() => {
-            // Session expired - log out user
-            console.log('Session expired due to inactivity');
-            localStorage.removeItem('webpotUserLoggedIn');
-            localStorage.removeItem('webpotUserEmail');
-            localStorage.removeItem('webpotUserName');
-            localStorage.removeItem('webpotUserProfilePic');
-            
-            alert('Your session has expired due to inactivity. Please log in again.');
-            window.location.href = 'auth.html';
-        }, SESSION_TIMEOUT_DURATION);
-    }
-    
-    // Reset timeout on user activity
-    document.addEventListener('mousemove', resetSessionTimeout);
-    document.addEventListener('keypress', resetSessionTimeout);
-    document.addEventListener('click', resetSessionTimeout);
-    
-    // Initialize timeout on load
-    resetSessionTimeout();
-}
-
 // Observe service cards on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
-    updateNavState(); // Update navigation state (show/hide user nav info)
     loadUpdates(); // Load updates from updates.html
     loadTestimonials(); // Load testimonials section
-    initSessionTimeout(); // Initialize session timeout
     
     const serviceCards = document.querySelectorAll('.service-card');
     
@@ -251,27 +122,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Modal Functions
-function checkLoginStatus() {
-    const isLoggedIn = localStorage.getItem('webpotUserLoggedIn');
-    if (!isLoggedIn) {
-        window.location.href = 'auth.html';
-        return false;
-    }
-    return true;
-}
-
-// Global order modal function - checks login before opening
+// Global order modal function
 window.openOrderModal = function() {
-    const isLoggedIn = localStorage.getItem('webpotUserLoggedIn');
-    
-    if (!isLoggedIn) {
-        // User not logged in - redirect to auth
-        window.location.href = 'auth.html';
-        return;
-    }
-    
-    // User is logged in - open order modal
+    // User can open order modal anytime
     const orderModal = document.getElementById('orderModal');
     if (orderModal) {
         orderModal.style.display = 'block';

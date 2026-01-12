@@ -22,8 +22,6 @@
                 <li><a href="#about" onclick="closeMenu()">About</a></li>
                 <li><a href="#services" onclick="closeMenu()">Services</a></li>
                 <li><a href="#contact" onclick="closeMenu()">Contact</a></li>
-                <li><a href="#" id="dashboardLink" onclick="closeMenu()" style="display: none;">Dashboard</a></li>
-                <li><a href="auth.html" onclick="closeMenu()">Login</a></li>
             </ul>
             <div class="notification-wrapper">
                 <button class="notification-btn" onclick="toggleNotifications()" title="Updates & Notifications">
@@ -39,12 +37,6 @@
                         <!-- Updates will be loaded here -->
                     </div>
                 </div>
-            </div>
-            <!-- User Navigation Info (shown when logged in) -->
-            <div class="user-nav-info" id="userNavInfo" style="display: none;">
-                <img id="navProfilePic" class="nav-profile-pic" src="" alt="Profile" style="display:none;" />
-                <a id="navUserName" href="index.html" class="nav-user-name"></a>
-                <button id="navLogoutBtn" class="nav-logout-btn" onclick="navLogout()">Logout</button>
             </div>
             <button class="cta-btn" onclick="openOrderModal()">Get Started</button>
         </nav>
