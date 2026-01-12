@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Webpot</title>
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Webpot Admin</h2>
+                <button class="toggle-sidebar" id="toggleSidebar">☰</button>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#dashboard" class="nav-link active" data-section="dashboard">
+                    <span class="icon">📊</span>
+                    <span class="label">Dashboard</span>
+                </a>
+                <a href="#orders" class="nav-link" data-section="orders">
+                    <span class="icon">📦</span>
+                    <span class="label">Orders</span>
+                </a>
+                <a href="#users" class="nav-link" data-section="users">
+                    <span class="icon">👥</span>
+                    <span class="label">Users</span>
+                </a>
+                <a href="#reviews" class="nav-link" data-section="reviews">
+                    <span class="icon">⭐</span>
+                    <span class="label">Reviews</span>
+                </a>
+                <a href="#logout" class="nav-link" id="logoutBtn">
+                    <span class="icon">🚪</span>
+                    <span class="label">Logout</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <h1 id="pageTitle">Dashboard</h1>
+                <div class="header-right">
+                    <span class="user-info">Admin User</span>
+                    <button class="mobile-menu-toggle" id="mobileSidebarToggle">☰</button>
+                </div>
+            </header>
+
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="section active">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Total Users</div>
+                        <div class="stat-value" id="totalUsers">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Total Orders</div>
+                        <div class="stat-value" id="totalOrders">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Pending Orders</div>
+                        <div class="stat-value" id="pendingOrders">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Active Users</div>
+                        <div class="stat-value" id="activeUsers">0</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Orders Section -->
+            <section id="orders" class="section">
+                <div class="section-header">
+                    <h2>Orders Management</h2>
+                    <input type="text" id="ordersSearch" class="search-input" placeholder="Search orders...">
+                </div>
+                <div class="table-container">
+                    <table class="data-table" id="ordersTable">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Client Name</th>
+                                <th>Service</th>
+                                <th>Total Amount</th>
+                                <th>Paid</th>
+                                <th>Due</th>
+                                <th>Payment Status</th>
+                                <th>Transaction ID</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTableBody">
+                            <tr>
+                                <td colspan="9" class="loading">Loading orders...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Users Section -->
+            <section id="users" class="section">
+                <div class="section-header">
+                    <h2>Users Management</h2>
+                    <input type="text" id="usersSearch" class="search-input" placeholder="Search users...">
+                </div>
+                <div class="table-container">
+                    <table class="data-table" id="usersTable">
+                        <thead>
+                            <tr>
+                                <th>Profile</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Status</th>
+                                <th>Referral Code</th>
+                                <th>Wallet Balance</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+                            <tr>
+                                <td colspan="8" class="loading">Loading users...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Reviews Section -->
+            <section id="reviews" class="section">
+                <div class="section-header">
+                    <h2>Reviews</h2>
+                </div>
+                <div class="placeholder">
+                    <p>Reviews section coming soon...</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal for Update Status -->
+    <div id="statusModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Update Order Status</h2>
+            <form id="statusForm">
+                <input type="hidden" id="orderIdInput">
+                <label for="statusSelect">New Status:</label>
+                <select id="statusSelect">
+                    <option value="">Select Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="processing">Processing</option>
+                    <option value="completed">Completed</option>
+                    <option value="failed">Failed</option>
+                    <option value="cancelled">Cancelled</option>
+                </select>
+                <button type="submit" class="btn-primary">Update Status</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal for Ban User -->
+    <div id="banModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Ban User</h2>
+            <p id="banConfirmText">Are you sure you want to ban this user?</p>
+            <form id="banForm">
+                <input type="hidden" id="userEmailInput">
+                <button type="submit" class="btn-danger">Confirm Ban</button>
+                <button type="button" class="btn-secondary" onclick="document.getElementById('banModal').style.display='none'">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html>

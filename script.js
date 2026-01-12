@@ -1,3 +1,25 @@
+// ========== REUSABLE BACKEND COMMUNICATION ==========
+// Central function for all backend API calls
+function callBackend(action, payload = {}) {
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyU1wfah__RUdCWmW4mBf1kvCgThl_wwEsqeQhXmtzPq50BSyWjjqph8rpd0ARU5TIx/exec';
+    
+    // Add action to payload
+    const requestData = { action, ...payload };
+    
+    return fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify(requestData),
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(res => res.json())
+    .catch(err => {
+        console.error('Backend call error:', err);
+        throw err;
+    });
+}
+
 // Mobile Menu Toggle Functions
 function toggleMenu() {
     const navMenu = document.getElementById('navMenu');

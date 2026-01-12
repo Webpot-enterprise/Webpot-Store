@@ -156,19 +156,12 @@ function handleLogin(event) {
 }
 
 function performLogin(emailOrPhone, password, submitBtn, originalText, userAgent, ipAddress) {
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyU1wfah__RUdCWmW4mBf1kvCgThl_wwEsqeQhXmtzPq50BSyWjjqph8rpd0ARU5TIx/exec';
-    
-    fetch(APPS_SCRIPT_URL, {
-        method: 'POST',
-        body: JSON.stringify({
-            action: 'login',
-            loginInput: emailOrPhone,
-            password: password,
-            userAgent: userAgent,
-            ipAddress: ipAddress
-        })
+    callBackend('login', {
+        email: emailOrPhone,
+        password: password,
+        userAgent: userAgent,
+        ipAddress: ipAddress
     })
-    .then(res => res.json())
     .then(data => {
         if (data.status === 'otp_required') {
             document.getElementById('loginForm').style.display = 'none';
@@ -177,6 +170,7 @@ function performLogin(emailOrPhone, password, submitBtn, originalText, userAgent
             localStorage.setItem('webpotUserLoggedIn', 'true');
             localStorage.setItem('webpotUserEmail', data.user.email);
             localStorage.setItem('webpotUserName', data.user.name);
+            localStorage.setItem('userId', data.user.id || data.userId); // Store userId
             // Use profile pic from backend if available, otherwise generate default avatar
             const profilePic = data.user.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(data.user.name)}&background=0ad4ff&color=fff&rounded=true`;
             localStorage.setItem('webpotUserProfilePic', profilePic);
@@ -239,25 +233,19 @@ function handleRegister(event) {
     submitBtn.textContent = 'Creating account...';
     submitBtn.disabled = true;
     
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyU1wfah__RUdCWmW4mBf1kvCgThl_wwEsqeQhXmtzPq50BSyWjjqph8rpd0ARU5TIx/exec';
-    
-    fetch(APPS_SCRIPT_URL, {
-        method: 'POST',
-        body: JSON.stringify({
-            action: 'register',
-            name: name,
-            email: email,
-            phone: phone,
-            password: password,
-            referralCode: referralCode
-        })
+    callBackend('signup', {
+        name: name,
+        email: email,
+        phone: phone,
+        password: password,
+        referral: referralCode
     })
-    .then(res => res.json())
     .then(data => {
         if (data.status === 'success') {
             localStorage.setItem('webpotUserLoggedIn', 'true');
             localStorage.setItem('webpotUserEmail', email);
             localStorage.setItem('webpotUserName', name);
+            localStorage.setItem('userId', data.userId || data.user?.id); // Store userId
             // Set default avatar using UI Avatars service (generates initials-based avatar)
             const defaultPicUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=0ad4ff&color=fff&rounded=true`;
             localStorage.setItem('webpotUserProfilePic', defaultPicUrl);

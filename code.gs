@@ -53,9 +53,26 @@ function doPost(e) {
   lock.tryLock(10000); // Prevent concurrent access
 
   try {
-    // Parse incoming JSON payload
-    var data = JSON.parse(e.postData.contents);
-    var action = data.action || data.formType;
+    // Parse incoming data - check if JSON or form parameters
+    var data = {};
+    var action = '';
+    
+    // Try to parse JSON from postData contents
+    if (e.postData && e.postData.contents) {
+      try {
+        data = JSON.parse(e.postData.contents);
+        action = data.action || data.formType;
+      } catch (jsonError) {
+        // If JSON parsing fails, fall back to form parameters
+        data = e.parameter;
+        action = e.parameter.action || e.parameter.formType;
+      }
+    } else {
+      // Use form parameters if no postData
+      data = e.parameter;
+      action = e.parameter.action || e.parameter.formType;
+    }
+    
     var response = { status: 'error', message: 'Invalid action' };
 
     // Route to appropriate handler based on action parameter
@@ -108,16 +125,22 @@ function doPost(e) {
         response = { status: 'error', message: 'Unknown action: ' + action };
     }
 
-    // Return JSON response with proper content type
+    // Return JSON response with proper content type and CORS headers
     return ContentService.createTextOutput(JSON.stringify(response))
-      .setMimeType(ContentService.MimeType.JSON);
+      .setMimeType(ContentService.MimeType.JSON)
+      .addHeader('Access-Control-Allow-Origin', '*')
+      .addHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+      .addHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   } catch(error) {
-    // Return error response in JSON format
+    // Return error response in JSON format with CORS headers
     return ContentService.createTextOutput(JSON.stringify({
       status: 'error',
       message: 'Server error: ' + error.toString()
-    })).setMimeType(ContentService.MimeType.JSON);
+    })).setMimeType(ContentService.MimeType.JSON)
+      .addHeader('Access-Control-Allow-Origin', '*')
+      .addHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+      .addHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   } finally {
     lock.releaseLock();
