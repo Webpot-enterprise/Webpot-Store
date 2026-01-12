@@ -19,6 +19,30 @@ This document tracks all requested changes, modifications, and fixes that are aw
 
 ---
 
+## Temporary References & Workarounds
+
+### CORS Policy Error - Fetch Reference (Temporary)
+```javascript
+fetch("http://127.0.0.1:5500/auth.css?_cacheOverride=1768215495298", {
+  "headers": {
+    "if-modified-since": "Mon, 12 Jan 2026 10:58:15 GMT",
+    "if-none-match": "W/\"3b00-19bb1db4208\"",
+    "sec-ch-ua": "\"Opera GX\";v=\"125\", \"Not?A_Brand\";v=\"8\", \"Chromium\";v=\"141\"",
+    "sec-ch-ua-mobile": "?0",
+    "sec-ch-ua-platform": "\"Windows\""
+  },
+  "referrer": "http://127.0.0.1:5500/auth.html",
+  "body": null,
+  "method": "GET",
+  "mode": "cors",
+  "credentials": "omit"
+});
+```
+**Purpose:** Temporary workaround for CORS policy errors during local development.
+**Status:** Temporary reference only.
+
+---
+
 ## Completed Changes Archive
 
 ✅ **Color Scheme Update: Black & Gray - January 12, 2026**
