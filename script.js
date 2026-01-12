@@ -109,6 +109,20 @@ const observer = new IntersectionObserver((entries) => {
 function updateNavState() {
     const isLoggedIn = localStorage.getItem('webpotUserLoggedIn');
     const userName = localStorage.getItem('webpotUserName');
+    const dashboardLink = document.getElementById('dashboardLink');
+    const adminAuth = localStorage.getItem('webpotAdminAuth');
+    const userAuth = localStorage.getItem('webpotUserLoggedIn');
+    
+    // Set up dashboard link based on auth state
+    if (adminAuth === 'WebpotAdmin2026') {
+        dashboardLink.textContent = 'Admin Panel';
+        dashboardLink.href = 'dashboard/admin.html';
+        dashboardLink.style.display = 'block';
+    } else if (userAuth === 'true') {
+        dashboardLink.textContent = 'Dashboard';
+        dashboardLink.href = 'dashboard/customer.html';
+        dashboardLink.style.display = 'block';
+    }
     
     const navUserName = document.getElementById('navUserName');
     const userNavInfo = document.getElementById('userNavInfo');
@@ -802,8 +816,8 @@ function payLater() {
     .then(res => res.json())
     .then(data => {
         if (data.status === 'success') {
-            alert('Order Placed! Thank you for your business.');
-            window.location.href = 'index.html';
+            alert('Order Placed! Redirecting to dashboard...');
+            window.location.href = 'dashboard/customer.html';
         } else {
             alert('Error: ' + data.message);
         }

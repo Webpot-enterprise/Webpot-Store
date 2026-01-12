@@ -11,6 +11,40 @@ document.addEventListener('DOMContentLoaded', function() {
     checkAuth();
     setupEventListeners();
     loadUserData();
+    
+    // Robust Navigation Logic
+    const navLinks = document.querySelectorAll('.nav-item');
+    const sections = document.querySelectorAll('.dashboard-section');
+
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            if (link.id === 'logoutBtn' || link.classList.contains('logout-btn')) return;
+            e.preventDefault();
+
+            navLinks.forEach(nav => nav.classList.remove('active'));
+            link.classList.add('active');
+
+            const targetId = link.getAttribute('data-section');
+
+            sections.forEach(section => {
+                section.style.display = 'none';
+                section.classList.remove('active');
+            });
+
+            const targetSection = document.getElementById(targetId);
+            if (targetSection) {
+                targetSection.style.display = 'block';
+                targetSection.classList.add('active');
+            } else {
+                console.error('Target section not found:', targetId);
+            }
+        });
+    });
+
+    const activeLink = document.querySelector('.nav-item.active');
+    if (activeLink) {
+        activeLink.click();
+    }
 });
 
 // Check authentication
@@ -29,16 +63,6 @@ function checkAuth() {
 
 // Setup event listeners
 function setupEventListeners() {
-    // Navigation links
-    const navLinks = document.querySelectorAll('.nav-link');
-    navLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            const section = this.getAttribute('data-section');
-            showSection(section);
-        });
-    });
-
     // Mobile menu
     const mobileMenuBtn = document.getElementById('mobileMenuBtn');
     if (mobileMenuBtn) {

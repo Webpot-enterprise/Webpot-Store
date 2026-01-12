@@ -15,23 +15,23 @@
                 <button class="toggle-sidebar" id="toggleSidebar">☰</button>
             </div>
             <nav class="sidebar-nav">
-                <a href="#dashboard" class="nav-link active" data-section="dashboard">
+                <a href="#dashboard" class="nav-link nav-item active" data-section="dashboard">
                     <span class="icon">📊</span>
                     <span class="label">Dashboard</span>
                 </a>
-                <a href="#orders" class="nav-link" data-section="orders">
+                <a href="#orders" class="nav-link nav-item" data-section="orders">
                     <span class="icon">📦</span>
                     <span class="label">Orders</span>
                 </a>
-                <a href="#users" class="nav-link" data-section="users">
+                <a href="#users" class="nav-link nav-item" data-section="users">
                     <span class="icon">👥</span>
                     <span class="label">Users</span>
                 </a>
-                <a href="#reviews" class="nav-link" data-section="reviews">
+                <a href="#reviews" class="nav-link nav-item" data-section="reviews">
                     <span class="icon">⭐</span>
                     <span class="label">Reviews</span>
                 </a>
-                <a href="#logout" class="nav-link" id="logoutBtn">
+                <a href="#logout" class="nav-link nav-item logout-btn" id="logoutBtn">
                     <span class="icon">🚪</span>
                     <span class="label">Logout</span>
                 </a>
@@ -50,7 +50,7 @@
             </header>
 
             <!-- Dashboard Section -->
-            <section id="dashboard" class="section active">
+            <section id="dashboard" class="section dashboard-section active">
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-label">Total Users</div>
@@ -72,7 +72,7 @@
             </section>
 
             <!-- Orders Section -->
-            <section id="orders" class="section">
+            <section id="orders" class="section dashboard-section">
                 <div class="section-header">
                     <h2>Orders Management</h2>
                     <input type="text" id="ordersSearch" class="search-input" placeholder="Search orders...">
@@ -102,7 +102,7 @@
             </section>
 
             <!-- Users Section -->
-            <section id="users" class="section">
+            <section id="users" class="section dashboard-section">
                 <div class="section-header">
                     <h2>Users Management</h2>
                     <input type="text" id="usersSearch" class="search-input" placeholder="Search users...">
@@ -131,7 +131,7 @@
             </section>
 
             <!-- Reviews Section -->
-            <section id="reviews" class="section">
+            <section id="reviews" class="section dashboard-section">
                 <div class="section-header">
                     <h2>Reviews</h2>
                 </div>
