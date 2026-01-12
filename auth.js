@@ -167,18 +167,13 @@ async function handleLogin(event) {
     setButtonLoading(true);
 
     try {
-        // Send login request to backend
-        const response = await fetch(WEBPOT_CONFIG.API_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                action: 'login',
-                email: emailInput.value.trim(),
-                password: passwordInput.value
-            })
+        // Send login request to backend via GET
+        const params = new URLSearchParams({
+            action: 'login',
+            email: emailInput.value.trim(),
+            password: passwordInput.value
         });
+        const response = await fetch(WEBPOT_CONFIG.API_URL + '?' + params.toString());
 
         const data = await response.json();
 
@@ -255,19 +250,14 @@ async function handleRegister(event) {
     setButtonLoading(true);
 
     try {
-        // Send registration request to backend
-        const response = await fetch(WEBPOT_CONFIG.API_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                action: 'register',
-                name: nameInput.value.trim(),
-                email: emailInput.value.trim(),
-                password: passwordInput.value
-            })
+        // Send registration request to backend via GET
+        const params = new URLSearchParams({
+            action: 'register',
+            name: nameInput.value.trim(),
+            email: emailInput.value.trim(),
+            password: passwordInput.value
         });
+        const response = await fetch(WEBPOT_CONFIG.API_URL + '?' + params.toString());
 
         const data = await response.json();
 
@@ -321,19 +311,15 @@ async function handleGoogleResponse(response) {
             return;
         }
 
-        // Send to backend for verification and account creation/login
-        const backendResponse = await fetch(WEBPOT_CONFIG.API_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                action: 'google_login',
-                name: userData.name || '',
-                email: userData.email,
-                profilePic: userData.picture || ''
-            })
+        // Send to backend for verification and account creation/login via GET
+        const params = new URLSearchParams({
+            action: 'google_login',
+            idToken: token,
+            name: userData.name || '',
+            email: userData.email,
+            profilePic: userData.picture || ''
         });
+        const backendResponse = await fetch(WEBPOT_CONFIG.API_URL + '?' + params.toString());
 
         const backendData = await backendResponse.json();
 

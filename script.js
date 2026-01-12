@@ -1,16 +1,10 @@
 // ========== REUSABLE BACKEND COMMUNICATION ==========
-// Central function for all backend API calls
+// Central function for all backend API calls - now uses GET to avoid CORS preflight
 function callBackend(action, payload = {}) {
-    // Add action to payload
-    const requestData = { action, ...payload };
+    // Build query string parameters
+    const params = new URLSearchParams({ action, ...payload });
     
-    return fetch(WEBPOT_CONFIG.API_URL, {
-        method: 'POST',
-        body: JSON.stringify(requestData),
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    })
+    return fetch(WEBPOT_CONFIG.API_URL + '?' + params.toString())
     .then(res => res.json())
     .catch(err => {
         console.error('Backend call error:', err);

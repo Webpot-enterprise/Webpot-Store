@@ -56,13 +56,11 @@ function logoutAdmin() {
 // ============== ORDERS MANAGEMENT ==============
 
 function loadAllOrders() {
-    fetch(WEBPOT_CONFIG.API_URL, {
-        method: 'POST',
-        body: JSON.stringify({
-            action: 'get_all_orders',
-            adminKey: ADMIN_KEY
-        })
-    })
+    const params = new URLSearchParams({
+        action: 'get_all_orders',
+        adminKey: ADMIN_KEY
+    });
+    fetch(WEBPOT_CONFIG.API_URL + '?' + params.toString())
     .then(res => res.json())
     .then(data => {
         if (data.status === 'success') {
@@ -109,15 +107,13 @@ function populateOrdersTable(orders) {
 }
 
 function updateOrderStatus(orderId, newStatus) {
-    fetch(WEBPOT_CONFIG.API_URL, {
-        method: 'POST',
-        body: JSON.stringify({
-            action: 'update_status',
-            orderId: orderId,
-            status: newStatus,
-            adminKey: ADMIN_KEY
-        })
-    })
+    const params = new URLSearchParams({
+        action: 'update_status',
+        orderId: orderId,
+        status: newStatus,
+        adminKey: ADMIN_KEY
+    });
+    fetch(WEBPOT_CONFIG.API_URL + '?' + params.toString())
     .then(res => res.json())
     .then(data => {
         if (data.status === 'success') {
@@ -137,13 +133,11 @@ function viewOrderDetails(orderId) {
 // ============== USER MANAGEMENT ==============
 
 function loadAllUsers() {
-    fetch(WEBPOT_CONFIG.API_URL, {
-        method: 'POST',
-        body: JSON.stringify({
-            action: 'get_all_users',
-            adminKey: ADMIN_KEY
-        })
-    })
+    const params = new URLSearchParams({
+        action: 'get_all_users',
+        adminKey: ADMIN_KEY
+    });
+    fetch(WEBPOT_CONFIG.API_URL + '?' + params.toString())
     .then(res => res.json())
     .then(data => {
         if (data.status === 'success') {
@@ -185,14 +179,12 @@ function populateUsersTable(users) {
 
 function banUser(email) {
     if (confirm(`Are you sure you want to ban ${email}?`)) {
-        fetch(WEBPOT_CONFIG.API_URL, {
-            method: 'POST',
-            body: JSON.stringify({
-                action: 'ban_user',
-                email: email,
-                adminKey: ADMIN_KEY
-            })
-        })
+        const params = new URLSearchParams({
+            action: 'ban_user',
+            email: email,
+            adminKey: ADMIN_KEY
+        });
+        fetch(WEBPOT_CONFIG.API_URL + '?' + params.toString())
         .then(res => res.json())
         .then(data => {
             if (data.status === 'success') {
@@ -209,12 +201,10 @@ function banUser(email) {
 // ============== REVIEW MODERATION ==============
 
 function loadAllReviews() {
-    fetch(WEBPOT_CONFIG.API_URL, {
-        method: 'POST',
-        body: JSON.stringify({
-            action: 'get_public_reviews'
-        })
-    })
+    const params = new URLSearchParams({
+        action: 'get_public_reviews'
+    });
+    fetch(WEBPOT_CONFIG.API_URL + '?' + params.toString())
     .then(res => res.json())
     .then(data => {
         if (data.status === 'success') {
