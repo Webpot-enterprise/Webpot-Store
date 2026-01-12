@@ -6,6 +6,20 @@ const SPREADSHEET = SpreadsheetApp.getActiveSpreadsheet();
 // This is a robust JSON API for the Webpot static website
 // It handles user authentication, order management, and data persistence
 
+// ========== OPTIONS REQUEST HANDLER ==========
+// Handle preflight requests from browsers
+function doOptions(e) {
+  var output = ContentService.createTextOutput('');
+  
+  // Set CORS headers for preflight
+  output.addHeader('Access-Control-Allow-Origin', '*');
+  output.addHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  output.addHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  output.addHeader('Access-Control-Max-Age', '86400');
+  
+  return output;
+}
+
 // ========== MAIN ENTRY POINT - DOGET ONLY ==========
 // Single unified endpoint handling all API requests via GET to avoid CORS preflight issues
 // This eliminates OPTIONS preflight requests that cause CORS failures on GitHub Pages
