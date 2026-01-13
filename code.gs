@@ -16,9 +16,113 @@ function doOptions(e) {
     .setHeader('Cache-Control', 'public, max-age=300');
 }
 
-// ========== MAIN ENTRY POINT - DOGET ONLY ==========
-// Single unified endpoint handling all API requests via GET to avoid CORS preflight issues
-// This eliminates OPTIONS preflight requests that cause CORS failures on GitHub Pages
+// ========== HELPER FUNCTION - FORMAT JSON RESPONSE WITH CORS HEADERS ==========
+function formatJsonResponse(data) {
+  return ContentService.createTextOutput(JSON.stringify(data))
+    .setMimeType(ContentService.MimeType.JSON)
+    .setHeader('Access-Control-Allow-Origin', '*')
+    .setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+    .setHeader('Access-Control-Allow-Headers', 'Content-Type')
+    .setHeader('Cache-Control', 'public, max-age=300');
+}
+
+// ========== UNIFIED REQUEST HANDLER ==========
+function handleRequest(data) {
+  // Support both 'action' (backend) and 'formType' (frontend contact forms)
+  var action = data.action || data.formType || '';
+  
+  var response = { status: 'error', message: 'Invalid action' };
+
+  // Route to appropriate handler based on action parameter
+  switch(action) {
+    case 'register':
+    case 'signup':
+      response = handleUserRegistration(data);
+      break;
+    case 'login':
+      response = handleUserLogin(data);
+      break;
+    case 'google_login':
+      response = handleGoogleLogin(data);
+      break;
+    case 'placeOrder':
+    case 'order':
+      response = handleOrderSubmission(data);
+      break;
+    case 'contact':
+    case 'contactForm':  // Frontend contact form uses 'contact'
+      response = handleContactInquiry(data);
+      break;
+    case 'submit_review':
+      response = handleSubmitReview(data);
+      break;
+    case 'get_public_reviews':
+      response = handleGetPublicReviews(data);
+      break;
+    case 'request_reset':
+      response = handleRequestReset(data);
+      break;
+    case 'verify_reset':
+      response = handleVerifyReset(data);
+      break;
+    case 'verify_login_otp':
+      response = handleVerifyLoginOTP(data);
+      break;
+    case 'update_payment':
+      response = handlePaymentUpdate(data);
+      break;
+    case 'get_all_orders':
+      response = handleGetAllOrders(data);
+      break;
+    case 'get_all_users':
+      response = handleGetAllUsers(data);
+      break;
+    case 'ban_user':
+      response = handleBanUser(data);
+      break;
+    case 'update_status':
+      response = handleUpdateStatus(data);
+      break;
+    case 'get_customer_dashboard':
+      response = handleGetCustomerDashboard(data);
+      break;
+    case 'get_customer_orders':
+      response = handleGetCustomerOrders(data);
+      break;
+    case 'get_customer_profile':
+      response = handleGetCustomerProfile(data);
+      break;
+    default:
+      // Return API status/documentation if no action specified
+      response = {
+        status: 'ready',
+        message: 'Webpot JSON API is running',
+        documentation: {
+          description: 'Unified API for Webpot static website (GitHub Pages)',
+          methods: 'GET, POST',
+          usage: 'GET: ?action=<action>&param1=value1 | POST: {"action":"<action>","param1":"value1"}',
+          actions: [
+            'signup/register - Register a new user',
+            'login - Authenticate user',
+            'google_login - Google OAuth login (requires idToken)',
+            'placeOrder/order - Submit an order',
+            'contact - Contact form inquiry',
+            'submit_review - Submit testimonial',
+            'get_public_reviews - Fetch approved testimonials',
+            'get_all_orders - Get all orders (admin)',
+            'get_all_users - Get all users (admin)',
+            'update_status - Update order status (admin)',
+            'ban_user - Ban a user (admin)'
+          ]
+        }
+      };
+  }
+
+  return response;
+}
+
+// ========== MAIN ENTRY POINTS - DOGET & DOPOST ==========
+// Handle GET requests (query parameters)
 function doGet(e) {
   var lock = LockService.getScriptLock();
   lock.tryLock(10000); // Prevent concurrent access
@@ -26,118 +130,50 @@ function doGet(e) {
   try {
     // Get parameters from query string (e.parameter contains GET query params)
     var data = e.parameter || {};
-    var action = data.action || '';
-    
-    var response = { status: 'error', message: 'Invalid action' };
-
-    // Route to appropriate handler based on action parameter
-    switch(action) {
-      case 'register':
-      case 'signup':
-        response = handleUserRegistration(data);
-        break;
-      case 'login':
-        response = handleUserLogin(data);
-        break;
-      case 'google_login':
-        response = handleGoogleLogin(data);
-        break;
-      case 'placeOrder':
-      case 'order':
-        response = handleOrderSubmission(data);
-        break;
-      case 'contact':
-        response = handleContactInquiry(data);
-        break;
-      case 'submit_review':
-        response = handleSubmitReview(data);
-        break;
-      case 'get_public_reviews':
-        response = handleGetPublicReviews(data);
-        break;
-      case 'request_reset':
-        response = handleRequestReset(data);
-        break;
-      case 'verify_reset':
-        response = handleVerifyReset(data);
-        break;
-      case 'verify_login_otp':
-        response = handleVerifyLoginOTP(data);
-        break;
-      case 'update_payment':
-        response = handlePaymentUpdate(data);
-        break;
-      case 'get_all_orders':
-        response = handleGetAllOrders(data);
-        break;
-      case 'get_all_users':
-        response = handleGetAllUsers(data);
-        break;
-      case 'ban_user':
-        response = handleBanUser(data);
-        break;
-      case 'update_status':
-        response = handleUpdateStatus(data);
-        break;
-      case 'get_customer_dashboard':
-        response = handleGetCustomerDashboard(data);
-        break;
-      case 'get_customer_orders':
-        response = handleGetCustomerOrders(data);
-        break;
-      case 'get_customer_profile':
-        response = handleGetCustomerProfile(data);
-        break;
-      default:
-        // Return API status/documentation if no action specified
-        response = {
-          status: 'ready',
-          message: 'Webpot JSON API is running',
-          documentation: {
-            description: 'GET-only API for Webpot static website (GitHub Pages)',
-            method: 'GET',
-            usage: 'Append ?action=<action>&param1=value1&param2=value2',
-            actions: [
-              'signup/register - Register a new user',
-              'login - Authenticate user',
-              'google_login - Google OAuth login (requires idToken)',
-              'placeOrder/order - Submit an order',
-              'contact - Contact form inquiry',
-              'submit_review - Submit testimonial',
-              'get_public_reviews - Fetch approved testimonials',
-              'get_all_orders - Get all orders (admin)',
-              'get_all_users - Get all users (admin)',
-              'update_status - Update order status (admin)',
-              'ban_user - Ban a user (admin)'
-            ],
-            cors: 'No preflight OPTIONS requests - GET only'
-          }
-        };
-    }
-
-    // Return JSON response with CORS headers
-    var output = ContentService.createTextOutput(JSON.stringify(response))
-      .setMimeType(ContentService.MimeType.JSON)
-      .setHeader('Access-Control-Allow-Origin', '*')
-      .setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-      .setHeader('Access-Control-Allow-Headers', 'Content-Type')
-      .setHeader('Cache-Control', 'public, max-age=300');
-    
-    return output;
+    var response = handleRequest(data);
+    return formatJsonResponse(response);
 
   } catch(error) {
     // Return error response in JSON format with CORS headers
-    var errorOutput = ContentService.createTextOutput(JSON.stringify({
+    return formatJsonResponse({
       status: 'error',
       message: 'Server error: ' + error.toString()
-    }))
-    .setMimeType(ContentService.MimeType.JSON)
-    .setHeader('Access-Control-Allow-Origin', '*')
-    .setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-    .setHeader('Access-Control-Allow-Headers', 'Content-Type')
-    .setHeader('Cache-Control', 'public, max-age=300');
+    });
+
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+// Handle POST requests (JSON body)
+function doPost(e) {
+  var lock = LockService.getScriptLock();
+  lock.tryLock(10000); // Prevent concurrent access
+
+  try {
+    var data = {};
     
-    return errorOutput;
+    // Parse POST body - check if it's JSON
+    if (e.postData && e.postData.contents) {
+      try {
+        data = JSON.parse(e.postData.contents);
+      } catch(parseError) {
+        return formatJsonResponse({
+          status: 'error',
+          message: 'Invalid JSON in request body: ' + parseError.toString()
+        });
+      }
+    }
+    
+    var response = handleRequest(data);
+    return formatJsonResponse(response);
+
+  } catch(error) {
+    // Return error response in JSON format with CORS headers
+    return formatJsonResponse({
+      status: 'error',
+      message: 'Server error: ' + error.toString()
+    });
 
   } finally {
     lock.releaseLock();
