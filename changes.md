@@ -6,6 +6,17 @@ Tracking all completed and pending changes to the Webpot Store website.
 
 ## ⏳ PENDING CHANGES (Awaiting Implementation)
 
+### Introduce backend support using Cloudflare for proxy, Google Sheets + Apps Script for database and using Hostinger for custom domain. Main website is hosted on GitHub Pages. - January 14, 2026
+
+**DESCRIPTION:** 
+- Implement backend infrastructure using Cloudflare Workers as proxy layer
+- Use Google Sheets as database with Google Apps Script for API
+- Deploy custom domain via Hostinger
+- Host main website on GitHub Pages
+- Remove all current frontend-only implementation
+
+---
+
 ### Deployment & Production Configuration - January 13, 2026
 
 **OBJECTIVE:** Complete deployment of Cloudflare Worker with custom domain, CORS restrictions, and security protections.

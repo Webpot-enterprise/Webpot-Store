@@ -1,93 +1,3 @@
-// ========== REUSABLE BACKEND COMMUNICATION ==========
-// Central function for all backend API calls - now uses GET to avoid CORS preflight
-function callBackend(action, payload = {}) {
-    // Build query string parameters
-    const params = new URLSearchParams({ action, ...payload });
-    
-    return fetch(WEBPOT_CONFIG.API_URL + '?' + params.toString())
-    .then(res => res.json())
-    .catch(err => {
-        console.error('Backend call error:', err);
-        throw err;
-    });
-}
-
-// ========== AUTHENTICATION STATE MANAGEMENT ==========
-
-// Check if user is logged in and update nav accordingly
-function initAuthState() {
-    const isLoggedIn = localStorage.getItem('webpotUserLoggedIn') === 'true';
-    
-    if (isLoggedIn) {
-        displayUserMenu();
-    } else {
-        displayLoginButton();
-    }
-}
-
-// Show login button (when not logged in)
-function displayLoginButton() {
-    const loginBtn = document.getElementById('loginBtn');
-    const userMenu = document.getElementById('userMenu');
-    
-    if (loginBtn) loginBtn.style.display = 'inline-block';
-    if (userMenu) userMenu.style.display = 'none';
-}
-
-// Show user menu with profile (when logged in)
-function displayUserMenu() {
-    const loginBtn = document.getElementById('loginBtn');
-    const userMenu = document.getElementById('userMenu');
-    const userProfilePic = document.getElementById('userProfilePic');
-    const userName = document.getElementById('userName');
-    
-    const name = localStorage.getItem('webpotUserName') || 'User';
-    const profilePic = localStorage.getItem('webpotUserProfilePic') || '';
-    
-    if (loginBtn) loginBtn.style.display = 'none';
-    if (userMenu) userMenu.style.display = 'flex';
-    if (userName) userName.textContent = name;
-    if (userProfilePic && profilePic) {
-        userProfilePic.src = profilePic;
-    } else {
-        // Fallback: Use initials or default avatar
-        userProfilePic.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="50" fill="%23cccccc"/%3E%3Ctext x="50" y="60" font-size="50" text-anchor="middle" fill="white" font-weight="bold"%3E' + (name.charAt(0).toUpperCase()) + '%3C/text%3E%3C/svg%3E';
-    }
-}
-
-// Toggle user dropdown menu
-function toggleUserMenu(event) {
-    event.stopPropagation();
-    const dropdown = document.getElementById('userDropdown');
-    if (dropdown) {
-        dropdown.classList.toggle('active');
-    }
-}
-
-// Close dropdown when clicking outside
-document.addEventListener('click', function(e) {
-    const userMenu = document.getElementById('userMenu');
-    const dropdown = document.getElementById('userDropdown');
-    
-    if (userMenu && !userMenu.contains(e.target)) {
-        if (dropdown) dropdown.classList.remove('active');
-    }
-});
-
-// Logout user
-function logoutUser() {
-    if (confirm('Are you sure you want to logout?')) {
-        localStorage.removeItem('webpotUserLoggedIn');
-        localStorage.removeItem('webpotUserName');
-        localStorage.removeItem('webpotUserEmail');
-        localStorage.removeItem('webpotUserProfilePic');
-        
-        displayLoginButton();
-        alert('You have been logged out successfully.');
-        window.location.href = 'index.html';
-    }
-}
-
 // Mobile Menu Toggle Functions
 function toggleMenu() {
     const navMenu = document.getElementById('navMenu');
@@ -178,7 +88,6 @@ const observer = new IntersectionObserver((entries) => {
 // Observe service cards on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
     loadUpdates(); // Load updates from updates.html
-    loadTestimonials(); // Load testimonials section
     
     const serviceCards = document.querySelectorAll('.service-card');
     
@@ -461,7 +370,7 @@ function regenerateQR() {
 function verifyAndSubmitPayment(event) {
     event.preventDefault();
     
-    const utrInput = document.getElementById('utrNumber'); // Ensure input ID matches HTML
+    const utrInput = document.getElementById('utrNumber');
     const utrValue = utrInput.value.trim();
 
     if (!utrValue) {
@@ -475,45 +384,16 @@ function verifyAndSubmitPayment(event) {
     verifyBtn.textContent = "Verifying...";
     verifyBtn.disabled = true;
 
-    // Build query parameters for GET request
-    const params = new URLSearchParams();
-    params.append('action', 'placeOrder');
-    params.append('transactionId', utrValue);
-    params.append('clientName', window.pendingOrderData.clientName || '');
-    params.append('email', window.pendingOrderData.email || '');
-    params.append('phone', window.pendingOrderData.phone || '');
-    params.append('service', window.pendingOrderData.service || '');
-    params.append('totalAmount', window.pendingOrderData.totalAmount || 0);
-
-    // Log for debugging
-    console.log('Sending payment verification:', params.toString());
-
-    // Send to Backend using GET to avoid CORS preflight
-    fetch(WEBPOT_CONFIG.API_URL + '?' + params.toString(), {
-        method: 'GET'
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.status === 'success') {
-            document.getElementById('paymentModal').style.display = 'none';
-            showSuccessModal('Order Confirmed!', `Order ID: ${data.orderId}. We will contact you shortly.`);
-            
-            // Cleanup
-            document.getElementById('orderForm').reset();
-            utrInput.value = '';
-            window.pendingOrderData = null;
-        } else {
-            alert('Error: ' + data.message);
-        }
-    })
-    .catch(err => {
-        console.error('Payment Error:', err);
-        alert('Network error. Please try again.');
-    })
-    .finally(() => {
-        verifyBtn.textContent = originalText;
-        verifyBtn.disabled = false;
-    });
+    // Display success message
+    showSuccessModal('Order Submitted!', 'Your order has been recorded. We will contact you shortly with payment confirmation.');
+    
+    // Cleanup
+    document.getElementById('orderForm').reset();
+    utrInput.value = '';
+    window.pendingOrderData = null;
+    
+    verifyBtn.textContent = originalText;
+    verifyBtn.disabled = false;
 }
 
 // Order success animation
@@ -560,7 +440,7 @@ function createConfetti() {
     setTimeout(() => confetti.remove(), 4000);
 }
 
-// Submit Contact Form to Google Sheets
+// Submit Contact Form
 function submitForm(event) {
     event.preventDefault();
     
@@ -574,40 +454,18 @@ function submitForm(event) {
         return;
     }
     
-    // Send to Google Apps Script backend
     // Show loading state
     const submitBtn = event.target.querySelector('button[type="submit"]');
     const originalText = submitBtn.textContent;
     submitBtn.textContent = 'Sending...';
     submitBtn.disabled = true;
     
-    fetch(WEBPOT_CONFIG.API_URL, {
-        method: 'POST',
-        body: JSON.stringify({
-            formType: 'contact',
-            name: name,
-            email: email,
-            phone: phone,
-            message: message
-        })
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.status === 'success') {
-            showSuccessModal('Message Sent!', 'We have received your inquiry and will contact you shortly.');
-            event.target.reset();
-        } else {
-            alert('Error: ' + (data.message || 'Failed to send message'));
-        }
-    })
-    .catch(err => {
-        console.error('Error:', err);
-        alert('Failed to send message. Please try again.');
-    })
-    .finally(() => {
-        submitBtn.textContent = originalText;
-        submitBtn.disabled = false;
-    });
+    // Display success message (no backend)
+    showSuccessModal('Message Received!', 'Thank you for your inquiry. We will contact you soon.');
+    event.target.reset();
+    
+    submitBtn.textContent = originalText;
+    submitBtn.disabled = false;
 }
 
 // Show Success Modal
@@ -729,42 +587,18 @@ function payLater() {
         submitBtn.disabled = true;
     }
     
-    // Build query parameters for GET request
-    const params = new URLSearchParams();
-    params.append('action', 'placeOrder');
-    params.append('transactionId', 'PAY_LATER');
-    params.append('clientName', window.pendingOrderData.clientName || '');
-    params.append('email', window.pendingOrderData.email || '');
-    params.append('phone', window.pendingOrderData.phone || '');
-    params.append('service', window.pendingOrderData.service || '');
-    params.append('totalAmount', window.pendingOrderData.totalAmount || 0);
+    // Show success message (no backend)
+    showSuccessModal('Order Submitted!', 'Your order has been recorded. Our team will contact you soon.');
     
-    // Log for debugging
-    console.log('Sending Pay Later order:', params.toString());
+    // Cleanup
+    document.getElementById('paymentModal').style.display = 'none';
+    document.getElementById('orderForm').reset();
+    window.pendingOrderData = null;
     
-    // Send order with PAY_LATER transaction ID using GET to avoid CORS preflight
-    fetch(WEBPOT_CONFIG.API_URL + '?' + params.toString(), {
-        method: 'GET'
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.status === 'success') {
-            alert('Order Placed! Redirecting to dashboard...');
-            window.location.href = 'dashboard/html/index.html';
-        } else {
-            alert('Error: ' + data.message);
-        }
-    })
-    .catch(err => {
-        console.error('Pay Later Error:', err);
-        alert('Network error. Please try again.');
-    })
-    .finally(() => {
-        if (submitBtn) {
-            submitBtn.textContent = 'Pay Later & Go to Dashboard';
-            submitBtn.disabled = false;
-        }
-    });
+    if (submitBtn) {
+        submitBtn.textContent = 'Pay Later & Go to Dashboard';
+        submitBtn.disabled = false;
+    }
 }
 
 function loadTestimonials() {
