@@ -1,0 +1,1579 @@
+# Webpot Website - Complete Depth View & Architecture
+
+**Document Purpose:** Complete technical overview of all files, their functions, and code details for senior developer review.
+
+**Website Type:** Three-Tier Web Application (Frontend → API Gateway → Backend)  
+**Last Updated:** January 16, 2026  
+**Status:** Production Ready  
+
+---
+
+## 📋 TABLE OF CONTENTS
+
+1. [System Architecture Overview](#system-architecture-overview)
+2. [Frontend Files](#frontend-files)
+3. [Backend Files](#backend-files)
+4. [API Gateway Files](#api-gateway-files)
+5. [Configuration & Deployment Files](#configuration--deployment-files)
+6. [Data Flow & Communication](#data-flow--communication)
+7. [File Structure & Organization](#file-structure--organization)
+
+---
+
+## System Architecture Overview
+
+### Three-Tier Architecture
+
+```
+TIER 1: PRESENTATION (Frontend)
+├── HTML (index.html)
+├── CSS (css/style.css)
+└── JavaScript (8 modules in js/)
+    ↓ HTTPS Requests (via fetch API)
+
+TIER 2: API GATEWAY (CORS Handler)
+├── Cloudflare Workers
+├── CORS Headers Management
+├── HTTPS Enforcement
+└── Request Forwarding
+    ↓ HTTP Requests
+
+TIER 3: BACKEND (Business Logic)
+├── Google Apps Script (Web App)
+├── CRUD Operations
+├── Data Validation
+└── Request Routing
+    ↓ Database Operations
+
+DATABASE LAYER
+└── Google Sheets
+    ├── Users (user_id, name, email, password)
+    ├── Orders (order_id, customer_name, amount)
+    ├── Sessions (session_id, user_id, created_at)
+    ├── Logs (log_id, action, timestamp)
+    ├── AuthTokens (token, user_id, expires)
+    └── ReferralCodes (code, user_id, discount)
+```
+
+### Request Flow Example
+
+```
+1. User visits GitHub Pages site → index.html loads
+2. JavaScript calls apiCall("/orders", {method: "GET", action: "getOrders"})
+3. js/api.js constructs: https://api.yourdomain.com/api/orders?action=getOrders
+4. Cloudflare Worker receives request
+   ├── Validates Origin header
+   ├── Adds CORS headers
+   └── Forwards to Google Apps Script
+5. Google Apps Script receives request
+   ├── Extracts ?action parameter
+   ├── Routes to getOrders() function
+   ├── Queries Google Sheets
+   └── Returns JSON response
+6. Cloudflare Worker adds security headers
+7. Browser receives data, JavaScript updates UI
+```
+
+---
+
+## Frontend Files
+
+### 1. **index.html** (443 lines)
+
+**Location:** `d:\My_Repos\Webpot-Store\index.html`
+
+**Purpose:** Main entry point of the website. Single-page application that contains all UI sections.
+
+**Key Sections:**
+
+#### Head Section (Lines 1-9)
+```html
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Webpot - Web Development Services</title>
+    <link rel="stylesheet" href="./css/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="./js/config.js"></script>
+</head>
+```
+- **Meta tags:** UTF-8 charset, responsive viewport, prevents zoom-out
+- **CSS:** Linked from `./css/style.css` (relative path for GitHub Pages compatibility)
+- **QRCode.js:** External library from CDN for generating UPI payment QR codes
+- **config.js:** Loaded first as it contains global configuration
+
+#### Body Structure (Lines 11-443)
+
+**Header/Navigation (Lines 12-70)**
+- Logo with image (logo.png)
+- Navigation menu (Home, About, Services, Contact)
+- Mobile menu toggle button
+- Authentication section:
+  - Login button (shown when NOT logged in)
+  - User profile dropdown (shown when logged in)
+    - Displays user profile picture & name
+    - Links to dashboard
+    - Logout button
+- Notification bell icon with badge
+- "Get Started" CTA button
+
+**Hero Section (Lines 72-85)**
+- Main headline: "Professional Web Development Services"
+- Subheading with value proposition
+- Two buttons: "View Services" and "Request a Website"
+
+**About Section (Lines 87-93)**
+- Company description
+- Commitment statement
+
+**Services Section (Lines 95-140+)**
+- Two view modes:
+  - **Card View:** Three service cards (Starter, Basic, Premium)
+    - Each shows: name, description, price, features list
+    - "Select" button calls `selectService(service, price)`
+  - **Table View:** Comparison table of all three plans
+
+- **Pricing:**
+  - Starter: ₹2,999
+  - Basic: ₹5,999
+  - Premium: ₹9,999
+
+- **Service Cards Include:**
+  - Service name & description
+  - Price
+  - Feature list (e.g., "Responsive Design", "Mobile Optimized")
+  - Select button
+
+**Order Modal (Lines 142-165)**
+- `<div id="orderModal">`
+- Form fields:
+  - Service selection dropdown
+  - Amount display (calculated from service)
+  - Customer name
+  - Customer email
+  - Customer phone
+  - Additional details (textarea)
+- Submit button calls `submitOrder(event)`
+- Close button calls `closeOrderModal()`
+
+**Payment Modal (Lines 167-180)**
+- `<div id="paymentModal">`
+- Displays amount to pay
+- Shows UPI QR code (generated by js/orders.js)
+- "Verify & Submit" button calls `verifyAndSubmitPayment()`
+- "Pay Later" button calls `payLater()`
+- Timer for QR code expiration
+
+**Testimonials Section (Lines 182-200)**
+- `<div id="testimonials-container">`
+- Dynamically populated by `loadTestimonials()` from js/content.js
+- Shows customer testimonials with ratings
+
+**Contact Section (Lines 202-220)**
+- Contact form with fields:
+  - Name
+  - Email
+  - Subject
+  - Message
+- Submit button calls `submitForm(event)`
+
+**Footer (Lines 222-230)**
+- Copyright year (auto-updated by js/script.js)
+- Links to privacy, terms, updates pages
+
+**Script Imports (Lines 232-240)**
+```html
+<script src="./js/api.js"></script>
+<script src="./js/config.js"></script>
+<script src="./js/ui.js"></script>
+<script src="./js/orders.js"></script>
+<script src="./js/users.js"></script>
+<script src="./js/forms.js"></script>
+<script src="./js/content.js"></script>
+<script src="./js/script.js"></script>
+```
+- **Order is CRITICAL** (each depends on previous):
+  1. config.js - Configuration (loaded twice, first in head for early availability)
+  2. api.js - API communication layer
+  3. ui.js - DOM manipulation utilities
+  4. orders.js - Order/payment logic
+  5. users.js - User authentication
+  6. forms.js - Form handling
+  7. content.js - Dynamic content loading
+  8. script.js - App initialization
+
+---
+
+### 2. **css/style.css** (Complete styling)
+
+**Location:** `d:\My_Repos\Webpot-Store\css\style.css`
+
+**Purpose:** All styling for the website. Mobile-first responsive design.
+
+**Key Sections:**
+
+#### Root Variables
+```css
+:root {
+  --primary-color: #2563eb;
+  --secondary-color: #1e40af;
+  --success-color: #10b981;
+  --danger-color: #ef4444;
+  --text-dark: #1f2937;
+  --text-light: #6b7280;
+  --bg-light: #f9fafb;
+  --border-color: #e5e7eb;
+  --shadow: 0 1px 3px rgba(0,0,0,0.1);
+  --spacing: 1rem;
+}
+```
+
+#### Responsive Breakpoints
+```css
+/* Mobile: default (320px+) */
+/* Tablet: @media (min-width: 768px) */
+/* Desktop: @media (min-width: 1024px) */
+```
+
+#### Key Component Styles
+
+**Header/Navigation**
+- Fixed navigation bar at top
+- Logo with image (40x40px)
+- Mobile menu toggle button (hidden on desktop)
+- Flex layout for responsive alignment
+- Authentication section with dropdown styling
+
+**Hero Section**
+- Full viewport height (100vh)
+- Gradient background
+- Centered content
+- Large headline (3-4rem)
+- CTA buttons with hover effects
+
+**Service Cards**
+- 3-column grid on desktop
+- 1 column on mobile
+- Card shadow & border styling
+- Price highlighting in primary color
+- Feature list with checkmarks
+- Hover effect on cards
+
+**Modals**
+- `position: fixed` (full screen overlay)
+- Centered content with `transform: translate(-50%, -50%)`
+- Backdrop with `background-color: rgba(0,0,0,0.5)`
+- Form styling with proper spacing
+- Close button styling
+
+**Form Elements**
+- Input fields with borders
+- Focus state styling (outline, box-shadow)
+- Button styling (primary, secondary, danger variants)
+- Label styling with proper font weight
+- Error message styling in red
+
+**Responsive Utilities**
+```css
+.mobile-optimized {
+  /* Ensures proper mobile viewport */
+}
+
+.menu-toggle {
+  /* Hamburger menu - hidden on desktop */
+  display: none; /* shown at 768px breakpoint */
+}
+
+.notification-badge {
+  /* Small red dot for unread notifications */
+  position: absolute;
+  background: #ef4444;
+  border-radius: 50%;
+  width: 8px;
+  height: 8px;
+}
+```
+
+---
+
+### 3. **js/config.js** (79 lines)
+
+**Location:** `d:\My_Repos\Webpot-Store\js\config.js`
+
+**Purpose:** Global application configuration and helper functions. Loaded first, used by all other modules.
+
+**Code Breakdown:**
+
+```javascript
+const API_CONFIG = {
+  CLOUDFLARE_WORKER: 'https://webpot-api.yourdomain.workers.dev',
+  GAS_URL: 'https://script.google.com/macros/s/.../exec',
+  AUTH_TOKEN_KEY: 'webpot_auth_token',
+  USER_DATA_KEY: 'webpot_user_data',
+  ACTIONS: {
+    LOGIN: 'login',
+    REGISTER: 'register',
+    GET_USER: 'getUser',
+    UPDATE_USER: 'updateUser',
+    SUBMIT_CONTACT: 'submitContact',
+    SUBMIT_ORDER: 'submitOrder',
+    GET_TESTIMONIALS: 'getTestimonials',
+    VERIFY_PAYMENT: 'verifyPayment'
+  },
+  FEATURES: {
+    ENABLE_UPI: true,
+    ENABLE_NOTIFICATIONS: true,
+    ENABLE_TESTIMONIALS: true
+  }
+}
+```
+
+**Key Functions:**
+
+1. **getAuthToken()** - Returns auth token from localStorage
+   - Used to check if user is logged in
+   - Returns null if not logged in
+
+2. **setAuthToken(token)** - Saves auth token to localStorage
+   - Called after successful login
+   - Used to remember user on page reload
+
+3. **clearAuthToken()** - Removes auth token
+   - Called on logout
+
+4. **getUserData()** - Retrieves user object from localStorage
+   - Parses JSON string to object
+   - Returns null if not found
+
+5. **setUserData(userData)** - Saves user object to localStorage
+   - Stringifies object to JSON
+   - Called after successful login/registration
+
+6. **clearUserData()** - Removes user data
+   - Called on logout
+
+7. **isAuthenticated()** - Checks if user is logged in
+   - Returns boolean
+   - Called before protected operations
+
+8. **requireAuth()** - Ensures user is logged in
+   - Redirects to /auth.html if not authenticated
+   - Called in protected functions
+
+---
+
+### 4. **js/api.js** (170 lines)
+
+**Location:** `d:\My_Repos\Webpot-Store\js/api.js`
+
+**Purpose:** Centralized API communication layer. All backend requests go through this module.
+
+**Code Breakdown:**
+
+```javascript
+const API_CONFIG = {
+  BASE_URL: "https://api.yourdomain.com",
+  TIMEOUT: 10000,  // 10 seconds
+  DEBUG: false     // Disabled for production
+};
+```
+
+**Main Function: apiCall(endpoint, options)**
+
+```javascript
+async function apiCall(endpoint, options = {}) {
+  const { method = "GET", body = null, headers = {}, action = null } = options;
+  
+  // Build URL: https://api.yourdomain.com/api/orders?action=getOrders
+  let url = `${API_CONFIG.BASE_URL}/api${endpoint}`;
+  if (action) {
+    url += `?action=${encodeURIComponent(action)}`;
+  }
+  
+  // Merge headers with defaults
+  const finalHeaders = { "Content-Type": "application/json", ...headers };
+  
+  // Create abort controller for timeout
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.TIMEOUT);
+  
+  // Make fetch request
+  const response = await fetch(url, {
+    method: method,
+    headers: finalHeaders,
+    body: body ? JSON.stringify(body) : null,
+    signal: controller.signal
+  });
+  
+  clearTimeout(timeoutId);
+  
+  if (!response.ok) {
+    throw new Error(`API Error ${response.status}`);
+  }
+  
+  const data = await response.json();
+  return { success: true, data: data };
+}
+```
+
+**Error Handling:**
+- **AbortError:** Request timeout (>10 seconds)
+  ```javascript
+  if (error.name === "AbortError") {
+    return {
+      success: false,
+      error: "Request Timeout",
+      message: "The server took too long to respond..."
+    };
+  }
+  ```
+
+- **TypeError (Failed to fetch):** Network error or CORS issue
+  ```javascript
+  if (error instanceof TypeError && error.message.includes("Failed to fetch")) {
+    return {
+      success: false,
+      error: "Network Error",
+      message: "Unable to reach the server..."
+    };
+  }
+  ```
+
+- **Other errors:** Caught and returned with error details
+
+**Specific API Endpoint Functions:**
+
+1. **getOrders()** - Retrieves all orders
+   ```javascript
+   async function getOrders() {
+     return apiCall("/orders", { method: "GET", action: "getOrders" });
+   }
+   ```
+
+2. **getOrderById(orderId)** - Retrieves specific order
+   ```javascript
+   async function getOrderById(orderId) {
+     return apiCall(`/orders?id=${orderId}`, { 
+       method: "GET", 
+       action: "getOrderById" 
+     });
+   }
+   ```
+
+3. **createOrder(orderData)** - Creates new order
+   ```javascript
+   async function createOrder(orderData) {
+     return apiCall("/orders", {
+       method: "POST",
+       action: "createOrder",
+       body: orderData
+     });
+   }
+   ```
+
+4. **updateOrder(orderId, orderData)** - Updates existing order
+   ```javascript
+   async function updateOrder(orderId, orderData) {
+     return apiCall(`/orders?id=${orderId}`, {
+       method: "POST",
+       action: "updateOrder",
+       body: orderData
+     });
+   }
+   ```
+
+5. **getUsers()** - Admin function to get all users
+6. **getLogs()** - Admin function to get system logs
+7. **getTestimonials()** - Retrieves customer testimonials
+8. **submitContact(contactData)** - Submits contact form
+
+---
+
+### 5. **js/ui.js** (100 lines)
+
+**Location:** `d:\My_Repos\Webpot-Store\js/ui.js`
+
+**Purpose:** UI interaction functions. All DOM manipulation for user interactions.
+
+**Key Functions:**
+
+1. **toggleMenu()**
+   - Toggles visibility of mobile navigation menu
+   - Adds/removes `active` class to `#navMenu`
+   - Controls hamburger menu button state
+
+2. **closeMenu()**
+   - Closes mobile menu
+   - Called when user clicks a menu item
+
+3. **openOrderModal()**
+   - Shows order form modal
+   - Sets `#orderModal` display to "block"
+   - Focuses on service dropdown
+
+4. **closeOrderModal()**
+   - Hides order form modal
+   - Sets `#orderModal` display to "none"
+   - Clears form fields
+
+5. **closePaymentModal()**
+   - Hides payment/QR code modal
+   - Sets `#paymentModal` display to "none"
+   - Stops QR code timer
+
+6. **toggleNotifications()**
+   - Shows/hides notification dropdown
+   - Toggles `#notificationDropdown` visibility
+   - Updates notification badge
+
+7. **toggleUserMenu(event)**
+   - Shows/hides user profile dropdown
+   - Toggles `#userDropdown` visibility
+   - Prevents event propagation
+
+8. **showPlanComparison(type)**
+   - Switches between card view and table view
+   - Parameters: 'cards' or 'table'
+   - Shows/hides comparison elements
+
+9. **scrollToTop()**
+   - Smooth scroll to page top
+   - Called when scroll button is clicked
+
+10. **showSuccessMessage(message, duration = 3000)**
+    - Displays temporary success notification
+    - Auto-dismisses after duration
+
+11. **showErrorMessage(message, duration = 3000)**
+    - Displays temporary error notification
+    - Red background styling
+
+12. **updateAuthUI()**
+    - Shows/hides auth elements based on login status
+    - Displays login button if not authenticated
+    - Shows profile dropdown if authenticated
+    - Updates profile picture & username
+
+---
+
+### 6. **js/orders.js** (233 lines)
+
+**Location:** `d:\My_Repos\Webpot-Store\js/orders.js`
+
+**Purpose:** Complete order and payment processing logic.
+
+**Service Pricing Configuration:**
+
+```javascript
+const SERVICE_PRICES = {
+  'Starter': 2999,
+  'Basic': 5999,
+  'Premium': 9999
+};
+```
+
+**Key Variables:**
+```javascript
+let selectedService = null;        // Currently selected service
+let selectedPrice = null;          // Price of selected service
+let qrTimer = null;               // Timer for QR code expiration
+```
+
+**Key Functions:**
+
+1. **selectService(service, price)**
+   - Called when user clicks service card
+   - Parameters: service name (string), price (number)
+   - Sets `selectedService` and `selectedPrice`
+   - Updates service dropdown
+   - Opens order modal
+
+2. **updateServicePrice()**
+   - Updates amount display when service is selected
+   - Reads from `#service` dropdown
+   - Calculates 50% advance amount
+   - Displays as `₹X (50% advance)`
+
+3. **submitOrder(event)**
+   - Form submission handler
+   - Validates all required fields:
+     - Email format validation (regex)
+     - Phone number validation (10+ digits)
+     - Required fields check
+   - Creates order object:
+     ```javascript
+     {
+       service: string,
+       amount: number,
+       advanceAmount: number,
+       name: string,
+       email: string,
+       phone: string,
+       details: string
+     }
+     ```
+   - Stores in `sessionStorage` for payment flow
+   - Opens payment modal
+   - Generates UPI QR code
+
+4. **generateUPIQR(amount)**
+   - Generates UPI payment QR code
+   - Uses QRCode.js library
+   - UPI string format: `upi://pay?pa=engagewebpot@upi&pn=Webpot&am=X&tn=Website Order`
+   - Displays amount to be paid
+   - Starts 5-minute expiration timer
+
+5. **startQRTimer()**
+   - Timer countdown for QR code validity
+   - Shows remaining time
+   - After 5 minutes, requires QR regeneration
+   - Calls `generateUPIQR()` to refresh code
+
+6. **regenerateQR()**
+   - Regenerates fresh QR code
+   - Resets timer
+   - Provides new UPI payment link
+
+7. **verifyAndSubmitPayment()**
+   - Called when "Verify & Submit" button clicked
+   - Retrieves order from `sessionStorage`
+   - Calls `createOrder(orderData)` from api.js
+   - If successful:
+     - Shows success message
+     - Clears forms
+     - Closes modals
+   - If failed:
+     - Shows error message
+     - Keeps modal open for retry
+
+8. **payLater()**
+   - Alternative payment option
+   - Creates order with `status: 'pending_payment'`
+   - Sends notification to admin
+   - Shows "We'll send you payment details via email"
+
+---
+
+### 7. **js/users.js** (50 lines)
+
+**Location:** `d:\My_Repos\Webpot-Store\js/users.js`
+
+**Purpose:** User authentication and profile management.
+
+**Key Functions:**
+
+1. **updateAuthUI()**
+   - Called on page load
+   - Checks if user is authenticated via `isAuthenticated()`
+   - If logged in:
+     - Hides `#loginBtn`
+     - Shows `#userMenu` with profile dropdown
+     - Displays user name and profile picture from localStorage
+     - Populates `#userName` and `#userProfilePic`
+   - If not logged in:
+     - Shows login button
+     - Hides profile dropdown
+
+2. **toggleUserMenu(event)**
+   - Shows/hides user dropdown
+   - Toggles `#userDropdown` visibility
+   - Prevents event bubbling
+
+3. **logoutUser()**
+   - Clears auth token via `clearAuthToken()`
+   - Clears user data via `clearUserData()`
+   - Calls `updateAuthUI()` to refresh UI
+   - Redirects to home page
+
+---
+
+### 8. **js/forms.js** (20 lines)
+
+**Location:** `d:\My_Repos\Webpot-Store\js/forms.js`
+
+**Purpose:** Form submission handling.
+
+**Key Functions:**
+
+1. **submitForm(event)**
+   - Form submission handler for contact form
+   - Prevents default form submission
+   - Gets form data
+   - Calls `submitContact(formData)` from api.js
+   - Shows success message on completion
+   - Clears form fields
+   - Handles errors with alert
+
+---
+
+### 9. **js/content.js** (100 lines)
+
+**Location:** `d:\My_Repos\Webpot-Store\js/content.js`
+
+**Purpose:** Dynamic content loading from backend.
+
+**Key Functions:**
+
+1. **loadTestimonials()**
+   - Fetches testimonials from `getTestimonials()` API
+   - Handles success with fallback testimonials:
+     ```javascript
+     [
+       { name: 'Raj Kumar', company: 'Tech Startup', message: '...', rating: 5 },
+       { name: 'Priya Singh', company: 'E-commerce', message: '...', rating: 5 },
+       { name: 'Amit Patel', company: 'Small Business', message: '...', rating: 5 }
+     ]
+     ```
+   - Renders to `#testimonials-container`
+   - Handles API failure gracefully
+
+2. **showFallbackTestimonials()**
+   - Displays hardcoded testimonials if API fails
+   - Ensures page always shows testimonials
+   - Built-in error resilience
+
+3. **loadNotifications()**
+   - Fetches latest notifications from backend
+   - Populates `#notificationList`
+   - Shows notification badge if new notifications exist
+   - Auto-refreshes every 5 minutes
+
+---
+
+### 10. **js/script.js** (50 lines)
+
+**Location:** `d:\My_Repos\Webpot-Store\js/script.js`
+
+**Purpose:** App initialization and setup.
+
+**Code Breakdown:**
+
+```javascript
+document.addEventListener('DOMContentLoaded', function() {
+  // Called when DOM is fully loaded
+  
+  // Update auth UI based on login status
+  updateAuthUI();
+  
+  // Load testimonials on page load
+  loadTestimonials();
+  
+  // Load notifications on page load
+  loadNotifications();
+});
+
+// Auto-update copyright year
+document.getElementById('copyright-year').textContent = new Date().getFullYear();
+
+// Refresh testimonials every 30 minutes
+setInterval(loadTestimonials, 30 * 60 * 1000);
+
+// Refresh notifications every 5 minutes
+setInterval(loadNotifications, 5 * 60 * 1000);
+
+// Show scroll-to-top button after 300px scroll
+window.addEventListener('scroll', () => {
+  const scrollBtn = document.getElementById('scroll-to-top-btn');
+  if (window.scrollY > 300) {
+    scrollBtn.style.display = 'block';
+  } else {
+    scrollBtn.style.display = 'none';
+  }
+});
+```
+
+---
+
+## Backend Files
+
+### 1. **GOOGLE_APPS_SCRIPT.gs** (437 lines)
+
+**Location:** `d:\My_Repos\Webpot-Store\GOOGLE_APPS_SCRIPT.gs`
+
+**Purpose:** Backend API server. Handles all business logic, data validation, and Google Sheets operations.
+
+**Deployment Instructions:**
+1. Go to https://script.google.com
+2. Create new project named "Production-Web-API"
+3. Copy entire file content
+4. Update SHEET_ID (line 28)
+5. Deploy as Web App with "Anyone" access
+
+**Configuration:**
+
+```javascript
+const SHEET_ID = "1CbFocUID9WLRrX34Xx093qxGC7V5CpZWRIU4H5NRTnM7pDBpLcZboPX2";
+const SHEET = SpreadsheetApp.openById(SHEET_ID);
+```
+
+**HTTP Entry Points:**
+
+1. **doGet(e)** - Handles GET requests
+   - Called by Cloudflare Worker
+   - Parameter `e` contains query parameters
+   - Passes to `handleRequest()`
+
+2. **doPost(e)** - Handles POST requests
+   - Called by Cloudflare Worker
+   - Parameter `e` contains JSON body
+   - Parses `e.postData.contents` as JSON
+   - Passes to `handleRequest()`
+
+**Main Router: handleRequest(e, method)**
+
+Routes requests via `?action=` parameter to appropriate function:
+
+```javascript
+switch(action) {
+  case 'getUsers': return getUsers();
+  case 'getUserById': return getUserById(e.parameter.id);
+  case 'createUser': return createUser(JSON.parse(e.postData.contents));
+  case 'updateUser': return updateUser(e.parameter.id, JSON.parse(e.postData.contents));
+  case 'getOrders': return getOrders();
+  case 'getOrderById': return getOrderById(e.parameter.id);
+  case 'createOrder': return createOrder(JSON.parse(e.postData.contents));
+  case 'updateOrder': return updateOrder(e.parameter.id, JSON.parse(e.postData.contents));
+  case 'getSessions': return getSessions();
+  case 'createSession': return createSession(JSON.parse(e.postData.contents));
+  case 'getLogs': return getLogs();
+  case 'getTestimonials': return getTestimonials();
+  case 'submitTestimonial': return submitTestimonial(JSON.parse(e.postData.contents));
+  case 'test': return returnJSON({message: 'Google Apps Script is working!'});
+  default: return returnJSON({error: `Unknown action: ${action}`}, 400);
+}
+```
+
+**User Management Functions:**
+
+1. **getUsers()** - Retrieves all users
+   - Reads from 'Users' sheet
+   - Returns array of user objects
+   - Includes user count
+
+2. **getUserById(userId)** - Retrieves specific user
+   - Searches 'Users' sheet for user_id
+   - Returns user object if found
+   - Returns 404 error if not found
+
+3. **createUser(userData)** - Creates new user
+   - **Validation:**
+     - Checks required fields: user_id, email
+     - Validates email format (regex)
+   - Appends row to 'Users' sheet
+   - Returns created user object with 201 status
+
+4. **updateUser(userId, userData)** - Updates existing user
+   - Finds user by user_id
+   - Updates all changed fields
+   - Returns updated object
+
+**Order Management Functions:**
+
+1. **getOrders()** - Retrieves all orders
+   - Reads from 'Orders' sheet
+   - Filters out empty rows
+   - Returns orders array
+
+2. **getOrderById(orderId)** - Retrieves specific order
+   - Searches 'Orders' sheet for order_id
+   - Returns 404 if not found
+
+3. **createOrder(orderData)** - Creates new order
+   - **Validation:**
+     - Requires: customer_name, customer_email
+     - Validates email format
+     - Validates amount is numeric
+   - Generates order_id if not provided: 'ORD-' + timestamp
+   - Sets order_date to current time
+   - Appends to 'Orders' sheet
+   - Returns 201 status with order_id
+
+4. **updateOrder(orderId, orderData)** - Updates existing order
+   - Finds and updates order
+   - Returns updated object
+
+**Session Management:**
+
+1. **getSessions()** - Gets all active sessions
+2. **createSession(sessionData)** - Creates new session
+   - Generates session_id if not provided
+   - Sets created_at timestamp
+
+**Logging & Testimonials:**
+
+1. **getLogs(limit=100)** - Retrieves last 100 log entries
+   - Returns logs in reverse chronological order
+   - Used for admin auditing
+
+2. **logAction(userId, action, details, email, source)** - Logs actions
+   - Appends to 'Logs' sheet
+   - Records: log_id, user_id, action, timestamp, email, details
+
+3. **getTestimonials()** - Returns sample testimonials
+   - Returns hardcoded testimonials (can be modified to read from sheet)
+
+4. **submitTestimonial(testimonialData)** - Stores testimonials
+   - Saves to database or email
+   - Returns confirmation
+
+**Helper Functions:**
+
+1. **returnJSON(data, statusCode=200)** - Returns JSON response
+   ```javascript
+   function returnJSON(data, statusCode = 200) {
+     // Security: Sanitizes error messages
+     if (data.error && data.message && data.message.includes("Line")) {
+       data.message = "An error occurred. Please try again later.";
+       data.error = "Server Error";
+     }
+     return ContentService
+       .createTextOutput(JSON.stringify(data))
+       .setMimeType(ContentService.MimeType.JSON);
+   }
+   ```
+
+2. **test()** - Test endpoint
+   ```javascript
+   function test() {
+     return returnJSON({
+       message: 'Google Apps Script is working!',
+       timestamp: new Date(),
+       sheetId: SHEET_ID,
+       sheets: SHEET.getSheets().map(s => s.getName())
+     });
+   }
+   ```
+
+---
+
+### 2. **GOOGLE_APPS_SCRIPT_PRODUCTION.gs** (400+ lines)
+
+**Location:** `d:\My_Repos\Webpot-Store\GOOGLE_APPS_SCRIPT_PRODUCTION.gs`
+
+**Purpose:** Production-ready copy of backend code. Ready to copy-paste into Google Apps Script editor.
+
+**Key Differences from GOOGLE_APPS_SCRIPT.gs:**
+- Includes all production security hardening
+- Input validation on all endpoints
+- Error messages sanitized (never expose internals)
+- Request logging implemented
+- Full comments and documentation
+- Ready for immediate deployment
+
+---
+
+## API Gateway Files
+
+### 1. **CLOUDFLARE_WORKER.js** (265 lines)
+
+**Location:** `d:\My_Repos\Webpot-Store\CLOUDFLARE_WORKER.js`
+
+**Purpose:** CORS gateway between frontend and backend. Handles cross-origin requests and adds security headers.
+
+**Deployment Instructions:**
+1. Go to Cloudflare Dashboard → Workers
+2. Create new service named "api-gateway"
+3. Copy entire file content
+4. Update GAS_URL (line 27)
+5. Update ALLOWED_ORIGINS (line 30)
+6. Deploy and configure route: `api.yourdomain.com/api/*`
+
+**Configuration:**
+
+```javascript
+const GAS_URL = "https://script.google.com/macros/s/AKfycb.../exec";
+
+const ALLOWED_ORIGINS = [
+  "https://yourusername.github.io",
+  "https://yourdomain.com",
+  "https://api.yourdomain.com"
+];
+```
+
+**Main Handler: fetch(request, env, ctx)**
+
+```javascript
+export default {
+  async fetch(request, env, ctx) {
+    const url = new URL(request.url);
+    const path = url.pathname;
+    const origin = request.headers.get("Origin");
+    
+    // Enforce HTTPS
+    if (url.protocol === "http:") {
+      return new Response(..., { status: 301, headers: { Location: https_url } });
+    }
+    
+    // Handle OPTIONS preflight
+    if (request.method === "OPTIONS") {
+      return handleCORSPreflight(origin);
+    }
+    
+    // Forward API requests
+    if (path.startsWith("/api/")) {
+      const response = await forwardToGAS(request, url, path);
+      return addCORSHeaders(response, origin);
+    }
+    
+    // 404 for other routes
+    return new Response(JSON.stringify({error: "Route not found"}), {status: 404});
+  }
+};
+```
+
+**Key Functions:**
+
+1. **handleCORSPreflight(origin)**
+   - Responds to OPTIONS requests (browser preflight)
+   - Returns 204 No Content status
+   - Headers:
+     - `Access-Control-Allow-Origin`: origin (if allowed) or "null"
+     - `Access-Control-Allow-Methods`: GET, POST, OPTIONS, PUT, DELETE
+     - `Access-Control-Allow-Headers`: Content-Type, Authorization, X-Requested-With
+     - `Access-Control-Max-Age`: 86400 (24 hours cache)
+     - `Access-Control-Allow-Credentials`: true
+
+2. **forwardToGAS(request, url, path)**
+   - Forwards request to Google Apps Script
+   - Preserves:
+     - HTTP method (GET, POST, etc)
+     - Query parameters
+     - Request body (for POST/PUT)
+     - Content-Type header
+   - Logging:
+     - Client IP (from CF-Connecting-IP header)
+     - Request method and path
+     - Response status code
+     - Timestamp
+   - Error handling:
+     - Returns 502 Bad Gateway on failure
+     - Never exposes GAS URL in error messages
+
+3. **addCORSHeaders(response, origin)**
+   - Adds CORS headers to response
+   - Adds security headers:
+     ```javascript
+     'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:;"
+     'X-Content-Type-Options': 'nosniff'
+     'X-Frame-Options': 'DENY'
+     'X-XSS-Protection': '1; mode=block'
+     'Referrer-Policy': 'strict-origin-when-cross-origin'
+     ```
+
+4. **isOriginAllowed(origin)**
+   - Validates origin against ALLOWED_ORIGINS
+   - Strict exact-match only (no wildcards)
+   - Returns boolean
+
+---
+
+### 2. **CLOUDFLARE_WORKER_PRODUCTION.js** (280+ lines)
+
+**Location:** `d:\My_Repos\Webpot-Store\CLOUDFLARE_WORKER_PRODUCTION.js`
+
+**Purpose:** Production-ready copy of Cloudflare Worker code. Ready to copy-paste into Cloudflare dashboard.
+
+**Key Features:**
+- HTTPS enforcement with 301 redirect
+- 8 security headers (CSP, X-Frame, etc)
+- Request logging with IP tracking
+- Error sanitization (never exposes GAS URL)
+- Comprehensive comments
+- Production-ready
+
+---
+
+## Configuration & Deployment Files
+
+### 1. **.github/workflows/deploy.yml** (GitHub Actions)
+
+**Location:** `d:\My_Repos\Webpot-Store\.github/workflows/deploy.yml`
+
+**Purpose:** Automated deployment to GitHub Pages when code is pushed.
+
+**Workflow Steps:**
+
+```yaml
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+    - name: Install dependencies
+      run: npm install
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./
+        include_dot_files: true
+```
+
+**How It Works:**
+1. On push to main branch
+2. Checkout code
+3. Install Node.js 18
+4. Install npm dependencies (if needed)
+5. Deploy to GitHub Pages using peaceiris action
+6. Public files go to GitHub Pages hosting
+
+---
+
+### 2. **.gitignore** (Git exclusion rules)
+
+**Location:** `d:\My_Repos\Webpot-Store\.gitignore`
+
+**Purpose:** Prevents committing unnecessary files to GitHub.
+
+**Excluded:**
+```
+node_modules/          # Dependencies (large)
+.env                   # Environment variables (secrets)
+.env.local             # Local environment (secrets)
+.env.*.local           # Environment variants
+.vscode/               # IDE configuration
+.idea/                 # IDE configuration
+*.swp, *.swo, *~       # Editor temporary files
+.DS_Store              # macOS system files
+Thumbs.db              # Windows system files
+logs/, *.log           # Log files
+npm-debug.log*         # npm error logs
+coverage/              # Test coverage
+tmp/, temp/            # Temporary directories
+*.bak                  # Backup files
+```
+
+---
+
+### 3. **CNAME** (Custom domain)
+
+**Location:** `d:\My_Repos\Webpot-Store\CNAME`
+
+**Purpose:** Specifies custom domain for GitHub Pages.
+
+**Content:**
+```
+webpot.shop
+```
+
+**How It Works:**
+1. GitHub Pages reads this file
+2. Maps domain webpot.shop to GitHub Pages
+3. Requires DNS configuration at domain registrar
+
+---
+
+## Data Flow & Communication
+
+### Complete Request-Response Cycle
+
+#### Example: Get Orders
+
+**Frontend Request:**
+```javascript
+// User calls in browser console or from UI
+getOrders()
+
+// js/api.js executes:
+apiCall("/orders", { method: "GET", action: "getOrders" })
+
+// Fetch request:
+fetch("https://api.yourdomain.com/api/orders?action=getOrders", {
+  method: "GET",
+  headers: { "Content-Type": "application/json" }
+})
+```
+
+**Cloudflare Worker Processing:**
+```javascript
+// Worker receives request
+fetch("https://api.yourdomain.com/api/orders?action=getOrders")
+
+// Validates:
+// 1. Check if OPTIONS (preflight) → return 204
+// 2. Check if /api/* path → forward to GAS
+// 3. Validate origin against ALLOWED_ORIGINS
+// 4. Log request: IP, method, path, timestamp
+
+// Forward to GAS:
+fetch("https://script.google.com/macros/s/.../exec?action=getOrders", {
+  method: "GET",
+  headers: { "Content-Type": "application/json" }
+})
+
+// Add CORS headers to response
+// Add security headers (CSP, X-Frame, etc)
+```
+
+**Google Apps Script Processing:**
+```javascript
+// doGet(e) called with parameter: {action: 'getOrders'}
+
+// handleRequest(e, 'GET') executes:
+switch(action) {
+  case 'getOrders':
+    return getOrders();  // Function executed
+}
+
+// getOrders() executes:
+const sheet = SHEET.getSheetByName('Orders');
+const data = sheet.getDataRange().getValues();
+// Reads all rows from Orders sheet
+// Converts to JSON array
+// Filters empty rows
+
+// Returns JSON:
+{
+  orders: [
+    {order_id: 'ORD-1', customer_name: 'John', amount: 2999, ...},
+    {order_id: 'ORD-2', customer_name: 'Jane', amount: 5999, ...},
+    ...
+  ],
+  count: 42
+}
+```
+
+**Response Through Layers:**
+```
+Google Apps Script returns JSON
+    ↓
+Cloudflare Worker adds headers
+    ↓
+Browser receives response
+    ↓
+js/api.js parses JSON
+    ↓
+Returns: { success: true, data: [...] }
+    ↓
+UI updates with data
+```
+
+---
+
+### Authentication Flow
+
+**Login Process:**
+
+```
+1. User enters email & password
+2. submitForm() in js/forms.js calls:
+   createUser({email, password, name})
+
+3. js/api.js makes request:
+   apiCall("/users", {
+     method: "POST",
+     action: "createUser",
+     body: {email, password, name}
+   })
+
+4. Cloudflare Worker:
+   - Validates origin
+   - Adds CORS headers
+   - Forwards to GAS
+
+5. Google Apps Script:
+   - createUser() validates email format
+   - Appends to Users sheet
+   - Generates auth token
+   - Returns: {token, user}
+
+6. Frontend receives response:
+   - setAuthToken(token) saves to localStorage
+   - setUserData(user) saves user object
+   - updateAuthUI() shows profile dropdown
+   - Redirects to dashboard
+
+7. On page reload:
+   - js/script.js calls updateAuthUI()
+   - getAuthToken() from localStorage
+   - Shows profile section if authenticated
+```
+
+---
+
+### Error Handling Strategy
+
+**Network Errors:**
+```javascript
+// js/api.js catch block
+if (error.name === "AbortError") {
+  // Timeout: request > 10 seconds
+  return { success: false, error: "Request Timeout" }
+}
+
+if (error instanceof TypeError && error.message.includes("Failed to fetch")) {
+  // Network error or CORS issue
+  return { success: false, error: "Network Error" }
+}
+```
+
+**API Errors:**
+```javascript
+// Cloudflare Worker catches GAS errors
+if (!response.ok) {
+  return new Response(
+    JSON.stringify({
+      error: "Gateway Error",
+      message: "Please try again later"
+      // Never expose GAS URL or internal details
+    }),
+    { status: 502 }
+  )
+}
+```
+
+**Validation Errors:**
+```javascript
+// Google Apps Script validates input
+if (!userData.user_id || !userData.email) {
+  return returnJSON({
+    error: 'Missing required fields',
+    required: ['user_id', 'email']
+  }, 400)
+}
+
+if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userData.email)) {
+  return returnJSON({
+    error: 'Invalid email format'
+  }, 400)
+}
+```
+
+---
+
+## File Structure & Organization
+
+### Directory Tree
+
+```
+Webpot-Store/
+│
+├── 📄 index.html (443 lines)
+│   └── Main website entry point
+│       └── Sections: Hero, About, Services, Modals, Footer
+│       └── Imports 8 JS modules + QRCode.js
+│
+├── 📁 css/
+│   └── style.css
+│       └── Mobile-first responsive design
+│       └── All component styling
+│
+├── 📁 js/ (8 modules)
+│   ├── config.js (79 lines)
+│   │   └── Global configuration
+│   │   └── Auth token management
+│   │   └── localStorage helpers
+│   │
+│   ├── api.js (170 lines)
+│   │   └── API communication layer
+│   │   └── Fetch wrapper with timeout
+│   │   └── 8 endpoint functions
+│   │   └── Error handling
+│   │
+│   ├── ui.js (100 lines)
+│   │   └── UI interaction functions
+│   │   └── Modal management
+│   │   └── Navigation toggle
+│   │   └── Notification handling
+│   │
+│   ├── orders.js (233 lines)
+│   │   └── Order & payment processing
+│   │   └── UPI QR code generation
+│   │   └── Form validation
+│   │   └── Service selection
+│   │
+│   ├── users.js (50 lines)
+│   │   └── Authentication UI
+│   │   └── Profile dropdown
+│   │   └── Logout handling
+│   │
+│   ├── forms.js (20 lines)
+│   │   └── Form submission
+│   │   └── Contact form handler
+│   │
+│   ├── content.js (100 lines)
+│   │   └── Dynamic content loading
+│   │   └── Testimonials
+│   │   └── Notifications
+│   │   └── Fallback data
+│   │
+│   └── script.js (50 lines)
+│       └── App initialization
+│       └── DOMContentLoaded handler
+│       └── Auto-refresh intervals
+│       └── Copyright year update
+│
+├── 📁 html/
+│   ├── privacy.html
+│   ├── terms.html
+│   └── updates.html
+│
+├── 📁 assets/
+│   └── images/ (empty, ready for images)
+│
+├── 📁 dashboard-webpot/
+│   └── Admin dashboard interface
+│   └── User dashboard interface
+│
+├── 📁 .github/workflows/
+│   └── deploy.yml (GitHub Actions automation)
+│
+├── 🔧 BACKEND CODE (Ready to Copy)
+│   ├── GOOGLE_APPS_SCRIPT.gs (437 lines)
+│   │   └── Backend API server
+│   │   └── User/Order/Session CRUD
+│   │   └── Input validation
+│   │   └── Data storage
+│   │
+│   └── GOOGLE_APPS_SCRIPT_PRODUCTION.gs (400+ lines)
+│       └── Production-ready copy
+│       └── Security hardening
+│       └── Error sanitization
+│
+├── 🚀 API GATEWAY (Ready to Copy)
+│   ├── CLOUDFLARE_WORKER.js (265 lines)
+│   │   └── CORS gateway
+│   │   └── Request forwarding
+│   │   └── Security headers
+│   │   └── Request logging
+│   │
+│   └── CLOUDFLARE_WORKER_PRODUCTION.js (280+ lines)
+│       └── Production-ready copy
+│       └── HTTPS enforcement
+│       └── CSP headers
+│
+├── 📋 CONFIGURATION
+│   ├── .gitignore (Git exclusion rules)
+│   ├── CNAME (webpot.shop)
+│   └── package.json (if Node.js used)
+│
+├── 📸 ASSETS
+│   ├── logo.png (Webpot logo)
+│   ├── default pfp.webp (Default profile picture)
+│
+└── 📚 DOCUMENTATION
+    ├── Final guide full.md (Original complete guide)
+    └── [Other markdown files - to be removed]
+```
+
+---
+
+## Security Architecture
+
+### CORS Protection
+```
+Frontend (GitHub Pages)
+    ↓ Only if origin in ALLOWED_ORIGINS
+Cloudflare Worker
+    ↓ Validates origin header
+    ↓ Adds Access-Control-Allow-Origin
+Google Apps Script (Never exposed to browser)
+```
+
+### Input Validation (3 Layers)
+```
+1. Frontend (js/orders.js):
+   - Email format (regex)
+   - Phone format (10+ digits)
+   - Required fields
+
+2. API Gateway (Cloudflare Worker):
+   - Content-Type validation
+   - Request size limits
+
+3. Backend (Google Apps Script):
+   - Email format validation
+   - Amount type validation
+   - Required fields checking
+```
+
+### Error Sanitization
+```
+Google Apps Script Error:
+  Error: Line 123: Cannot read property of undefined
+  
+Cloudflare Worker intercepts:
+  Removes: Line number, internal details
+  Returns: "An error occurred. Please try again later."
+  
+Browser receives:
+  { error: "Server Error", message: "An error occurred..." }
+  (No internal details exposed)
+```
+
+### HTTPS Enforcement
+```
+Browser: http://api.yourdomain.com
+  ↓ Cloudflare Worker
+  301 Redirect: https://api.yourdomain.com
+  ↓ Browser follows redirect
+```
+
+---
+
+## Performance Considerations
+
+### Frontend Optimization
+- **Lazy Loading:** Images load on scroll
+- **Minified CSS:** Compressed stylesheet
+- **Module Loading:** Each JS module loaded once
+- **localStorage Caching:** Auth token cached locally
+- **API Timeout:** 10 seconds maximum wait
+
+### Backend Optimization
+- **Sheet Queries:** Direct range access, not entire sheet
+- **Filtered Results:** Empty rows filtered out
+- **JSON Response:** Compact format, no unnecessary data
+
+### Caching Strategy
+- **Testimonials:** Refresh every 30 minutes
+- **Notifications:** Refresh every 5 minutes
+- **User Profile:** Cached in localStorage until logout
+- **CORS Preflight:** Cached for 24 hours (86400 seconds)
+
+---
+
+## Deployment Checklist
+
+### Before Going Live:
+
+✅ Update SHEET_ID in GOOGLE_APPS_SCRIPT_PRODUCTION.gs  
+✅ Deploy GAS as Web App with "Anyone" access  
+✅ Update GAS_URL in CLOUDFLARE_WORKER_PRODUCTION.js  
+✅ Update ALLOWED_ORIGINS with GitHub Pages URL  
+✅ Deploy Cloudflare Worker with route `/api/*`  
+✅ Update BASE_URL in js/api.js  
+✅ Push to GitHub main branch  
+✅ Enable GitHub Pages in Settings  
+✅ Run all 7 tests from DEPLOYMENT_CHECKLIST.md  
+✅ Verify no CORS errors in console  
+✅ Verify data writes to Google Sheets  
+
+---
+
+## Summary
+
+This Webpot website is a complete three-tier web application:
+
+- **Frontend:** 8 JavaScript modules + HTML/CSS on GitHub Pages
+- **API Gateway:** Cloudflare Workers handling CORS & security
+- **Backend:** Google Apps Script handling business logic
+- **Database:** Google Sheets storing all data
+
+Every file has a specific purpose, and they work together to create a seamless user experience with proper security, validation, and error handling throughout all three tiers.
+
+---
+
+**Created:** January 16, 2026  
+**Version:** 2.0 - Production Ready  
+**Status:** ✅ Complete & Ready for Senior Review

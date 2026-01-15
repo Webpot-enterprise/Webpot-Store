@@ -1072,7 +1072,7 @@ Before testing, ensure:
 On your terminal/command line:
 
 ```bash
-curl "https://script.google.com/macros/s/AKfycbwyb7w0ZFQpGdcCbrm1KfhYyI_0Bsws1CycGT8otylvQlV-tOf1A6vJLVUum37L5vX6/exec?action=test"
+curl "https://script.google.com/macros/s/AKfycbxb5XesTNnxNySyUVuDBU6Vjyk2PBDia5pbyULneRBVYnGExxisZY7zXFBJ48nDekwe/exec?action=test"
 ```
 
 **Production URL used above.** For your own deployment, replace with your actual GAS Web App URL.
