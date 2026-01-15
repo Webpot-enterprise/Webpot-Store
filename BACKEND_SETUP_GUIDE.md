@@ -6,6 +6,21 @@
 
 ---
 
+## Credentials Reference (Save These)
+
+> ⚠️ **IMPORTANT:** Keep these credentials secure and never commit them to public repositories.
+
+| Component | Value |
+|-----------|-------|
+| **Google OAuth Client ID** | `709120008855-p9m39a4h5i728l0kltuhk9r2dme7t192.apps.googleusercontent.com` |
+| **Google OAuth Client Secret** | `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` |
+| **Google Sheet ID** | `1CbFocUID9WLRrX34Xx093qxGC7V5CpZWRIU4H5NRTnM7pDBpLcZboPX2` |
+| **GAS Web App URL** | `https://script.google.com/macros/s/AKfycbwyb7w0ZFQpGdcCbrm1KfhYyI_0Bsws1CycGT8otylvQlV-tOf1A6vJLVUum37L5vX6/exec` |
+
+**Use these values throughout the setup process.** They're already embedded in the code examples below.
+
+---
+
 ## Table of Contents
 
 1. [Google Sheets Database Architecture](#1-google-sheets-database-architecture)
@@ -31,7 +46,7 @@
 7. Copy the **Sheet ID** from the URL (the long alphanumeric string between `/d/` and `/edit`)
    - Example: `https://docs.google.com/spreadsheets/d/**1A2B3C4D5E6F7G8H9I**`
    - Save this ID; you'll need it later
-   - **Your Existing Sheet ID:** `1wreXWGm1j4CCO7Id00ypwU3dd4fGFxlLs03_0RsPh78`
+   - **Your Existing Sheet ID:** `1CbFocUID9WLRrX34Xx093qxGC7V5CpZWRIU4H5NRTnM7pDBpLcZboPX2`
 
 ### Step 1.2: Create Tab 1 - `Users`
 
@@ -325,7 +340,7 @@ ReferralCodes Table:
 // WebDevServices API - Google Apps Script Core
 // ============================================================
 
-const SHEET_ID = "YOUR_GOOGLE_SHEET_ID_HERE"; // Replace with your Sheet ID from Step 1.1
+const SHEET_ID = "1CbFocUID9WLRrX34Xx093qxGC7V5CpZWRIU4H5NRTnM7pDBpLcZboPX2"; // Your Google Sheet ID
 const SHEET = SpreadsheetApp.openById(SHEET_ID);
 
 // ============================================================
@@ -1586,70 +1601,24 @@ function handleFetchOrdersByStatus(params) {
 
 ---
 
-## 4. Cloudflare Workers (The Gateway & CORS Manager)
+## 4. Cloudflare Workers (The Gateway & CORS Manager) - Web Dashboard Setup
 
-### Step 4.1: Create a Cloudflare Workers Project
+### Step 4.1: Create Worker via Cloudflare Dashboard
 
 1. Go to [Cloudflare Dashboard](https://dash.cloudflare.com)
 2. Log in with your Cloudflare account
-3. In the left sidebar, click **Workers & Pages** → **Overview**
-4. Click **Create application** → **Create a Worker**
-5. Name the worker: **`webdevservices-api`**
-6. Click **Create service**
-7. You'll see the script editor
+3. Select your domain: **webpot.shop** (from the domain list)
+4. In the **left sidebar**, click **Workers & Pages**
+5. Click **Create Application**
+6. Click **Create a Worker**
+7. Enter name: **`webdevservices-api`**
+8. Click **Create service**
+9. You'll see the **Code Editor** with a template script
 
-### Step 4.2: Create wrangler.toml Configuration
+### Step 4.2: Paste the Worker Code
 
-1. Ensure you have [Node.js](https://nodejs.org) installed
-2. Open your terminal and create a project directory:
-   ```bash
-   mkdir webdevservices-worker
-   cd webdevservices-worker
-   ```
-3. Initialize with Wrangler (Cloudflare's CLI):
-   ```bash
-   npm install wrangler --save-dev
-   npx wrangler init
-   ```
-4. Choose your options:
-   - **Name:** `webdevservices-api`
-   - **Type:** `fetch` handler
-   - **Authorize to Cloudflare:** Yes, then log in
-5. After initialization, open `wrangler.toml` and replace its contents:
-
-```toml
-# ============================================================
-# Cloudflare Worker Configuration
-# ============================================================
-
-name = "webdevservices-api"
-main = "src/index.js"
-compatibility_date = "2025-01-15"
-
-# ============================================================
-# Environment Variables
-# ============================================================
-[env.production]
-vars = { GAS_WEB_APP_URL = "https://script.googleapis.com/macros/d/YOUR_GAS_DEPLOYMENT_ID/usercontent" }
-
-[env.development]
-vars = { GAS_WEB_APP_URL = "https://script.googleapis.com/macros/d/YOUR_GAS_DEPLOYMENT_ID/usercontent" }
-
-# ============================================================
-# Route Configuration
-# ============================================================
-route = "yourdomain.com/api/*"
-zone_id = "YOUR_CLOUDFLARE_ZONE_ID"
-```
-
-**Important:** Replace the following:
-- `YOUR_GAS_DEPLOYMENT_ID`: The deployment ID from your GAS Web App URL (Step 3.5)
-- `yourdomain.com`: Your actual domain
-- `YOUR_CLOUDFLARE_ZONE_ID`: Your Cloudflare zone ID (find this in Cloudflare Dashboard under your domain)
-
-### Step 4.3: Create the Worker Script
-
-1. Open `src/index.js` and replace its contents:
+1. In the code editor, **delete all the template code**
+2. **Paste this complete code:**
 
 ```javascript
 // ============================================================
@@ -1716,7 +1685,8 @@ export default {
     // ============================================================
     // Build the request to Google Apps Script
     // ============================================================
-    const gasUrl = new URL(env.GAS_WEB_APP_URL);
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwyb7w0ZFQpGdcCbrm1KfhYyI_0Bsws1CycGT8otylvQlV-tOf1A6vJLVUum37L5vX6/exec";
+    const gasUrl = new URL(GAS_WEB_APP_URL);
     gasUrl.searchParams.set("action", action);
 
     // If it's a GET request, forward query parameters
@@ -1744,7 +1714,6 @@ export default {
         headers: gasHeaders
       });
     } else if (method === "POST") {
-      // For POST, forward the body as-is
       const body = await request.text();
       gasRequest = new Request(gasUrl.toString(), {
         method: "POST",
@@ -1766,13 +1735,13 @@ export default {
     }
 
     // ============================================================
-    // Handle GAS Response & Redirects (Critical)
+    // Handle GAS Response & Redirects
     // ============================================================
     let gasResponse;
     try {
       gasResponse = await fetch(gasRequest);
 
-      // Handle 302 redirects from GAS (GAS sometimes redirects, follow it)
+      // Handle 302 redirects from GAS
       if (gasResponse.status === 302) {
         const redirectUrl = gasResponse.headers.get("Location");
         if (redirectUrl) {
@@ -1809,7 +1778,6 @@ export default {
     try {
       jsonBody = JSON.parse(gasBody);
     } catch (e) {
-      // If GAS returns non-JSON, wrap it
       jsonBody = {
         success: false,
         code: "INVALID_GAS_RESPONSE",
@@ -1825,7 +1793,7 @@ export default {
       status: gasResponse.status,
       headers: {
         "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*", // Allow all origins (frontend domain)
+        "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With",
         "Cache-Control": "no-cache, no-store, must-revalidate"
@@ -1835,34 +1803,67 @@ export default {
 };
 ```
 
-### Step 4.4: Deploy the Worker
+3. Click **Save and Deploy** (blue button in top right)
+4. Wait for the deployment to complete (you'll see ✅ success message)
 
-1. In your terminal, ensure you're in the `webdevservices-worker` directory
-2. Deploy the worker:
-   ```bash
-   npx wrangler deploy --env production
-   ```
-3. If prompted, log in to your Cloudflare account
-4. After successful deployment, you'll see:
-   ```
-   ✓ Uploaded webdevservices-api (2.3 KiB)
-   ✓ Published webdevservices-api
-     https://webdevservices-api.YOURUSERNAME.workers.dev
-   ```
+### Step 4.3: Connect Worker to Your Domain
 
-### Step 4.5: Set the Worker Custom Domain
+1. In the **Worker details page**, click the **Settings** tab
+2. Scroll down to **Domains & Routes**
+3. Click **Add route**
+4. Fill in:
+   - **Route:** `webpot.shop/api/*`
+   - **Zone:** `webpot.shop` (select from dropdown)
+5. Click **Save**
 
-1. Go to [Cloudflare Dashboard](https://dash.cloudflare.com)
-2. Select your domain
-3. Click **Workers & Pages** → **Overview**
-4. Find your worker `webdevservices-api`
-5. Click it → **Settings**
-6. Under **Domains & Routes**, click **Add route**
-7. Enter:
-   - **Route:** `yourdomain.com/api/*`
-   - **Zone:** Select your zone
-8. Click **Save**
-9. Now your API is accessible at: `https://yourdomain.com/api/`
+✅ **Your API is now live at:** `https://webpot.shop/api/`
+
+### Step 4.4: Test Your Worker
+
+Open your browser and visit:
+
+```
+https://webpot.shop/api/login?action=login
+```
+
+You should see a JSON response:
+
+```json
+{
+  "success": false,
+  "code": "MISSING_CREDENTIALS",
+  "message": "Email and password are required"
+}
+```
+If i get this error when going to this url: https://webpot.shop/api/login?action=login
+
+-> 
+{
+  "success": false,
+  "code": "SERVER_ERROR",
+  "message": "TypeError: Cannot read properties of undefined (reading 'getRemoteUser')"
+}
+
+then what to do? and how to solve it?The error message you're encountering indicates that the `e.source.getRemoteUser` property is undefined in the Google Apps Script environment. This property is not available in the context of web app requests, which is causing the TypeError.
+Solution:To resolve this issue, you need to modify the way you obtain the IP address in your Google Apps Script. Instead of using `e.source.getRemoteUser`, you can use the `X-Forwarded-For` header from the request to get the client's IP address. Here's how you can do it:1. Locate the lines in your `doGet` and `doPost` functions where you are trying to get the IP address:```javascript
+const ipAddress = e.source.getRemoteUser ? "server" : "unknown";
+```2. Replace that line with the following code to extract the IP address from the request headers:```javascript
+const ipAddress = e.headers["X-Forwarded-For"] || "unknown";
+```
+
+✅ **If you see this, your Worker is working!**
+
+### Summary: No Terminal Required!
+
+| Step | Action | Where |
+|------|--------|-------|
+| 1 | Create Worker | Cloudflare Dashboard |
+| 2 | Paste code | Dashboard editor |
+| 3 | Click Deploy | Dashboard button |
+| 4 | Add route to domain | Dashboard settings |
+| 5 | Test | Browser address bar |
+
+**Everything happens on the Cloudflare website!**
 
 ---
 
@@ -1971,7 +1972,7 @@ if (isAllowedOrigin) {
 ### Pre-Deployment Verification
 
 - [ ] **Google Sheet:** Created with tabs: Users, Sessions, AuthTokens, Logs, Orders, ReferralCodes
-- [ ] **Google Sheet ID:** Copied and saved (`1wreXWGm1j4CCO7Id00ypwU3dd4fGFxlLs03_0RsPh78`)
+- [ ] **Google Sheet ID:** Copied and saved (`1CbFocUID9WLRrX34Xx093qxGC7V5CpZWRIU4H5NRTnM7pDBpLcZboPX2`)
 - [ ] **Headers Frozen:** All 6 tabs have row 1 frozen
 - [ ] **Data Validation:** Applied to all required columns (auth_provider, status, order_status, referral_code expiry, etc.)
 - [ ] **Google Cloud Project:** Created and OAuth APIs enabled (Sheets API, Drive API)
@@ -3328,3 +3329,98 @@ Before launching to production:
 Your backend is production-ready. Next step: Build your customer and admin dashboards to consume these APIs.
 
 Last validated: January 2026
+
+---
+
+## Complete Folder & File Structure
+
+\\\
+Webpot-Store/
+ .git/                                (Git repository)
+ BACKEND_SETUP_GUIDE.md              (This file)
+ QUICK_REFERENCE_ORDERS.md           (Orders API quick reference)
+ Readme.md                           (Project overview)
+ changes.md                          (Changelog)
+ CNAME                               (Domain configuration)
+ logo.png                            (Logo asset)
+ default pfp.webp                    (Default profile picture)
+
+ main page/                          (Landing page website)
+    html/
+       index.html                 (Main landing page)
+       privacy.html               (Privacy policy)
+       terms.html                 (Terms of service)
+       updates.html               (Updates/news page)
+    css/
+        styles.css                 (Landing page styles)
+
+ dashboard-webpot/                   (User & Admin dashboards)
+     logo.png                        (Dashboard logo)
+     default pfp.webp                (Default user profile picture)
+    
+     admin dashboard/                (Legacy admin dashboard)
+        admin.html                 (Admin interface)
+        admin-style.css            (Admin styles)
+    
+     admin_dashboard/                (Current admin dashboard)
+        admin.html                 (Admin dashboard HTML)
+        admin-script.js            (Admin dashboard logic)
+        admin-style.css            (Admin dashboard styles)
+    
+     user dashboard/                 (User dashboard)
+        html/
+           index.html             (User dashboard home)
+           orders.html            (User orders page)
+           privacy.html           (Privacy policy)
+           settings.html          (User account settings)
+           QUICKSTART.html        (Quick start guide)
+           terms-conditions.html  (Terms & conditions)
+           terms.html             (Terms of service)
+        css/
+            style.css              (Main user dashboard styles)
+            orders.css             (Orders page styles)
+            settings.css           (Settings page styles)
+            terms-conditions.css   (Legal page styles)
+    
+     html/                           (Shared HTML files)
+        index.html                 (Index page)
+        orders.html                (Orders page)
+        privacy.html               (Privacy policy)
+        settings.html              (Settings page)
+        QUICKSTART.html            (Quick start guide)
+        terms-conditions.html      (Terms & conditions)
+        terms.html                 (Terms of service)
+    
+     css/                            (Shared CSS files)
+        style.css                  (Main styles)
+        orders.css                 (Orders page styles)
+        settings.css               (Settings page styles)
+        terms-conditions.css       (Legal page styles)
+    
+     js/                             (JavaScript files - currently empty)
+    
+     assets/                         (Media assets)
+         images/                     (Image files)
+\\\
+
+### Directory Descriptions
+
+- **main page/**: Public-facing landing/marketing website
+- **dashboard-webpot/**: Complete user and admin dashboard application
+  - **admin_dashboard/**: Admin panel for managing orders, users, and system settings
+  - **user dashboard/**: End-user dashboard for viewing orders, managing accounts, and accessing services
+  - **assets/**: Images and media files used across dashboards
+  - **html/ & css/**: Shared resources for both user and admin dashboards
+
+### Key Files Reference
+
+| File | Purpose |
+|------|---------|
+| BACKEND_SETUP_GUIDE.md | Complete backend API setup and configuration (this file) |
+| QUICK_REFERENCE_ORDERS.md | Quick reference for Orders API endpoints |
+| Readme.md | Project overview and general documentation |
+| changes.md | Changelog of updates and modifications |
+| admin.html / admin-script.js | Admin dashboard components |
+| index.html (user dashboard) | Main user dashboard interface |
+| orders.html | User orders management page |
+| settings.html | User account settings |
