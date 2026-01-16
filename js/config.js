@@ -6,7 +6,7 @@ const API_CONFIG = {
   CLOUDFLARE_WORKER: 'https://webpot-api.yourdomain.workers.dev',
   
   // Google Apps Script Web App URL (used for direct testing only)
-  GAS_URL: 'https://script.google.com/macros/s/AKfycbwyb7w0ZFQpGdcCbrm1KfhYyI_0Bsws1CycGT8otylvQlV-tOf1A6vJLVUum37L5vX6/exec',
+  GAS_URL: 'https://script.google.com/macros/s/AKfycbxb5XesTNnxNySyUVuDBU6Vjyk2PBDia5pbyULneRBVYnGExxisZY7zXFBJ48nDekwe/exec',
   
   // Authentication token storage
   AUTH_TOKEN_KEY: 'webpot_auth_token',
@@ -16,6 +16,8 @@ const API_CONFIG = {
   ACTIONS: {
     LOGIN: 'login',
     REGISTER: 'register',
+    GOOGLE_LOGIN: 'googleLogin',
+    VERIFY_TOKEN: 'verifyToken',
     GET_USER: 'getUser',
     UPDATE_USER: 'updateUser',
     SUBMIT_CONTACT: 'submitContact',

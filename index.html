@@ -31,13 +31,14 @@
                 
                 <!-- User Profile Dropdown (shown when logged in) -->
                 <div class="user-menu" id="userMenu" style="display: none;">
+                    <button class="dashboard-btn" onclick="window.location.href='./dashboard-webpot/user_dashboard/html/index.html'" title="Go to Dashboard">Dashboard</button>
                     <button class="user-profile-btn" onclick="toggleUserMenu(event)">
                         <img class="user-profile-pic" id="userProfilePic" src="" alt="Profile">
                         <span class="user-name" id="userName"></span>
                         <span class="dropdown-arrow">▼</span>
                     </button>
                     <div class="user-dropdown" id="userDropdown">
-                        <a href="../dashboard-webpot/user dashboard/html/index.html" class="dropdown-item">Go To Dashboard</a>
+                        <a href="./dashboard-webpot/user_dashboard/html/index.html" class="dropdown-item">Dashboard</a>
                         <button class="dropdown-item logout-btn" onclick="logoutUser()">Logout</button>
                     </div>
                 </div>

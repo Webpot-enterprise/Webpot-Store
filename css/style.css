@@ -809,8 +809,29 @@ nav a:hover::after {
     box-shadow: 0 8px 20px rgba(176, 176, 176, 0.4);
 }
 
+.dashboard-btn {
+    padding: 8px 20px;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: white;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: none;
+    margin-right: 10px;
+}
+
+.dashboard-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
+}
+
 .user-menu {
     position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .user-profile-btn {

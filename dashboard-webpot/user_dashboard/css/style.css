@@ -532,6 +532,10 @@ body {
     color: var(--accent-gray);
 }
 
+.profile-status {
+    margin-top: 0.75rem;
+}
+
 .profile-details {
     padding: 2rem;
     display: grid;
@@ -1129,3 +1133,238 @@ body {
         font-size: 0.95rem;
     }
 }
+
+/* =============================================
+   ORDERS TABLE STYLES
+   ============================================= */
+
+.orders-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+.orders-table thead {
+    background-color: var(--secondary-light);
+    border-bottom: 2px solid var(--border-gray);
+}
+
+.orders-table th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-dark);
+    font-size: 0.9rem;
+}
+
+.orders-table td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-gray);
+    font-size: 0.95rem;
+}
+
+.orders-table tbody tr:hover {
+    background-color: var(--secondary-light);
+}
+
+/* =============================================
+   SESSIONS TABLE STYLES
+   ============================================= */
+
+.sessions-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+.sessions-table thead {
+    background-color: var(--secondary-light);
+    border-bottom: 2px solid var(--border-gray);
+}
+
+.sessions-table th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-dark);
+    font-size: 0.9rem;
+}
+
+.sessions-table td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-gray);
+    font-size: 0.95rem;
+}
+
+.sessions-table tbody tr:hover {
+    background-color: var(--secondary-light);
+}
+
+/* =============================================
+   STATUS BADGE STYLES
+   ============================================= */
+
+.status-badge {
+    display: inline-block;
+    padding: 0.4rem 0.8rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.status-pending {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.status-processing {
+    background-color: #d1ecf1;
+    color: #0c5460;
+}
+
+.status-shipped {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status-delivered {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status-cancelled {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.status-active {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status-expired {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+/* =============================================
+   ACTIVITY TIMELINE STYLES
+   ============================================= */
+
+.activity-timeline {
+    margin-top: 1rem;
+}
+
+.activity-item {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+    border-left: 2px solid var(--border-gray);
+    margin-left: 1rem;
+    transition: var(--transition);
+}
+
+.activity-item:hover {
+    border-left-color: #666;
+}
+
+.activity-time {
+    font-size: 0.85rem;
+    color: var(--accent-gray);
+    min-width: 150px;
+    font-weight: 600;
+}
+
+.activity-action {
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+.activity-details {
+    color: var(--accent-gray);
+    font-size: 0.9rem;
+}
+
+/* =============================================
+   EMPTY STATE STYLES
+   ============================================= */
+
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--accent-gray);
+    background-color: var(--secondary-light);
+    border-radius: 8px;
+    margin-top: 1rem;
+}
+
+.error-state {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: #721c24;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 8px;
+    margin-top: 1rem;
+}
+
+.loading-spinner {
+    text-align: center;
+    padding: 2rem;
+    color: var(--accent-gray);
+}
+
+/* =============================================
+   RESPONSIVE ADJUSTMENTS FOR TABLES
+   ============================================= */
+
+@media (max-width: 768px) {
+    .orders-table,
+    .sessions-table {
+        font-size: 0.85rem;
+    }
+
+    .orders-table th,
+    .sessions-table th,
+    .orders-table td,
+    .sessions-table td {
+        padding: 0.75rem 0.5rem;
+    }
+
+    .activity-item {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .activity-time {
+        min-width: auto;
+    }
+}
+
+/* =============================================
+   SECTION CONTAINER STYLES
+   ============================================= */
+
+.sessions-section,
+.activity-section {
+    margin-top: 2rem;
+}
+
+.sessions-container,
+.activity-log-container {
+    margin-top: 1rem;
+}
+
+.copy-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--accent-gray);
+    transition: var(--transition);
+    padding: 0.25rem 0.5rem;
+}
+
+.copy-btn:hover {
+    color: var(--text-dark);
+}
+

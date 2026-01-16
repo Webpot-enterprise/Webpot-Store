@@ -6,6 +6,9 @@
     <title>WebPot Dashboard</title>
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="../../js/config.js"></script>
+    <script src="../../js/api.js"></script>
+    <script src="../../js/users.js"></script>
 </head>
 <body>
     <!-- Navigation Bar -->
@@ -95,7 +98,7 @@
             <section class="section profile-section">
                 <div class="section-header">
                     <h2>User Profile</h2>
-                    <button class="edit-btn">
+                    <button class="edit-btn" onclick="goToSettings()">
                         <i class="fas fa-edit"></i> Edit Profile
                     </button>
                 </div>
@@ -107,15 +110,10 @@
                         <div class="profile-info">
                             <h3 id="userName">Loading...</h3>
                             <p class="profile-email" id="profileHeaderEmail">-</p>
+                            <p class="profile-status"><span id="userStatus" class="status-badge">-</span></p>
                         </div>
                     </div>
                     <div class="profile-details">
-                        <div class="detail-item">
-                            <span class="detail-label">
-                                <i class="fas fa-phone"></i> Phone Number
-                            </span>
-                            <span class="detail-value" id="userPhone">-</span>
-                        </div>
                         <div class="detail-item">
                             <span class="detail-label">
                                 <i class="fas fa-envelope"></i> Email
@@ -124,20 +122,21 @@
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">
-                                <i class="fas fa-wallet"></i> Wallet Balance
+                                <i class="fas fa-phone"></i> Phone Number
                             </span>
-                            <span class="detail-value" id="userWallet">$0.00</span>
+                            <span class="detail-value" id="userPhone">-</span>
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">
-                                <i class="fas fa-link"></i> Referral Code
+                                <i class="fas fa-clock"></i> Last Login
                             </span>
-                            <span class="detail-value referral-code">
-                                <span id="referralCode">-</span>
-                                <button class="copy-btn" onclick="copyToClipboard()">
-                                    <i class="fas fa-copy"></i>
-                                </button>
+                            <span class="detail-value" id="lastLogin">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">
+                                <i class="fas fa-calendar"></i> Member Since
                             </span>
+                            <span class="detail-value" id="memberSince">-</span>
                         </div>
                     </div>
                 </div>
@@ -148,7 +147,7 @@
                 <div class="section-header">
                     <h2>Your Orders</h2>
                     <div class="filter-group">
-                        <select id="statusFilter" class="filter-select">
+                        <select id="statusFilter" class="filter-select" onchange="filterOrdersByStatus(this.value)">
                             <option value="all">All Status</option>
                             <option value="pending">Pending</option>
                             <option value="processing">Processing</option>
@@ -164,6 +163,26 @@
                 </div>
             </section>
 
+            <!-- Sessions Section -->
+            <section class="section sessions-section">
+                <div class="section-header">
+                    <h2>Active Sessions</h2>
+                </div>
+                <div class="sessions-container" id="sessionsContainer">
+                    <!-- Sessions will be loaded here -->
+                </div>
+            </section>
+
+            <!-- Activity Log Section -->
+            <section class="section activity-section">
+                <div class="section-header">
+                    <h2>Activity Log</h2>
+                </div>
+                <div class="activity-log-container" id="activityLog">
+                    <!-- Activity will be loaded here -->
+                </div>
+            </section>
+
             <!-- Footer -->
             <footer class="dashboard-footer">
                 <p>&copy; 2026 WebPot. All rights reserved.</p>
@@ -171,6 +190,12 @@
         </main>
     </div>
 
+    <script src="../../js/config.js"></script>
+    <script src="../../js/api.js"></script>
+    <script src="../../js/users.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/ui.js"></script>
     <script src="../js/script.js"></script>
 </body>
 </html>
