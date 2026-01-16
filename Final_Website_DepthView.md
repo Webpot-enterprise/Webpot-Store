@@ -2559,6 +2559,147 @@ if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userData.email)) {
 
 ---
 
+## Protected Endpoints (Authentication Required)
+
+### Overview
+
+Starting with v2.1, sensitive endpoints require token-based authentication. All protected endpoints must include an `Authorization` header with a Bearer token.
+
+**Token Lifecycle:**
+- **Generation:** Created during user login/registration via `generateToken()` in Google Apps Script
+- **Format:** UUID + random 8-digit number (e.g., `12345678-90abcdef-12345678`)
+- **Expiry:** 24 hours from creation
+- **Storage:** localStorage with key `webpot_auth_token`
+- **Transmission:** HTTP Authorization header with Bearer scheme
+
+### Protected Endpoints List
+
+#### 1. Order Endpoints (All Require Bearer Token)
+
+**GET /api/orders?action=getOrders**
+- **Purpose:** Retrieve all orders for authenticated user
+- **Auth Required:** ✅ Yes (Bearer token)
+- **Response (200):**
+  ```json
+  {
+    "orders": [
+      {
+        "order_id": "ORD-123456",
+        "user_id": "USER-1704067200000",
+        "customer_name": "John Doe",
+        "amount": 5999,
+        "order_status": "delivered"
+      }
+    ]
+  }
+  ```
+- **Response (401):**
+  ```json
+  {
+    "error": "Unauthorized"
+  }
+  ```
+
+**POST /api/orders?action=createOrder**
+- **Purpose:** Create a new order (requires authentication)
+- **Auth Required:** ✅ Yes (Bearer token)
+
+**GET /api/orders?action=getOrderById&orderId=ORD-123456**
+- **Purpose:** Retrieve a specific order by ID
+- **Auth Required:** ✅ Yes (Bearer token)
+
+**POST /api/orders?action=updateOrder**
+- **Purpose:** Update existing order status
+- **Auth Required:** ✅ Yes (Bearer token)
+
+#### 2. Contact Form Endpoint (Requires Authentication)
+
+**POST /api/contacts?action=submitContact**
+- **Purpose:** Submit contact form (authenticated users only)
+- **Auth Required:** ✅ Yes (Bearer token)
+
+**GET /api/contacts?action=getContacts**
+- **Purpose:** Retrieve all submitted contacts (admin only)
+- **Auth Required:** ✅ Yes (Bearer token)
+
+### Public Endpoints (No Authentication Required)
+
+**POST /api/users?action=register**
+- Register new user
+
+**POST /api/users?action=login**
+- Login and receive token
+
+**POST /api/users?action=googleLogin**
+- Login with Google OAuth
+
+**POST /api/users?action=verifyToken**
+- Verify token validity
+
+### Authorization Header Format
+
+All protected endpoints expect:
+```
+Authorization: Bearer {token}
+```
+
+**Example:**
+```
+Authorization: Bearer 12345678-90abcdef-99887766-55443322
+```
+
+### Frontend Auto-Forwarding
+
+The frontend automatically includes the Bearer token for all API calls via `js/api.js`:
+
+```javascript
+async function apiCall(endpoint, options = {}) {
+  const token = getAuthToken()  // Get from localStorage
+  const defaultHeaders = { 'Content-Type': 'application/json' }
+  
+  // Auto-add Authorization header if authenticated
+  if (token) {
+    defaultHeaders['Authorization'] = `Bearer ${token}`
+  }
+  
+  // Handle 401 Unauthorized
+  if (response.status === 401) {
+    clearAuthToken()                    // Clear token
+    window.location.href = '/auth.html' // Redirect to login
+  }
+}
+```
+
+### Backend Token Validation
+
+**Google Apps Script:**
+```javascript
+function validateTokenFromRequest(e) {
+  const authHeader = e.headers['Authorization'] || ''
+  if (!authHeader.startsWith('Bearer ')) return null
+  
+  const token = authHeader.substring(7)
+  const userId = validateToken(token)
+  return userId ? userId : null
+}
+```
+
+**Usage in protected endpoints:**
+```javascript
+const authUser = validateTokenFromRequest(e)
+if (!authUser) {
+  return returnJSON({ error: 'Unauthorized' }, 401)
+}
+// Process request with authUser
+```
+
+### Error Responses
+
+- **401 Unauthorized:** Invalid, missing, or expired token
+- **403 Forbidden:** User lacks required permissions
+
+---
+
 ## File Structure & Organization
 
 ### Directory Tree

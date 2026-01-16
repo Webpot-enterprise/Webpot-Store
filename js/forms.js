@@ -7,6 +7,13 @@
 async function submitForm(event) {
   event.preventDefault();
   
+  // Check authentication
+  if (!isAuthenticated()) {
+    showErrorMessage('Please login first to submit a contact form');
+    window.location.href = '/auth.html';
+    return;
+  }
+  
   const formData = {
     name: document.getElementById('name').value,
     email: document.getElementById('email').value,
@@ -20,6 +27,6 @@ async function submitForm(event) {
     showSuccessMessage();
     document.getElementById('contactForm').reset();
   } else {
-    alert('Error submitting form. Please try again.');
+    showErrorMessage(result.data?.error || 'Error submitting form. Please try again.');
   }
 }

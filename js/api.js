@@ -42,6 +42,12 @@ async function apiCall(endpoint, options = {}) {
     "Content-Type": "application/json"
   };
 
+  // Add Authorization header if user is authenticated
+  const token = getAuthToken();
+  if (token) {
+    defaultHeaders["Authorization"] = `Bearer ${token}`;
+  }
+
   // Merge headers
   const finalHeaders = { ...defaultHeaders, ...headers };
 
@@ -71,6 +77,19 @@ async function apiCall(endpoint, options = {}) {
     // Log response if debugging
     if (API_CONFIG.DEBUG) {
       console.log(`[API] Response: ${response.status} ${response.statusText}`);
+    }
+
+    // Handle unauthorized responses
+    if (response.status === 401) {
+      // Clear auth token and redirect to login
+      clearAuthToken();
+      clearUserData();
+      window.location.href = '/auth.html';
+      return {
+        success: false,
+        error: "Unauthorized",
+        message: "Your session has expired. Please log in again."
+      };
     }
 
     // Check if response is OK

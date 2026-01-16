@@ -24,6 +24,13 @@ function closeMenu() {
  * Open order modal
  */
 function openOrderModal() {
+  // Check authentication first
+  if (!isAuthenticated()) {
+    alert('Please login first to place an order');
+    window.location.href = '/auth.html';
+    return;
+  }
+  
   const modal = document.getElementById('orderModal');
   if (modal) {
     modal.style.display = 'block';
@@ -119,6 +126,26 @@ function showSuccessMessage() {
       successMessage.classList.remove('show');
     }, 4000);
   }
+}
+
+/**
+ * Show error message
+ * @param {string} message - Error message to display
+ */
+function showErrorMessage(message) {
+  // Try to show error in error message div if it exists
+  const errorDiv = document.getElementById('loginError') || 
+                   document.getElementById('registerError');
+  
+  if (errorDiv) {
+    errorDiv.textContent = message;
+    errorDiv.style.display = 'block';
+    errorDiv.classList.add('show');
+    return;
+  }
+  
+  // Fallback to alert
+  alert(message);
 }
 
 /**

@@ -55,6 +55,13 @@ function updateServicePrice() {
 async function submitOrder(event) {
   event.preventDefault();
   
+  // Check authentication
+  if (!isAuthenticated()) {
+    alert('Please login first to place an order');
+    window.location.href = '/auth.html';
+    return;
+  }
+  
   const service = document.getElementById('service').value;
   
   if (!service) {
