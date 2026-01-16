@@ -113,18 +113,41 @@ function showPlanComparison(view) {
 
 /**
  * Show success message
+ * @param {string} message - Optional success message to display
  */
-function showSuccessMessage() {
-  const successMessage = document.getElementById('successMessage');
+function showSuccessMessage(message = '') {
+  // Try to find success message div
+  let successMessage = document.getElementById('successMessage');
+  
+  // If on auth page, look for forms and show in a temporary div
+  if (!successMessage) {
+    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+    if (loginForm || registerForm) {
+      successMessage = document.createElement('div');
+      successMessage.className = 'success-message';
+      successMessage.id = 'successMessage';
+      const targetForm = loginForm && loginForm.style.display !== 'none' ? loginForm : registerForm;
+      if (targetForm) {
+        targetForm.insertAdjacentElement('afterbegin', successMessage);
+      }
+    }
+  }
   
   if (successMessage) {
+    if (message) {
+      successMessage.textContent = message;
+    }
     successMessage.style.display = 'block';
     successMessage.classList.add('show');
     
     setTimeout(() => {
       successMessage.style.display = 'none';
       successMessage.classList.remove('show');
-    }, 4000);
+      if (message && successMessage.parentNode) {
+        successMessage.textContent = '';
+      }
+    }, 3000);
   }
 }
 

@@ -62,14 +62,16 @@
   <script src="./js/script.js"></script>
   <script>
     // Tab toggle logic
-    document.getElementById('loginTab').onclick = function() {
-      this.classList.add('active');
+    document.getElementById('loginTab').onclick = function(e) {
+      e.preventDefault();
+      document.getElementById('loginTab').classList.add('active');
       document.getElementById('registerTab').classList.remove('active');
       document.getElementById('loginForm').classList.add('active');
       document.getElementById('registerForm').classList.remove('active');
     };
-    document.getElementById('registerTab').onclick = function() {
-      this.classList.add('active');
+    document.getElementById('registerTab').onclick = function(e) {
+      e.preventDefault();
+      document.getElementById('registerTab').classList.add('active');
       document.getElementById('loginTab').classList.remove('active');
       document.getElementById('loginForm').classList.remove('active');
       document.getElementById('registerForm').classList.add('active');

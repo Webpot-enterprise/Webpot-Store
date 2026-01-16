@@ -39,11 +39,13 @@ body {
   width: 100%;
   max-width: 400px;
   overflow: hidden;
+  min-height: auto;
 }
 
 .auth-toggle {
   display: flex;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 2px solid var(--border-color);
+  background: var(--bg-lighter);
 }
 
 .auth-toggle button {
@@ -57,35 +59,30 @@ body {
   color: var(--text-light);
   transition: all 0.3s ease;
   position: relative;
+  margin-bottom: -2px;
+  border-bottom: 2px solid transparent;
 }
 
 .auth-toggle button:hover {
   color: var(--text-dark);
-  background-color: var(--bg-lighter);
+  background-color: rgba(37, 99, 235, 0.05);
 }
 
 .auth-toggle button.active {
   color: var(--primary-color);
-}
-
-.auth-toggle button.active::after {
-  content: '';
-  position: absolute;
-  bottom: -1px;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: var(--primary-color);
+  border-bottom-color: var(--primary-color);
+  background-color: white;
 }
 
 .auth-form {
   padding: 32px 24px;
   display: none;
+  animation: none;
 }
 
 .auth-form.active {
   display: block;
-  animation: slideIn 0.3s ease-out;
+  animation: slideIn 0.2s ease-out;
 }
 
 #loginForm {
@@ -97,24 +94,32 @@ body {
   color: var(--text-dark);
   margin-bottom: 24px;
   text-align: center;
+  font-weight: 600;
 }
 
 .auth-form label {
   display: block;
   margin-bottom: 8px;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--text-dark);
+  letter-spacing: 0.3px;
 }
 
 .auth-form input {
   width: 100%;
-  padding: 12px;
+  padding: 12px 14px;
   margin-bottom: 16px;
   border: 1px solid var(--border-color);
   border-radius: 6px;
   font-size: 14px;
-  transition: all 0.3s ease;
+  font-family: inherit;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.auth-form input:hover {
+  border-color: #d1d5db;
 }
 
 .auth-form input:focus {
@@ -130,7 +135,7 @@ body {
 
 .auth-form button[type='submit'] {
   width: 100%;
-  padding: 12px;
+  padding: 12px 16px;
   margin-top: 8px;
   margin-bottom: 16px;
   background: var(--primary-color);
@@ -140,17 +145,24 @@ body {
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+  font-family: inherit;
 }
 
-.auth-form button[type='submit']:hover {
+.auth-form button[type='submit']:hover:not(:disabled) {
   background: var(--primary-hover);
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-  transform: translateY(-2px);
+  transform: translateY(-1px);
 }
 
-.auth-form button[type='submit']:active {
+.auth-form button[type='submit']:active:not(:disabled) {
   transform: translateY(0);
+}
+
+.auth-form button[type='submit']:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .error-message {
@@ -289,16 +301,14 @@ body {
   }
 
   .auth-toggle button:hover {
-    background-color: #111827;
+    background-color: rgba(96, 165, 250, 0.08);
     color: #e5e7eb;
   }
 
   .auth-toggle button.active {
     color: #60a5fa;
-  }
-
-  .auth-toggle button.active::after {
-    background: #60a5fa;
+    border-bottom-color: #60a5fa;
+    background-color: #1f2937;
   }
 
   .auth-form h2 {
