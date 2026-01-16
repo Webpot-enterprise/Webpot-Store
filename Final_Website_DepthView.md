@@ -57,7 +57,8 @@ DATABASE LAYER
     ├── Sessions (session_id, user_id, token, created_at, expires_at, ip_address, device_info)
     ├── AuthTokens (token_id, user_id, token_hash, created_at, expires_at, token_type)
     ├── Logs (log_id, user_id, action, timestamp, ip_address, details)
-    └── Referrals (code_id, referral_code, user_id, created_at, expires_at, discount_percentage)
+    ├── Referrals (code_id, referral_code, user_id, created_at, expires_at, discount_percentage)
+    └── Contacts (contact_id, name, email, subject, message, submitted_at, source)
 ```
 
 ---

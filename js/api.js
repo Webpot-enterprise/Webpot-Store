@@ -168,3 +168,20 @@ async function getLogs() {
     action: "getLogs"
   });
 }
+
+// Submit contact form
+async function submitContact(contactData) {
+  return apiCall("/contacts", {
+    method: "POST",
+    action: "submitContact",
+    body: contactData
+  });
+}
+
+// Get all contacts (admin only)
+async function getContacts() {
+  return apiCall("/contacts", {
+    method: "GET",
+    action: "getContacts"
+  });
+}

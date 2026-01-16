@@ -165,7 +165,6 @@ function initializeDashboard() {
     }
 }
 
-// =============================================
 // PAGE SWITCHING FUNCTIONALITY
 // =============================================
 function switchPage(pageName) {
@@ -201,6 +200,11 @@ function switchPage(pageName) {
         item.classList.remove('active');
     });
     event.target.closest('.menu-item')?.classList.add('active');
+    
+    // Load contacts data when switching to contacts page
+    if (pageName === 'contacts') {
+        loadContacts();
+    }
 }
 
 // Update Order Status
@@ -367,6 +371,153 @@ function showNotification(message, type = 'success') {
     }, 4000);
 }
 
+// Load Contacts Data on Page Switch
+function loadContacts() {
+    const contactsTableBody = document.getElementById('contactsTableBody');
+    if (!contactsTableBody) return; // Contacts page not loaded yet
+    
+    // Show loading state
+    contactsTableBody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 2rem;">Loading contacts...</td></tr>';
+    
+    // Fetch contacts from backend
+    fetch('https://script.google.com/macros/s/AKfycbxb5XesTNnxNySyUVuDBU6Vjyk2PBDia5pbyULneRBVYnGExxisZY7zXFBJ48nDekwe/exec?action=getContacts')
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                showNotification(`Error loading contacts: ${data.error}`, 'error');
+                contactsTableBody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 2rem;">Failed to load contacts</td></tr>';
+                return;
+            }
+            
+            const contacts = data.contacts || [];
+            
+            if (contacts.length === 0) {
+                contactsTableBody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 2rem; color: #999;">No contacts yet</td></tr>';
+                return;
+            }
+            
+            // Populate table with contact data
+            contactsTableBody.innerHTML = contacts.map(contact => {
+                const messagePreview = contact.message.substring(0, 50) + (contact.message.length > 50 ? '...' : '');
+                const submittedDate = new Date(contact.submitted_at).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                return `
+                    <tr>
+                        <td>${escapeHtml(contact.contact_id)}</td>
+                        <td>${escapeHtml(contact.name)}</td>
+                        <td>${escapeHtml(contact.email)}</td>
+                        <td>${escapeHtml(contact.subject || 'N/A')}</td>
+                        <td title="${escapeHtml(contact.message)}">${escapeHtml(messagePreview)}</td>
+                        <td>${submittedDate}</td>
+                        <td>${escapeHtml(contact.source || 'website')}</td>
+                        <td>
+                            <button class="action-btn view-btn" onclick="viewContact('${escapeHtml(contact.contact_id)}', event)" title="View full message">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="action-btn delete-btn" onclick="deleteContact('${escapeHtml(contact.contact_id)}', event)" title="Delete contact">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        })
+        .catch(error => {
+            console.error('Error loading contacts:', error);
+            showNotification('Failed to load contacts', 'error');
+            contactsTableBody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 2rem;">Error loading contacts</td></tr>';
+        });
+}
+
+// View Full Contact Message
+function viewContact(contactId, event) {
+    if (event) event.preventDefault();
+    
+    const table = document.getElementById('contactsTableBody');
+    const row = Array.from(table.querySelectorAll('tr')).find(r => r.cells[0].textContent === contactId);
+    
+    if (row) {
+        const cells = row.cells;
+        const messagePreview = cells[4].getAttribute('title') || cells[4].textContent;
+        
+        alert(`Contact Details:\n\nID: ${cells[0].textContent}\nName: ${cells[1].textContent}\nEmail: ${cells[2].textContent}\nSubject: ${cells[3].textContent}\n\nMessage:\n${messagePreview}`);
+    }
+}
+
+// Delete Contact
+function deleteContact(contactId, event) {
+    if (event) event.preventDefault();
+    
+    if (confirm(`Are you sure you want to delete contact ${contactId}?`)) {
+        const row = document.querySelector(`tr:has(td:first-child:contains("${contactId}"))`);
+        if (row) {
+            row.style.animation = 'fadeOut 0.3s ease-out';
+            setTimeout(() => {
+                row.remove();
+                showNotification(`Contact ${contactId} has been deleted`, 'success');
+            }, 300);
+        }
+    }
+}
+
+// Export Contacts as CSV
+function exportContacts() {
+    const table = document.getElementById('contactsTableBody');
+    const rows = table.querySelectorAll('tr');
+    
+    if (rows.length === 0) {
+        showNotification('No contacts to export', 'error');
+        return;
+    }
+    
+    let csv = 'Contact ID,Name,Email,Subject,Message Preview,Submitted At,Source\n';
+    
+    rows.forEach(row => {
+        if (row.cells.length > 0) {
+            const contactId = row.cells[0].textContent;
+            const name = row.cells[1].textContent;
+            const email = row.cells[2].textContent;
+            const subject = row.cells[3].textContent;
+            const message = row.cells[4].getAttribute('title') || row.cells[4].textContent;
+            const date = row.cells[5].textContent;
+            const source = row.cells[6].textContent;
+            
+            csv += `"${contactId}","${name}","${email}","${subject}","${message}","${date}","${source}"\n`;
+        }
+    });
+    
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `contacts-${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+    
+    showNotification('Contacts exported successfully', 'success');
+}
+
+// Helper function to escape HTML
+function escapeHtml(text) {
+    if (!text) return '';
+    const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    };
+    return text.toString().replace(/[&<>"']/g, m => map[m]);
+}
+
 // Search Functionality
 document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.querySelector('.search-input');
@@ -381,6 +532,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 filterOrders(searchTerm);
             } else if (activePage.id === 'users-page') {
                 filterUsers(searchTerm);
+            } else if (activePage.id === 'contacts-page') {
+                filterContacts(searchTerm);
             }
         });
     }
@@ -467,6 +620,28 @@ function filterUsersByStatus(status) {
                 card.style.display = '';
             } else {
                 card.style.display = 'none';
+            }
+        }
+    });
+}
+
+// Filter Contacts by Search
+function filterContacts(searchTerm) {
+    const table = document.querySelector('#contacts-page .data-table tbody');
+    if (!table) return;
+    
+    const rows = table.querySelectorAll('tr');
+    
+    rows.forEach(row => {
+        if (row.cells.length >= 3) {
+            const name = row.cells[1].textContent.toLowerCase();
+            const email = row.cells[2].textContent.toLowerCase();
+            const subject = row.cells[3].textContent.toLowerCase();
+            
+            if (name.includes(searchTerm) || email.includes(searchTerm) || subject.includes(searchTerm)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
             }
         }
     });

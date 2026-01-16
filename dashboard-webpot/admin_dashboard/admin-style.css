@@ -1130,6 +1130,43 @@ body {
 }
 
 /* =============================================
+   CONTACTS TABLE ACTION BUTTONS
+   ============================================= */
+
+.action-btn {
+    padding: 0.4rem 0.6rem;
+    background: var(--secondary-light);
+    border: 1px solid var(--border-gray);
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: var(--text-dark);
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    margin-right: 0.5rem;
+}
+
+.action-btn:hover {
+    background: var(--text-dark);
+    color: var(--primary-light);
+    border-color: var(--text-dark);
+}
+
+.action-btn.view-btn:hover {
+    background: var(--info);
+    border-color: var(--info);
+}
+
+.action-btn.delete-btn:hover {
+    background: var(--danger);
+    border-color: var(--danger);
+}
+
+/* =============================================
    SCROLLBAR STYLING
    ============================================= */
 
