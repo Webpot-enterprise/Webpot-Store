@@ -9,20 +9,84 @@
   <script src="./js/config.js"></script>
 </head>
 <body>
-  <div class="auth-container">
-    <div class="auth-toggle">
-      <button id="loginTab" class="active">Login</button>
-      <button id="registerTab">Register</button>
+  <!-- Terms & Privacy Modal -->
+  <div id="termsModal" class="auth-modal" hidden>
+    <div class="auth-modal-overlay"></div>
+    <div class="auth-modal-content">
+      <div class="auth-modal-header">
+        <h3 id="modalTitle">Terms & Conditions</h3>
+        <button type="button" class="auth-modal-close" aria-label="Close modal">&times;</button>
+      </div>
+      <div id="modalBody" class="auth-modal-body">
+        <!-- Content loaded dynamically -->
+      </div>
+      <div class="auth-modal-footer">
+        <p id="scrollPrompt" class="scroll-prompt">👇 Scroll to the bottom to continue</p>
+        <button type="button" id="modalNextBtn" class="auth-modal-btn" disabled>
+          Next: Privacy Policy
+        </button>
+      </div>
     </div>
-    <form id="loginForm" class="auth-form">
-      <h2>Login</h2>
-      <label for="loginEmail">Email</label>
-      <input type="email" id="loginEmail" required autocomplete="username">
-      <label for="loginPassword">Password</label>
-      <input type="password" id="loginPassword" required autocomplete="current-password">
-      <button type="submit">Login</button>
-      <div id="loginError" class="error-message"></div>
-      <div class="google-signin-container">
+  </div>
+
+  <!-- Main Auth Container -->
+  <div class="auth-container">
+    <!-- Tab Navigation -->
+    <div class="auth-tabs">
+      <button id="loginTabBtn" class="auth-tab-btn active" data-tab="login">
+        <span>Login</span>
+        <span class="tab-underline"></span>
+      </button>
+      <button id="registerTabBtn" class="auth-tab-btn" data-tab="register">
+        <span>Register</span>
+        <span class="tab-underline"></span>
+      </button>
+    </div>
+
+    <!-- Login Form -->
+    <form id="loginForm" class="auth-form active" data-form="login">
+      <h2>Welcome Back</h2>
+      <p class="auth-subtitle">Sign in to your account</p>
+
+      <div class="auth-form-group">
+        <label for="loginEmail" class="auth-label">Email Address</label>
+        <input 
+          type="email" 
+          id="loginEmail" 
+          class="auth-input" 
+          placeholder="you@example.com"
+          required 
+          autocomplete="email">
+        <span class="input-error" id="loginEmailError"></span>
+      </div>
+
+      <div class="auth-form-group">
+        <label for="loginPassword" class="auth-label">Password</label>
+        <input 
+          type="password" 
+          id="loginPassword" 
+          class="auth-input" 
+          placeholder="••••••••"
+          required 
+          autocomplete="current-password">
+        <span class="input-error" id="loginPasswordError"></span>
+      </div>
+
+      <button type="submit" class="auth-btn auth-btn-primary">
+        <span class="btn-text">Sign In</span>
+        <span class="btn-loader" style="display: none;">
+          <span class="spinner"></span>
+        </span>
+      </button>
+
+      <div id="loginError" class="auth-error-message"></div>
+
+      <!-- Google OAuth -->
+      <div class="auth-divider">
+        <span>or continue with</span>
+      </div>
+
+      <div class="auth-oauth-container">
         <div id="g_id_onload"
           data-client_id="709120008855-p9m39a4h5i728l0kltuhk9r2dme7t192.apps.googleusercontent.com"
           data-context="signin"
@@ -34,48 +98,102 @@
           data-type="standard"
           data-shape="rectangular"
           data-theme="outline"
-          data-text="sign_in_with"
+          data-text="signin_with"
           data-size="large"
           data-logo_alignment="left">
         </div>
       </div>
     </form>
-    <form id="registerForm" class="auth-form" style="display:none;">
-      <h2>Register</h2>
-      <label for="registerName">Name</label>
-      <input type="text" id="registerName" required autocomplete="name">
-      <label for="registerEmail">Email</label>
-      <input type="email" id="registerEmail" required autocomplete="username">
-      <label for="registerPassword">Password</label>
-      <input type="password" id="registerPassword" required autocomplete="new-password">
-      <button type="submit">Register</button>
-      <div id="registerError" class="error-message"></div>
+
+    <!-- Register Form -->
+    <form id="registerForm" class="auth-form" data-form="register" style="display: none;">
+      <h2>Create Account</h2>
+      <p class="auth-subtitle">Join us today</p>
+
+      <div class="auth-form-group">
+        <label for="registerName" class="auth-label">Full Name</label>
+        <input 
+          type="text" 
+          id="registerName" 
+          class="auth-input" 
+          placeholder="John Doe"
+          required 
+          autocomplete="name">
+        <span class="input-error" id="registerNameError"></span>
+      </div>
+
+      <div class="auth-form-group">
+        <label for="registerEmail" class="auth-label">Email Address</label>
+        <input 
+          type="email" 
+          id="registerEmail" 
+          class="auth-input" 
+          placeholder="you@example.com"
+          required 
+          autocomplete="email">
+        <span class="input-error" id="registerEmailError"></span>
+      </div>
+
+      <div class="auth-form-group">
+        <label for="registerPassword" class="auth-label">Password</label>
+        <input 
+          type="password" 
+          id="registerPassword" 
+          class="auth-input" 
+          placeholder="At least 8 characters"
+          required 
+          autocomplete="new-password">
+        <span class="input-error" id="registerPasswordError"></span>
+      </div>
+
+      <div class="auth-form-group">
+        <label for="registerConfirmPassword" class="auth-label">Confirm Password</label>
+        <input 
+          type="password" 
+          id="registerConfirmPassword" 
+          class="auth-input" 
+          placeholder="Confirm your password"
+          required 
+          autocomplete="new-password">
+        <span class="input-error" id="registerConfirmPasswordError"></span>
+      </div>
+
+      <!-- Terms & Privacy Checkbox -->
+      <div class="auth-checkbox-group">
+        <input 
+          type="checkbox" 
+          id="termsCheckbox" 
+          class="auth-checkbox">
+        <label for="termsCheckbox" class="auth-checkbox-label">
+          I agree to the <button type="button" class="auth-link" id="termsLink">Terms & Conditions</button> and <button type="button" class="auth-link" id="privacyLink">Privacy Policy</button>
+        </label>
+        <span class="input-error" id="termsError"></span>
+      </div>
+
+      <button type="submit" class="auth-btn auth-btn-primary" disabled>
+        <span class="btn-text">Create Account</span>
+        <span class="btn-loader" style="display: none;">
+          <span class="spinner"></span>
+        </span>
+      </button>
+
+      <div id="registerError" class="auth-error-message"></div>
     </form>
-    <div class="auth-back">
-      <a href="index.html">&larr; Back to Home</a>
+
+    <!-- Footer -->
+    <div class="auth-footer">
+      <a href="index.html" class="auth-footer-link">← Back to Home</a>
     </div>
   </div>
+
+  <!-- Google Sign-In Script -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
+  
+  <!-- API and Auth Scripts -->
   <script src="./js/api.js"></script>
+  <script src="./js/config.js"></script>
   <script src="./js/auth.js"></script>
   <script src="./js/users.js"></script>
   <script src="./js/script.js"></script>
-  <script>
-    // Tab toggle logic
-    document.getElementById('loginTab').onclick = function(e) {
-      e.preventDefault();
-      document.getElementById('loginTab').classList.add('active');
-      document.getElementById('registerTab').classList.remove('active');
-      document.getElementById('loginForm').classList.add('active');
-      document.getElementById('registerForm').classList.remove('active');
-    };
-    document.getElementById('registerTab').onclick = function(e) {
-      e.preventDefault();
-      document.getElementById('registerTab').classList.add('active');
-      document.getElementById('loginTab').classList.remove('active');
-      document.getElementById('loginForm').classList.remove('active');
-      document.getElementById('registerForm').classList.add('active');
-    };
-  </script>
 </body>
 </html>
