@@ -1,43 +1,68 @@
 // Configuration for the Webpot application
-// DEPRECATED: Core config moved to js/api.js
-// This file provides backwards-compatible helper functions
+// All API and authentication settings
 
-// Note: API_CONFIG must be loaded from api.js before these functions are called
-// Hardcoded storage keys for backwards compatibility
-
-// Legacy storage keys (must match api.js)
-const AUTH_TOKEN_STORAGE_KEY = 'webpot_auth_token';
-const USER_DATA_STORAGE_KEY = 'webpot_user_data';
+const API_CONFIG = {
+  // Cloudflare Worker Gateway URL
+  CLOUDFLARE_WORKER: 'https://webpot-api.yourdomain.workers.dev',
+  
+  // Google Apps Script Web App URL (used for direct testing only)
+  GAS_URL: 'https://script.google.com/macros/s/AKfycbxb5XesTNnxNySyUVuDBU6Vjyk2PBDia5pbyULneRBVYnGExxisZY7zXFBJ48nDekwe/exec',
+  
+  // Authentication token storage
+  AUTH_TOKEN_KEY: 'webpot_auth_token',
+  USER_DATA_KEY: 'webpot_user_data',
+  
+  // API Actions
+  ACTIONS: {
+    LOGIN: 'login',
+    REGISTER: 'register',
+    GOOGLE_LOGIN: 'googleLogin',
+    VERIFY_TOKEN: 'verifyToken',
+    GET_USER: 'getUser',
+    UPDATE_USER: 'updateUser',
+    SUBMIT_CONTACT: 'submitContact',
+    SUBMIT_ORDER: 'submitOrder',
+    GET_TESTIMONIALS: 'getTestimonials',
+    VERIFY_PAYMENT: 'verifyPayment'
+  },
+  
+  // Feature flags
+  FEATURES: {
+    ENABLE_UPI: true,
+    ENABLE_NOTIFICATIONS: true,
+    ENABLE_TESTIMONIALS: true
+  }
+};
 
 // Helper function to get stored auth token
 function getAuthToken() {
-  return localStorage.getItem(AUTH_TOKEN_STORAGE_KEY);
+  return localStorage.getItem(API_CONFIG.AUTH_TOKEN_KEY);
 }
 
 // Helper function to save auth token
 function setAuthToken(token) {
-  localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, token);
+  localStorage.setItem(API_CONFIG.AUTH_TOKEN_KEY, token);
 }
 
 // Helper function to remove auth token
 function clearAuthToken() {
-  localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
+  localStorage.removeItem(API_CONFIG.AUTH_TOKEN_KEY);
 }
 
 // Helper function to get user data
 function getUserData() {
-  const data = localStorage.getItem(USER_DATA_STORAGE_KEY);
+  const data = localStorage.getItem(API_CONFIG.USER_DATA_KEY);
   return data ? JSON.parse(data) : null;
 }
 
 // Helper function to save user data
 function setUserData(userData) {
-  localStorage.setItem(USER_DATA_STORAGE_KEY, JSON.stringify(userData));
+  localStorage.setItem(API_CONFIG.USER_DATA_KEY, JSON.stringify(userData));
 }
 
 // Helper function to clear user data
 function clearUserData() {
-  localStorage.removeItem(USER_DATA_STORAGE_KEY);
+  localStorage.removeItem(API_CONFIG.USER_DATA_KEY);
 }
 
 // Check if user is authenticated
