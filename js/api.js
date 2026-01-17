@@ -6,8 +6,8 @@
 
 // CONFIGURATION
 const API_CONFIG = {
-  // Your Cloudflare Worker URL (or GitHub Pages testing URL)
-  BASE_URL: "https://api.webpot.shop",
+  // Your Cloudflare Worker URL (API Gateway)
+  BASE_URL: "https://api-gateway.engagewebpot.workers.dev",
   
   // Timeout for all requests (milliseconds)
   TIMEOUT: 10000,

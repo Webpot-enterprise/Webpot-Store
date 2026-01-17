@@ -3,7 +3,7 @@
 
 const API_CONFIG = {
   // Cloudflare Worker Gateway URL
-  CLOUDFLARE_WORKER: 'https://webpot-api.shop.workers.dev',
+  CLOUDFLARE_WORKER: 'https://api-gateway.engagewebpot.workers.dev',
   
   // Google Apps Script Web App URL (used for direct testing only)
   GAS_URL: 'https://script.google.com/macros/s/AKfycbxb5XesTNnxNySyUVuDBU6Vjyk2PBDia5pbyULneRBVYnGExxisZY7zXFBJ48nDekwe/exec',
