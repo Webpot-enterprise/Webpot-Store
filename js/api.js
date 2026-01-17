@@ -1,20 +1,8 @@
 // ============================================================================
-// API CONFIGURATION
+// API HELPER FUNCTIONS
 // ============================================================================
-// This file centralizes all API calls to your backend
+// This file defines the apiCall() function which uses API_CONFIG from config.js
 // Ensures consistency across the entire frontend
-
-// CONFIGURATION
-const API_CONFIG = {
-  // Your Cloudflare Worker URL (API Gateway)
-  BASE_URL: "https://api-gateway.engagewebpot.workers.dev",
-  
-  // Timeout for all requests (milliseconds)
-  TIMEOUT: 10000,
-  
-  // Whether to log all requests (set to false in production) - SECTION 11.4
-  DEBUG: false
-};
 
 // ============================================================================
 // FETCH HELPER FUNCTION

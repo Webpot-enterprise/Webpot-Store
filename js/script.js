@@ -8,13 +8,13 @@ document.addEventListener('DOMContentLoaded', function() {
   // Update authentication UI
   updateAuthUI();
   
-  // Load testimonials if feature is enabled
-  if (API_CONFIG.FEATURES.ENABLE_TESTIMONIALS) {
+  // Load testimonials if feature is enabled and function exists
+  if (API_CONFIG.FEATURES.ENABLE_TESTIMONIALS && typeof loadTestimonials === 'function') {
     loadTestimonials();
   }
   
-  // Load notifications if feature is enabled
-  if (API_CONFIG.FEATURES.ENABLE_NOTIFICATIONS) {
+  // Load notifications if feature is enabled and function exists
+  if (API_CONFIG.FEATURES.ENABLE_NOTIFICATIONS && typeof loadNotifications === 'function') {
     loadNotifications();
   }
   
@@ -50,7 +50,7 @@ function initializeGlobalFeatures() {
  * Auto-refresh testimonials every 30 minutes
  */
 setInterval(() => {
-  if (API_CONFIG.FEATURES.ENABLE_TESTIMONIALS) {
+  if (API_CONFIG.FEATURES.ENABLE_TESTIMONIALS && typeof loadTestimonials === 'function') {
     loadTestimonials();
   }
 }, 30 * 60 * 1000);
@@ -59,7 +59,7 @@ setInterval(() => {
  * Auto-refresh notifications every 5 minutes
  */
 setInterval(() => {
-  if (API_CONFIG.FEATURES.ENABLE_NOTIFICATIONS) {
+  if (API_CONFIG.FEATURES.ENABLE_NOTIFICATIONS && typeof loadNotifications === 'function') {
     loadNotifications();
   }
 }, 5 * 60 * 1000);

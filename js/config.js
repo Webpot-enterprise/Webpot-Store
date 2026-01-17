@@ -2,11 +2,18 @@
 // All API and authentication settings
 
 const API_CONFIG = {
-  // Cloudflare Worker Gateway URL
+  // Cloudflare Worker Gateway URL (Primary endpoint)
+  BASE_URL: 'https://api-gateway.engagewebpot.workers.dev',
   CLOUDFLARE_WORKER: 'https://api-gateway.engagewebpot.workers.dev',
   
   // Google Apps Script Web App URL (used for direct testing only)
   GAS_URL: 'https://script.google.com/macros/s/AKfycbxb5XesTNnxNySyUVuDBU6Vjyk2PBDia5pbyULneRBVYnGExxisZY7zXFBJ48nDekwe/exec',
+  
+  // Request timeout (milliseconds)
+  TIMEOUT: 10000,
+  
+  // Debug logging
+  DEBUG: false,
   
   // Authentication token storage
   AUTH_TOKEN_KEY: 'webpot_auth_token',
