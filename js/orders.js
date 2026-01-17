@@ -225,7 +225,7 @@ async function verifyAndSubmitPayment(event) {
     paymentStatus: 'pending'
   };
   
-  const result = await submitOrder(paymentData);
+  const result = await createOrder(paymentData);
   
   if (result.success) {
     closePaymentModal();
