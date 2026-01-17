@@ -233,6 +233,18 @@
     </div>
   </div>
 
+  <!-- Google Coming Soon Popup Modal -->
+  <div id="googleComingSoonModal" class="coming-soon-modal" style="display: none;">
+    <div class="coming-soon-content">
+      <button class="coming-soon-close" onclick="closeGoogleComingSoonModal()">&times;</button>
+      <div class="coming-soon-icon">🔐</div>
+      <h2>Google Login Coming Soon!</h2>
+      <p>We're working on integrating Google sign-in for a faster, more secure login experience.</p>
+      <p>This feature will be available shortly.</p>
+      <button class="coming-soon-btn" onclick="closeGoogleComingSoonModal()">Got It</button>
+    </div>
+  </div>
+
   <!-- Google Sign-In Script -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   
@@ -241,5 +253,50 @@
   <script src="./js/api.js"></script>
   <script src="./js/auth.js"></script>
   <script src="./js/users.js"></script>
+
+  <script>
+    // Google Coming Soon Modal Functions
+    function showGoogleComingSoonModal() {
+      const modal = document.getElementById('googleComingSoonModal');
+      if (modal) {
+        modal.style.display = 'flex';
+        modal.classList.add('show');
+      }
+    }
+
+    function closeGoogleComingSoonModal() {
+      const modal = document.getElementById('googleComingSoonModal');
+      if (modal) {
+        modal.classList.remove('show');
+        setTimeout(() => {
+          modal.style.display = 'none';
+        }, 300);
+      }
+    }
+
+    // Close modal on backdrop click
+    document.addEventListener('DOMContentLoaded', function() {
+      const modal = document.getElementById('googleComingSoonModal');
+      if (modal) {
+        modal.addEventListener('click', function(e) {
+          if (e.target === modal) {
+            closeGoogleComingSoonModal();
+          }
+        });
+
+        // Close on Escape key
+        document.addEventListener('keydown', function(e) {
+          if (e.key === 'Escape' && modal.style.display !== 'none') {
+            closeGoogleComingSoonModal();
+          }
+        });
+      }
+
+      // Override Google Sign-In callback
+      window.onGoogleSignIn = function(response) {
+        showGoogleComingSoonModal();
+      };
+    });
+  </script>
 </body>
 </html>
