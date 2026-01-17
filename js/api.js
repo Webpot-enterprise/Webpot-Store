@@ -12,9 +12,74 @@ const API_CONFIG = {
   // Timeout for all requests (milliseconds)
   TIMEOUT: 10000,
   
-  // Whether to log all requests (set to false in production) - SECTION 11.4
-  DEBUG: false
+  // Whether to log all requests (set to false in production)
+  DEBUG: false,
+  
+  // Authentication token storage keys
+  AUTH_TOKEN_KEY: 'webpot_auth_token',
+  USER_DATA_KEY: 'webpot_user_data',
+  
+  // API Actions
+  ACTIONS: {
+    LOGIN: 'login',
+    REGISTER: 'register',
+    GOOGLE_LOGIN: 'googleLogin',
+    VERIFY_TOKEN: 'verifyToken',
+    GET_USER: 'getUser',
+    UPDATE_USER: 'updateUser',
+    SUBMIT_CONTACT: 'submitContact',
+    SUBMIT_ORDER: 'submitOrder',
+    GET_TESTIMONIALS: 'getTestimonials',
+    VERIFY_PAYMENT: 'verifyPayment'
+  },
+  
+  // Feature flags
+  FEATURES: {
+    ENABLE_UPI: true,
+    ENABLE_NOTIFICATIONS: true,
+    ENABLE_TESTIMONIALS: true
+  }
 };
+
+// ============================================================================
+// AUTH TOKEN & USER DATA MANAGEMENT
+// ============================================================================
+
+// Helper function to get stored auth token
+function getAuthToken() {
+  return localStorage.getItem(API_CONFIG.AUTH_TOKEN_KEY);
+}
+
+// Helper function to save auth token
+function setAuthToken(token) {
+  localStorage.setItem(API_CONFIG.AUTH_TOKEN_KEY, token);
+}
+
+// Helper function to remove auth token
+function clearAuthToken() {
+  localStorage.removeItem(API_CONFIG.AUTH_TOKEN_KEY);
+}
+
+// Helper function to check if user is authenticated
+function isAuthenticated() {
+  return !!getAuthToken();
+}
+
+// Helper function to get stored user data
+function getUserData() {
+  const data = localStorage.getItem(API_CONFIG.USER_DATA_KEY);
+  return data ? JSON.parse(data) : null;
+}
+
+// Helper function to save user data
+function setUserData(user) {
+  localStorage.setItem(API_CONFIG.USER_DATA_KEY, JSON.stringify(user));
+}
+
+// Helper function to remove user data
+function clearUserData() {
+  localStorage.removeItem(API_CONFIG.USER_DATA_KEY);
+}
 
 // ============================================================================
 // FETCH HELPER FUNCTION
