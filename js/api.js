@@ -7,7 +7,7 @@
 // CONFIGURATION
 const API_CONFIG = {
   // Your Cloudflare Worker URL (or GitHub Pages testing URL)
-  BASE_URL: "https://api.yourdomain.com",
+  BASE_URL: "https://api.webpot.shop",
   
   // Timeout for all requests (milliseconds)
   TIMEOUT: 10000,
