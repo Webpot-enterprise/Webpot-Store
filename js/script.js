@@ -97,11 +97,68 @@ function initializePricingComparison() {
     });
   });
   
+  // Initialize plan card selection with localStorage
+  initializePlanSelection();
+  
   // Initialize sticky CTA
   initializeStickyClA();
   
   // Watch scroll for sticky CTA visibility
   window.addEventListener('scroll', handleStickyCTAScroll);
+}
+
+/**
+ * Initialize plan card selection with localStorage persistence
+ */
+function initializePlanSelection() {
+  const serviceCards = document.querySelectorAll('.service-card');
+  
+  // Load previously selected plan
+  const savedPlanType = localStorage.getItem('webpot_selected_plan_type');
+  const savedPlanName = localStorage.getItem('webpot_selected_plan_name');
+  
+  if (savedPlanType && savedPlanName) {
+    // Restore selection on page load
+    const savedCard = document.querySelector(
+      '.pricing-section[data-type="' + savedPlanType + '"] .service-card[data-plan="' + savedPlanName + '"]'
+    );
+    if (savedCard) {
+      applyPlanSelection(savedCard, savedPlanType, savedPlanName);
+    }
+  }
+  
+  // Add click handlers to plan cards
+  serviceCards.forEach(card => {
+    card.addEventListener('click', function() {
+      const planName = this.dataset.plan;
+      const planSection = this.closest('.pricing-section');
+      const planType = planSection ? planSection.dataset.type : 'startup';
+      
+      // Clear previous selections in this section
+      if (planSection) {
+        planSection.querySelectorAll('.service-card').forEach(c => {
+          c.classList.remove('selected');
+        });
+      }
+      
+      // Apply new selection
+      applyPlanSelection(this, planType, planName);
+    });
+  });
+}
+
+/**
+ * Apply plan selection styling and save to localStorage
+ */
+function applyPlanSelection(card, planType, planName) {
+  card.classList.add('selected');
+  
+  // Save selection to localStorage
+  localStorage.setItem('webpot_selected_plan_type', planType);
+  localStorage.setItem('webpot_selected_plan_name', planName);
+  
+  // Scroll card into view with smooth animation
+  card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 /**

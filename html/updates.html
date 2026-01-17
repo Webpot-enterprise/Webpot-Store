@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>Updates - Webpot</title>
-    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/style.css">
 </head>
 <body class="mobile-optimized">
     <!-- Background Elements -->
@@ -23,7 +23,7 @@
     </nav>
 
     <!-- Updates Container -->
-    <div class="updates-container">
+    <div class="updates-container" id="updatesContainer">
         <!-- Personalized Dashboards - Jan 5, 2026 -->
         <div class="update-item new-update">
             <div class="update-badges">
@@ -530,6 +530,82 @@
         }
     </style>
 
+    <script src="../js/config.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/notifications.js"></script>
     <script src="../js/script.js"></script>
+    
+    <script>
+        // Override notification rendering for updates page
+        function renderUpdatesFromNotifications() {
+            const container = document.getElementById('updatesContainer');
+            if (!container) return;
+            
+            if (!notificationsCache || notificationsCache.length === 0) {
+                container.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-muted);"><p>No updates available. Check back soon!</p></div>';
+                return;
+            }
+            
+            // Render notifications as update items
+            container.innerHTML = notificationsCache.map(notification => {
+                const date = new Date(notification.timestamp).toLocaleDateString('en-IN', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+                
+                const unreadClass = !notification.read_status ? 'new-update' : '';
+                
+                return `
+                    <div class="update-item ${unreadClass}">
+                        <div class="update-badges">
+                            ${!notification.read_status ? '<span class="badge badge-new">New Update</span>' : '<span class="badge badge-read">Read</span>'}
+                        </div>
+                        <div class="update-content">
+                            <h3 class="update-title">${escapeHtml(notification.title)}</h3>
+                            <p class="update-date">${date}</p>
+                            <p class="update-description">${escapeHtml(notification.message)}</p>
+                            ${!notification.read_status ? `<button onclick="markNotificationAsRead('${notification.id}'); renderUpdatesFromNotifications();" class="mark-read-btn">Mark as Read</button>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // Render when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            // Wait for notifications to load from cache/API
+            setTimeout(renderUpdatesFromNotifications, 500);
+            // Re-render periodically to catch updates
+            setInterval(renderUpdatesFromNotifications, 60000);
+        });
+    </script>
+    
+    <style>
+        .mark-read-btn {
+            margin-top: 1rem;
+            padding: 0.5rem 1rem;
+            background: var(--primary-accent);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .mark-read-btn:hover {
+            box-shadow: 0 0 15px rgba(37, 99, 235, 0.4);
+            transform: translateY(-2px);
+        }
+        
+        .badge-read {
+            background-color: rgba(76, 175, 80, 0.2);
+            color: #4caf50;
+            border: 1px solid #4caf50;
+        }
+    </style>
 </body>
 </html>

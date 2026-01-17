@@ -3,8 +3,8 @@
 **Document Purpose:** Complete technical overview of all files, their functions, and code details for senior developer review.
 
 **Website Type:** Three-Tier Web Application (Frontend → API Gateway → Backend)  
-**Last Updated:** January 17, 2026 (v2.2.0 - Complete Auth Page Redesign with Glassmorphism & Scroll-to-Agree)  
-**Status:** Production Ready - Enterprise-Grade Authentication System with Advanced UI  
+**Last Updated:** January 17, 2026 (v2.3.0 - Enhanced UX with Password Strength, Session Expiry, Interactive Pricing)  
+**Status:** Production Ready - Enterprise-Grade Authentication + Advanced Dashboard + Interactive Pricing  
 
 ---
 
@@ -19,6 +19,7 @@
 7. [Configuration & Deployment Files](#configuration--deployment-files)
 8. [Data Flow & Communication](#data-flow--communication)
 9. [File Structure & Organization](#file-structure--organization)
+10. [New Features (v2.3.0)](#new-features-v230)
 
 ---
 
@@ -3222,7 +3223,215 @@ Every file has a specific purpose, and they work together to create a seamless u
 
 ---
 
-**Created:** January 16, 2026  
-**Last Updated:** January 17, 2026 (v2.2.0)  
-**Version:** 2.2.0 - Complete Authentication Page Redesign with Glassmorphism & Scroll-to-Agree Modal  
+## New Features (v2.3.0)
+
+### Feature 1: Password Strength Indicator
+
+**Location:** `js/auth.js` (lines 45-125) + `auth.html` (password input section) + `css/auth.css` (lines 840-900)
+
+**Purpose:** Real-time password strength validation during registration with visual feedback.
+
+**Implementation:**
+
+```javascript
+function calculatePasswordStrength(password) {
+  let strength = 0;
+  const requirements = {
+    length: password.length >= 8,
+    uppercase: /[A-Z]/.test(password),
+    lowercase: /[a-z]/.test(password),
+    number: /[0-9]/.test(password),
+    special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)
+  };
+  
+  Object.values(requirements).forEach(met => {
+    if (met) strength++;
+  });
+  
+  // Returns: { level: 'weak'|'medium'|'good'|'strong', strength: 0-5, requirements: {} }
+}
+```
+
+**Features:**
+- ✅ Live password strength meter (animates on input)
+- ✅ Animated gradient bar: Weak (red) → Medium (orange) → Good (green) → Strong (dark green)
+- ✅ Interactive requirement checklist (5 requirements)
+- ✅ Registration button disabled until strength ≥ "Good"
+- ✅ Smooth slide-down animation when password input starts
+- ✅ Color-coded requirement icons (met = green checkmark, unmet = transparent)
+- ✅ Frontend-only implementation (no API changes)
+- ✅ Matches glassmorphism + dark theme aesthetic
+
+**Files Modified:**
+- `auth.html`: Added password strength container with 5 requirement divs
+- `css/auth.css`: Added 60 lines (password-strength-* classes + animations)
+- `js/auth.js`: Added `calculatePasswordStrength()` + `updatePasswordStrengthUI()` + real-time listeners
+
+**Code Statistics:**
+- Total lines added: 130 lines
+- Functions: 3 (calculatePasswordStrength, updatePasswordStrengthUI, updateRequirementUI)
+- CSS classes: 8 (password-strength-container, bar, fill, requirements, etc.)
+- Validation rules: 5 (length, uppercase, lowercase, number, special)
+
+---
+
+### Feature 2: Session Expiry Indicator
+
+**Location:** Dashboard pages (navbar) + `dashboard-webpot/user_dashboard/js/script.js` + `dashboard-webpot/user_dashboard/css/style.css`
+
+**Purpose:** Display live session countdown in dashboard navbar with warning state when <10 minutes remaining.
+
+**Implementation:**
+
+```javascript
+function getTokenExpiry() {
+  const loginTime = localStorage.getItem('webpot_login_time');
+  if (loginTime) {
+    return new Date(parseInt(loginTime) + 24 * 60 * 60 * 1000);
+  }
+  return null;
+}
+
+function updateSessionExpiryIndicator() {
+  const expiry = getTokenExpiry();
+  const remaining = formatTimeRemaining(expiry);
+  
+  // Display indicator with warning state when <10 minutes
+  const totalMinutes = Math.floor((expiry - new Date()) / (1000 * 60));
+  if (totalMinutes < 10) {
+    indicator.classList.add('warning'); // Red border + pulsing icon
+  }
+  
+  // Auto-logout when expired
+  if (remaining === 'expired') {
+    clearAuthToken();
+    window.location.href = '../../auth.html';
+  }
+}
+```
+
+**Features:**
+- ✅ Live countdown showing "Session expires in Xh Ym" format
+- ✅ Updates every minute in navbar
+- ✅ Warning state (red border + pulsing icon) when <10 minutes remaining
+- ✅ Auto-detects token expiry from login time (24-hour tokens)
+- ✅ Automatically logs out user when session expires
+- ✅ Displays on all dashboard pages (Dashboard, Orders, Settings)
+- ✅ Non-breaking, modular implementation
+- ✅ No backend changes required
+
+**Files Modified:**
+- `dashboard-webpot/user_dashboard/html/index.html`: Added session expiry indicator HTML to navbar
+- `dashboard-webpot/user_dashboard/html/settings.html`: Added session expiry indicator HTML to navbar
+- `dashboard-webpot/user_dashboard/css/style.css`: Added 60 lines (session-expiry-* classes + animations)
+- `dashboard-webpot/user_dashboard/js/script.js`: Added 80 lines (session tracking functions)
+- `js/auth.js`: Store login time on successful authentication
+- `js/users.js`: Clear login time on logout
+
+**Code Statistics:**
+- Total lines added: 200 lines
+- Functions: 5 (getTokenExpiry, formatTimeRemaining, updateSessionExpiryIndicator, startSessionExpiryTracking, handleStickyCTAScroll)
+- CSS classes: 5 (session-expiry-indicator, content, icon, text, warning)
+- Update interval: Every 60 seconds
+
+---
+
+### Feature 3: Interactive Pricing Comparison
+
+**Location:** `index.html` (services section) + `css/style.css` + `js/script.js`
+
+**Purpose:** Dynamic pricing table with toggles for Monthly/One-time billing and Startup/Business plan types.
+
+**Implementation:**
+
+```html
+<!-- Dual Toggle Controls -->
+<div class="pricing-controls">
+  <div class="toggle-group">
+    <label>Billing</label>
+    <div class="billing-toggle">
+      <button class="billing-btn active" data-billing="monthly">Monthly</button>
+      <button class="billing-btn" data-billing="onetime">One-time</button>
+    </div>
+  </div>
+  
+  <div class="toggle-group">
+    <label>Plan Type</label>
+    <div class="plan-type-toggle">
+      <button class="plan-btn active" data-type="startup">Startup</button>
+      <button class="plan-btn" data-type="business">Business</button>
+    </div>
+  </div>
+</div>
+
+<!-- Dynamic Pricing Sections -->
+<div class="pricing-container">
+  <div class="pricing-section" data-type="startup">
+    <!-- Starter & Basic cards -->
+  </div>
+  <div class="pricing-section" data-type="business" style="display: none;">
+    <!-- Professional & Premium cards -->
+  </div>
+</div>
+
+<!-- Sticky CTA Banner -->
+<div class="sticky-cta" id="stickyCTA">
+  <div class="sticky-content">
+    <div class="sticky-info">
+      <h4>Ready to get started?</h4>
+      <p>Choose a plan and take your business online</p>
+    </div>
+    <button class="sticky-btn" onclick="scrollToPricing()">View Plans</button>
+  </div>
+</div>
+```
+
+```javascript
+function updatePricingDisplay(billingType) {
+  // Toggle between Monthly (₹X/month) and One-time (₹X*12/year)
+  const onetimePrice = monthlyPrice * 12;
+  expiryText.textContent = billingType === 'monthly' ? '/month' : '/year';
+}
+
+function switchPricingPlan(planType) {
+  // Show/hide sections based on Startup vs Business selection
+}
+
+function initializeStickyClA() {
+  // Show sticky CTA when user scrolls past pricing section
+  // Auto-hide when user returns to pricing
+}
+```
+
+**Features:**
+- ✅ Mobile-friendly responsive design (single column on mobile)
+- ✅ Toggle 1: Monthly vs One-time (12x multiplier for annual pricing)
+- ✅ Toggle 2: Startup plans vs Business plans
+- ✅ Startup: Starter (₹2,999) + Basic Recommended (₹5,999)
+- ✅ Business: Professional (₹7,999) + Premium Recommended (₹9,999)
+- ✅ Dynamic price updates with smooth animations
+- ✅ Recommended plan highlighting (blue border + shadow)
+- ✅ Sticky CTA banner appears when user scrolls past pricing
+- ✅ Smart visibility: Auto-hide when user returns to section
+- ✅ CSS + JS only (no backend changes)
+- ✅ Fully responsive (tablet + mobile optimized)
+
+**Files Modified:**
+- `index.html`: Replaced services section with interactive pricing (220 lines)
+- `css/style.css`: Added 140 lines (pricing-controls, pricing-container, sticky-cta classes + animations + mobile styles)
+- `js/script.js`: Added 120 lines (pricing initialization, toggle handlers, sticky CTA logic)
+
+**Code Statistics:**
+- Total lines added: 480 lines
+- Functions: 7 (initializePricingComparison, updatePricingDisplay, switchPricingPlan, initializeStickyClA, handleStickyCTAScroll, scrollToPricing)
+- CSS classes: 18 (pricing-*, toggle-*, sticky-*, billing-*, plan-*)
+- Toggle combinations: 4 (Monthly/Startup, Monthly/Business, OneTime/Startup, OneTime/Business)
+- Animations: 3 (fadeInUp, slideUpSticky, slideDown)
+
+---
+
+**Created:** January 17, 2026  
+**Last Updated:** January 17, 2026 (v2.3.0)  
+**Version:** 2.3.0 - Enhanced UX with Password Strength, Session Expiry, Interactive Pricing  
 **Status:** ✅ Production Ready & Enterprise-Grade
+```
