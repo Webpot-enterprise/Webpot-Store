@@ -13,6 +13,8 @@
 // TAB SWITCHING
 // ============================================
 
+let currentAuthTab = 'login'; // Track which tab is active for Google auth
+
 function initTabSwitching() {
   const loginTabBtn = document.getElementById('loginTabBtn');
   const registerTabBtn = document.getElementById('registerTabBtn');
@@ -31,6 +33,8 @@ function initTabSwitching() {
 }
 
 function switchTab(tabName, loginBtn, registerBtn, loginForm, registerForm) {
+  currentAuthTab = tabName; // Track active tab for Google auth
+  
   if (tabName === 'login') {
     loginBtn.classList.add('active');
     registerBtn.classList.remove('active');
@@ -49,8 +53,88 @@ function switchTab(tabName, loginBtn, registerBtn, loginForm, registerForm) {
 }
 
 // ============================================
-// VALIDATION
+// PASSWORD STRENGTH INDICATOR
 // ============================================
+
+function calculatePasswordStrength(password) {
+  let strength = 0;
+  const requirements = {
+    length: password.length >= 8,
+    uppercase: /[A-Z]/.test(password),
+    lowercase: /[a-z]/.test(password),
+    number: /[0-9]/.test(password),
+    special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)
+  };
+
+  // Count met requirements
+  Object.values(requirements).forEach(met => {
+    if (met) strength++;
+  });
+
+  // Determine strength level
+  let level = 'weak';
+  if (strength === 5) {
+    level = 'strong';
+  } else if (strength >= 4) {
+    level = 'good';
+  } else if (strength >= 3) {
+    level = 'medium';
+  } else {
+    level = 'weak';
+  }
+
+  return { level, strength, requirements };
+}
+
+function updatePasswordStrengthUI(password) {
+  const container = document.getElementById('passwordStrengthContainer');
+  const fill = document.getElementById('passwordStrengthFill');
+  const label = document.getElementById('passwordStrengthLabel');
+  const registerBtn = document.querySelector('#registerForm button[type="submit"]');
+
+  if (!password) {
+    container.style.display = 'none';
+    if (registerBtn) registerBtn.disabled = true;
+    return;
+  }
+
+  container.style.display = 'block';
+
+  const { level, strength, requirements } = calculatePasswordStrength(password);
+
+  // Update strength bar
+  fill.className = `password-strength-fill ${level}`;
+  label.className = level;
+  label.textContent = level.charAt(0).toUpperCase() + level.slice(1);
+
+  // Update requirement indicators
+  updateRequirementUI('req-length', requirements.length);
+  updateRequirementUI('req-uppercase', requirements.uppercase);
+  updateRequirementUI('req-lowercase', requirements.lowercase);
+  updateRequirementUI('req-number', requirements.number);
+  updateRequirementUI('req-special', requirements.special);
+
+  // Enable/disable submit button based on strength
+  if (registerBtn) {
+    registerBtn.disabled = level !== 'good' && level !== 'strong';
+  }
+}
+
+function updateRequirementUI(id, met) {
+  const element = document.getElementById(id);
+  if (!element) return;
+
+  if (met) {
+    element.classList.add('met');
+    element.classList.remove('unmet');
+  } else {
+    element.classList.add('unmet');
+    element.classList.remove('met');
+  }
+}
+
+// ============================================
+// AUTHENTICATION VALIDATION
 
 function validateEmail(email) {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -203,6 +287,14 @@ async function submitRegisterForm(event) {
     showFieldError('registerPasswordError', 'Password must be at least 8 characters');
     return;
   }
+  
+  // Check password strength (must be "good" or "strong")
+  const { level } = calculatePasswordStrength(password);
+  if (level !== 'good' && level !== 'strong') {
+    showFieldError('registerPasswordError', `Password strength is ${level}. Please meet all requirements above.`);
+    return;
+  }
+  
   if (password !== confirmPassword) {
     showFieldError('registerConfirmPasswordError', 'Passwords do not match');
     return;
@@ -230,7 +322,8 @@ window.onGoogleSignIn = function(response) {
   if (response.credential) {
     loginWithGoogle(response.credential);
   } else {
-    showErrorMessage('Google sign-in failed', 'loginError');
+    const errorTarget = currentAuthTab === 'register' ? 'registerError' : 'loginError';
+    showErrorMessage('Google sign-in failed', errorTarget);
   }
 };
 
@@ -245,11 +338,13 @@ async function loginWithGoogle(googleIdToken) {
     if (res.success && res.data.token && res.data.user) {
       handleAuthSuccess(res.data.token, res.data.user);
     } else {
-      showErrorMessage(res.data?.error || 'Google login failed', 'loginError');
+      const errorTarget = currentAuthTab === 'register' ? 'registerError' : 'loginError';
+      showErrorMessage(res.data?.error || 'Google authentication failed', errorTarget);
     }
   } catch (e) {
-    console.error('Google login error:', e);
-    showErrorMessage('Google login error', 'loginError');
+    console.error('Google authentication error:', e);
+    const errorTarget = currentAuthTab === 'register' ? 'registerError' : 'loginError';
+    showErrorMessage('Google authentication error', errorTarget);
   }
 }
 
@@ -260,6 +355,8 @@ async function loginWithGoogle(googleIdToken) {
 function handleAuthSuccess(token, user) {
   setAuthToken(token);
   setUserData(user);
+  // Store login time for session expiry calculation (24-hour tokens)
+  localStorage.setItem('webpot_login_time', Date.now().toString());
   showSuccessMessage('Login successful! Redirecting...');
   setTimeout(() => {
     window.location.href = '/index.html';
@@ -494,6 +591,12 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       clearErrorMessage('loginEmailError');
     }
+  });
+
+  document.getElementById('registerPassword')?.addEventListener('input', () => {
+    const password = document.getElementById('registerPassword').value;
+    updatePasswordStrengthUI(password);
+    clearErrorMessage('registerPasswordError');
   });
 
   document.getElementById('registerPassword')?.addEventListener('blur', () => {

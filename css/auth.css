@@ -391,6 +391,11 @@ body {
   justify-content: center;
 }
 
+/* Register OAuth - Differentiated styling */
+.auth-oauth-register {
+  margin-bottom: 20px;
+}
+
 /* ============================================
    Messages
    ============================================ */
@@ -828,4 +833,146 @@ body {
     padding: 10px;
     gap: 10px;
   }
+}
+
+/* ============================================
+   Password Strength Indicator
+   ============================================ */
+
+.password-strength-container {
+  margin-top: 12px;
+  padding: 12px;
+  background: rgba(37, 99, 235, 0.08);
+  border-radius: 8px;
+  border: 1px solid rgba(37, 99, 235, 0.15);
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    max-height: 500px;
+  }
+}
+
+.password-strength-bar {
+  width: 100%;
+  height: 6px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.password-strength-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #ef4444, #f59e0b, #10b981);
+  border-radius: 3px;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 8px rgba(37, 99, 235, 0.3);
+}
+
+.password-strength-fill.weak {
+  width: 25%;
+  background: linear-gradient(90deg, #ef4444, #f87171);
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+}
+
+.password-strength-fill.medium {
+  width: 50%;
+  background: linear-gradient(90deg, #f59e0b, #fbbf24);
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.4);
+}
+
+.password-strength-fill.good {
+  width: 75%;
+  background: linear-gradient(90deg, #10b981, #34d399);
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+}
+
+.password-strength-fill.strong {
+  width: 100%;
+  background: linear-gradient(90deg, #059669, #10b981);
+  box-shadow: 0 0 8px rgba(5, 150, 105, 0.4);
+}
+
+.password-strength-text {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+#passwordStrengthLabel {
+  color: var(--text-dark);
+  transition: color 0.3s ease;
+}
+
+#passwordStrengthLabel.weak {
+  color: #ef4444;
+}
+
+#passwordStrengthLabel.medium {
+  color: #f59e0b;
+}
+
+#passwordStrengthLabel.good {
+  color: #10b981;
+}
+
+#passwordStrengthLabel.strong {
+  color: #059669;
+}
+
+.password-strength-requirements {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.requirement {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-light);
+  transition: all 0.2s ease;
+}
+
+.requirement-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.1);
+  color: transparent;
+  font-size: 10px;
+  font-weight: bold;
+  transition: all 0.2s ease;
+}
+
+.requirement.met .requirement-icon {
+  background: #10b981;
+  color: white;
+}
+
+.requirement.met {
+  color: #10b981;
+}
+
+.requirement.unmet .requirement-icon {
+  background: rgba(239, 68, 68, 0.2);
 }

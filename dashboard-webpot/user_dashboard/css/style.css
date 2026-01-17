@@ -244,6 +244,66 @@ body {
 }
 
 /* =============================================
+   SESSION EXPIRY INDICATOR
+   ============================================= */
+
+.session-expiry-indicator {
+    display: none;
+    padding: 0.75rem 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    border-left: 3px solid #fbbf24;
+    transition: all 0.3s ease;
+    font-size: 0.85rem;
+}
+
+.session-expiry-indicator.warning {
+    background: rgba(239, 68, 68, 0.15);
+    border-left-color: #ef4444;
+}
+
+.session-expiry-content {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-light);
+}
+
+.session-expiry-icon {
+    font-size: 1rem;
+    animation: sessionPulse 2s infinite;
+}
+
+.session-expiry-indicator.warning .session-expiry-icon {
+    animation: sessionPulseWarning 1s infinite;
+}
+
+@keyframes sessionPulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.6;
+    }
+}
+
+@keyframes sessionPulseWarning {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.5;
+        transform: scale(1.15);
+    }
+}
+
+.session-expiry-text {
+    font-weight: 500;
+    color: var(--text-light);
+}
+
+/* =============================================
    MAIN CONTAINER & LAYOUT
    ============================================= */
 

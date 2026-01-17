@@ -143,6 +143,38 @@
           required 
           autocomplete="new-password">
         <span class="input-error" id="registerPasswordError"></span>
+        
+        <!-- Password Strength Indicator -->
+        <div class="password-strength-container" id="passwordStrengthContainer" style="display: none;">
+          <div class="password-strength-bar">
+            <div class="password-strength-fill" id="passwordStrengthFill"></div>
+          </div>
+          <div class="password-strength-text">
+            <span id="passwordStrengthLabel">Weak</span>
+          </div>
+          <div class="password-strength-requirements">
+            <div class="requirement" id="req-length">
+              <span class="requirement-icon">✓</span>
+              <span>At least 8 characters</span>
+            </div>
+            <div class="requirement" id="req-uppercase">
+              <span class="requirement-icon">✓</span>
+              <span>Upper case letter (A-Z)</span>
+            </div>
+            <div class="requirement" id="req-lowercase">
+              <span class="requirement-icon">✓</span>
+              <span>Lower case letter (a-z)</span>
+            </div>
+            <div class="requirement" id="req-number">
+              <span class="requirement-icon">✓</span>
+              <span>Number (0-9)</span>
+            </div>
+            <div class="requirement" id="req-special">
+              <span class="requirement-icon">✓</span>
+              <span>Special character (!@#$%^&*)</span>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="auth-form-group">
@@ -177,6 +209,22 @@
       </button>
 
       <div id="registerError" class="auth-error-message"></div>
+
+      <!-- Google OAuth for Register -->
+      <div class="auth-divider">
+        <span>or sign up with</span>
+      </div>
+
+      <div class="auth-oauth-container auth-oauth-register">
+        <div class="g_id_signin"
+          data-type="standard"
+          data-shape="rectangular"
+          data-theme="outline"
+          data-text="signup_with"
+          data-size="large"
+          data-logo_alignment="left">
+        </div>
+      </div>
     </form>
 
     <!-- Footer -->

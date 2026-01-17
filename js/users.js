@@ -58,6 +58,8 @@ document.addEventListener('click', function(e) {
 function logoutUser() {
   clearAuthToken();
   clearUserData();
+  // Clear session expiry tracking data
+  localStorage.removeItem('webpot_login_time');
   updateAuthUI();
   
   // Close user menu
