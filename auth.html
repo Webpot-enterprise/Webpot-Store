@@ -2,244 +2,78 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Webpot - Login / Register</title>
+
   <link rel="stylesheet" href="./css/style.css">
   <link rel="stylesheet" href="./css/auth.css">
+
+  <!-- Google Identity Services -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
-  <!-- Terms & Privacy Modal -->
-  <div id="termsModal" class="auth-modal" hidden>
-    <div class="auth-modal-overlay"></div>
-    <div class="auth-modal-content">
-      <div class="auth-modal-header">
-        <h3 id="modalTitle">Terms & Conditions</h3>
-        <button type="button" class="auth-modal-close" aria-label="Close modal">&times;</button>
-      </div>
-      <div id="modalBody" class="auth-modal-body">
-        <!-- Content loaded dynamically -->
-      </div>
-      <div class="auth-modal-footer">
-        <p id="scrollPrompt" class="scroll-prompt">👇 Scroll to the bottom to continue</p>
-        <button type="button" id="modalNextBtn" class="auth-modal-btn" disabled>
-          Next: Privacy Policy
-        </button>
-      </div>
-    </div>
+
+  <!-- ✅ SINGLE GOOGLE INITIALIZER (GLOBAL) -->
+  <div id="g_id_onload"
+    data-client_id="709120008855-p9m39a4h5i728l0kltuhk9r2dme7t192.apps.googleusercontent.com"
+    data-callback="onGoogleSignIn"
+    data-ux_mode="popup"
+    data-auto_prompt="false">
   </div>
 
-  <!-- Main Auth Container -->
   <div class="auth-container">
-    <!-- Tab Navigation -->
+
+    <!-- Tabs -->
     <div class="auth-tabs">
-      <button id="loginTabBtn" class="auth-tab-btn active" data-tab="login">
-        <span>Login</span>
-        <span class="tab-underline"></span>
-      </button>
-      <button id="registerTabBtn" class="auth-tab-btn" data-tab="register">
-        <span>Register</span>
-        <span class="tab-underline"></span>
-      </button>
+      <button id="loginTabBtn" class="auth-tab-btn active" data-tab="login">Login</button>
+      <button id="registerTabBtn" class="auth-tab-btn" data-tab="register">Register</button>
     </div>
 
-    <!-- Login Form -->
-    <form id="loginForm" class="auth-form active" data-form="login">
+    <!-- LOGIN -->
+    <form id="loginForm" class="auth-form active">
       <h2>Welcome Back</h2>
-      <p class="auth-subtitle">Sign in to your account</p>
 
-      <div class="auth-form-group">
-        <label for="loginEmail" class="auth-label">Email Address</label>
-        <input 
-          type="email" 
-          id="loginEmail" 
-          class="auth-input" 
-          placeholder="kakadiyasuprince@gmail.com"
-          required 
-          autocomplete="email">
-        <span class="input-error" id="loginEmailError"></span>
-      </div>
+      <input id="loginEmail" type="email" placeholder="Email" required>
+      <input id="loginPassword" type="password" placeholder="Password" required>
 
-      <div class="auth-form-group">
-        <label for="loginPassword" class="auth-label">Password</label>
-        <input 
-          type="password" 
-          id="loginPassword" 
-          class="auth-input" 
-          placeholder="••••••••"
-          required 
-          autocomplete="current-password">
-        <span class="input-error" id="loginPasswordError"></span>
-      </div>
-
-      <button type="submit" class="auth-btn auth-btn-primary">
-        <span class="btn-text">Sign In</span>
-        <span class="btn-loader" style="display: none;">
-          <span class="spinner"></span>
-        </span>
-      </button>
-
+      <button type="submit">Sign In</button>
       <div id="loginError" class="auth-error-message"></div>
 
-      <!-- Google OAuth -->
-      <div class="auth-divider">
-        <span>or continue with</span>
-      </div>
+      <div class="auth-divider">or</div>
 
-      <div class="auth-oauth-container">
-        <div id="g_id_onload"
-          data-client_id="709120008855-p9m39a4h5i728l0kltuhk9r2dme7t192.apps.googleusercontent.com"
-          data-context="signin"
-          data-ux_mode="popup"
-          data-callback="onGoogleSignIn"
-          data-auto_prompt="false">
-        </div>
-        <div class="g_id_signin"
-          data-type="standard"
-          data-shape="rectangular"
-          data-theme="outline"
-          data-text="signin_with"
-          data-size="large"
-          data-logo_alignment="left">
-        </div>
+      <!-- ✅ LOGIN GOOGLE BUTTON -->
+      <div class="g_id_signin"
+        data-type="standard"
+        data-size="large"
+        data-text="signin_with">
       </div>
     </form>
 
-    <!-- Register Form -->
-    <form id="registerForm" class="auth-form" data-form="register" style="display: none;">
+    <!-- REGISTER -->
+    <form id="registerForm" class="auth-form" style="display:none;">
       <h2>Create Account</h2>
-      <p class="auth-subtitle">Join us today</p>
 
-      <div class="auth-form-group">
-        <label for="registerName" class="auth-label">Full Name</label>
-        <input 
-          type="text" 
-          id="registerName" 
-          class="auth-input" 
-          placeholder="Suprince Kakadiya"
-          required 
-          autocomplete="name">
-        <span class="input-error" id="registerNameError"></span>
-      </div>
+      <input id="registerName" type="text" placeholder="Full name" required>
+      <input id="registerEmail" type="email" placeholder="Email" required>
+      <input id="registerPassword" type="password" placeholder="Password" required>
 
-      <div class="auth-form-group">
-        <label for="registerEmail" class="auth-label">Email Address</label>
-        <input 
-          type="email" 
-          id="registerEmail" 
-          class="auth-input" 
-          placeholder="kakadiyasuprince.com"
-          required 
-          autocomplete="email">
-        <span class="input-error" id="registerEmailError"></span>
-      </div>
-
-      <div class="auth-form-group">
-        <label for="registerPassword" class="auth-label">Password</label>
-        <input 
-          type="password" 
-          id="registerPassword" 
-          class="auth-input" 
-          placeholder="At least 8 characters"
-          required 
-          autocomplete="new-password">
-        <span class="input-error" id="registerPasswordError"></span>
-        
-        <!-- Password Strength Indicator -->
-        <div class="password-strength-container" id="passwordStrengthContainer" style="display: none;">
-          <div class="password-strength-bar">
-            <div class="password-strength-fill" id="passwordStrengthFill"></div>
-          </div>
-          <div class="password-strength-text">
-            <span id="passwordStrengthLabel">Weak</span>
-          </div>
-          <div class="password-strength-requirements">
-            <div class="requirement" id="req-length">
-              <span class="requirement-icon">✓</span>
-              <span>At least 8 characters</span>
-            </div>
-            <div class="requirement" id="req-uppercase">
-              <span class="requirement-icon">✓</span>
-              <span>Upper case letter (A-Z)</span>
-            </div>
-            <div class="requirement" id="req-lowercase">
-              <span class="requirement-icon">✓</span>
-              <span>Lower case letter (a-z)</span>
-            </div>
-            <div class="requirement" id="req-number">
-              <span class="requirement-icon">✓</span>
-              <span>Number (0-9)</span>
-            </div>
-            <div class="requirement" id="req-special">
-              <span class="requirement-icon">✓</span>
-              <span>Special character (!@#$%^&*)</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="auth-form-group">
-        <label for="registerConfirmPassword" class="auth-label">Confirm Password</label>
-        <input 
-          type="password" 
-          id="registerConfirmPassword" 
-          class="auth-input" 
-          placeholder="Confirm your password"
-          required 
-          autocomplete="new-password">
-        <span class="input-error" id="registerConfirmPasswordError"></span>
-      </div>
-
-      <!-- Terms & Privacy Checkbox -->
-      <div class="auth-checkbox-group">
-        <input 
-          type="checkbox" 
-          id="termsCheckbox" 
-          class="auth-checkbox">
-        <label for="termsCheckbox" class="auth-checkbox-label">
-          I agree to the <button type="button" class="auth-link" id="termsLink">Terms & Conditions</button> and <button type="button" class="auth-link" id="privacyLink">Privacy Policy</button>
-        </label>
-        <span class="input-error" id="termsError"></span>
-      </div>
-
-      <button type="submit" class="auth-btn auth-btn-primary" disabled>
-        <span class="btn-text">Create Account</span>
-        <span class="btn-loader" style="display: none;">
-          <span class="spinner"></span>
-        </span>
-      </button>
-
+      <button type="submit">Create Account</button>
       <div id="registerError" class="auth-error-message"></div>
 
-      <!-- Google OAuth for Register -->
-      <div class="auth-divider">
-        <span>or sign up with</span>
-      </div>
+      <div class="auth-divider">or</div>
 
-      <div class="auth-oauth-container auth-oauth-register">
-        <div class="g_id_signin"
-          data-type="standard"
-          data-shape="rectangular"
-          data-theme="outline"
-          data-text="signup_with"
-          data-size="large"
-          data-logo_alignment="left">
-        </div>
+      <!-- ✅ REGISTER GOOGLE BUTTON -->
+      <div class="g_id_signin"
+        data-type="standard"
+        data-size="large"
+        data-text="signup_with">
       </div>
     </form>
 
-    <!-- Footer -->
-    <div class="auth-footer">
-      <a href="index.html" class="auth-footer-link">← Back to Home</a>
-    </div>
   </div>
 
-  <!-- Google Sign-In Script -->
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
-  
-  <!-- Configuration and API Scripts (in correct order) -->
   <script src="./js/config.js"></script>
   <script src="./js/api.js"></script>
   <script src="./js/auth.js"></script>
-  <script src="./js/users.js"></script>
 </body>
 </html>
