@@ -368,74 +368,23 @@ function handleAuthSuccess(token, user) {
 // ============================================
 
 function initScrollToAgreeModal() {
-  // Defensively get all required elements
-  const modal = document.getElementById('termsModal');
-  const modalOverlay = document.querySelector('.auth-modal-overlay');
-  const modalClose = document.querySelector('.auth-modal-close');
   const termsCheckbox = document.getElementById('termsCheckbox');
-  const termsLink = document.getElementById('termsLink');
-  const privacyLink = document.getElementById('privacyLink');
+  const modal = document.getElementById('termsModal');
   const modalBody = document.getElementById('modalBody');
   const modalNextBtn = document.getElementById('modalNextBtn');
   const scrollPrompt = document.getElementById('scrollPrompt');
   const modalTitle = document.getElementById('modalTitle');
+  const termsLink = document.getElementById('termsLink');
+  const privacyLink = document.getElementById('privacyLink');
+  const modalClose = document.querySelector('.auth-modal-close');
 
-  // Exit early if modal is not present on this page (e.g., login-only view)
-  if (!modal || !modalBody) {
-    console.debug('Terms modal not found - skipping initialization');
+  if (!termsCheckbox || !modal || !modalBody || !modalNextBtn || !scrollPrompt || !modalTitle) {
     return;
   }
 
-  // Exit if critical elements are missing
-  if (!termsCheckbox || !modalNextBtn || !modalTitle) {
-    console.warn('Required modal elements missing - terms modal functionality disabled');
-    return;
-  }
-
-  let currentStep = 'terms'; // 'terms' or 'privacy'
+  let currentStep = 'terms';
   let termsScrolled = false;
   let privacyScrolled = false;
-
-  // Prevent default checkbox behavior - only if checkbox exists
-  if (termsCheckbox) {
-    termsCheckbox.addEventListener('click', (e) => {
-      if (!termsCheckbox.checked) {
-        e.preventDefault();
-        openModal();
-      }
-    });
-  }
-
-  // Open modal from terms link - only if element exists
-  if (termsLink) {
-    termsLink.addEventListener('click', (e) => {
-      e.preventDefault();
-      openModal();
-    });
-  }
-
-  // Open modal from privacy link - only if element exists
-  if (privacyLink) {
-    privacyLink.addEventListener('click', (e) => {
-      e.preventDefault();
-      currentStep = 'privacy';
-      openModal();
-    });
-  }
-
-  // Close modal button - only if element exists
-  if (modalClose) {
-    modalClose.addEventListener('click', closeModal);
-  }
-
-  // Close modal on overlay click - only if overlay exists
-  if (modalOverlay) {
-    modalOverlay.addEventListener('click', (e) => {
-      if (e.target === modalOverlay) {
-        closeModal();
-      }
-    });
-  }
 
   function openModal() {
     if (!modal) return;
@@ -466,15 +415,15 @@ function initScrollToAgreeModal() {
         if (!modalBody || !modalTitle) return;
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, 'text/html');
-        const content = doc.body.innerText;
+        const contentDiv = doc.getElementById('terms-content');
+        const content = contentDiv ? contentDiv.innerHTML : doc.body.innerHTML;
         modalTitle.textContent = 'Terms & Conditions';
-        modalBody.innerText = content;
+        modalBody.innerHTML = content;
         updateScrollPrompt();
       })
       .catch(err => {
-        console.error('Error loading terms:', err);
         if (modalBody) {
-          modalBody.innerText = 'Error loading Terms & Conditions. Please try again.';
+          modalBody.innerHTML = '<p>Error loading Terms & Conditions. Please try again.</p>';
         }
       });
   }
@@ -488,15 +437,15 @@ function initScrollToAgreeModal() {
         if (!modalBody || !modalTitle) return;
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, 'text/html');
-        const content = doc.body.innerText;
+        const contentDiv = doc.getElementById('privacy-content');
+        const content = contentDiv ? contentDiv.innerHTML : doc.body.innerHTML;
         modalTitle.textContent = 'Privacy Policy';
-        modalBody.innerText = content;
+        modalBody.innerHTML = content;
         updateScrollPrompt();
       })
       .catch(err => {
-        console.error('Error loading privacy:', err);
         if (modalBody) {
-          modalBody.innerText = 'Error loading Privacy Policy. Please try again.';
+          modalBody.innerHTML = '<p>Error loading Privacy Policy. Please try again.</p>';
         }
       });
   }
@@ -515,23 +464,82 @@ function initScrollToAgreeModal() {
 
       if (currentStep === 'terms') {
         termsScrolled = true;
-        modalNextBtn.textContent = 'Next: Privacy Policy';
+        modalNextBtn.textContent = '✓ Transitioning to Privacy...';
+        modalNextBtn.classList.add('auto-transition');
+        
+        setTimeout(() => {
+          if (currentStep === 'terms' && termsScrolled) {
+            currentStep = 'privacy';
+            loadPrivacyContent();
+            if (modalBody) modalBody.scrollTop = 0;
+            modalNextBtn.classList.remove('auto-transition');
+            modalNextBtn.textContent = 'Next: Privacy Policy';
+          }
+        }, 1000);
       } else {
         privacyScrolled = true;
-        modalNextBtn.textContent = 'I Agree & Continue';
+        modalNextBtn.textContent = '✓ Auto-confirming...';
+        modalNextBtn.classList.add('auto-transition');
+        
+        setTimeout(() => {
+          if (currentStep === 'privacy' && privacyScrolled) {
+            if (termsCheckbox) termsCheckbox.checked = true;
+            closeModal();
+            modalNextBtn.classList.remove('auto-transition');
+            modalNextBtn.textContent = 'I Agree & Continue';
+            const submitBtn = document.querySelector('#registerForm button[type="submit"]');
+            if (submitBtn) submitBtn.disabled = false;
+          }
+        }, 1000);
       }
     } else {
       scrollPrompt.classList.remove('hidden');
       modalNextBtn.disabled = true;
+      modalNextBtn.classList.remove('auto-transition');
     }
   }
 
-  // Scroll event listener - only if modalBody exists
+  if (termsCheckbox) {
+    termsCheckbox.addEventListener('click', (e) => {
+      if (!termsCheckbox.checked) {
+        e.preventDefault();
+        openModal();
+      }
+    });
+  }
+
+  if (termsLink) {
+    termsLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      openModal();
+    });
+  }
+
+  if (privacyLink) {
+    privacyLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      currentStep = 'privacy';
+      openModal();
+    });
+  }
+
+  if (modalClose) {
+    modalClose.addEventListener('click', closeModal);
+  }
+
+  const modalOverlay = document.querySelector('.auth-modal-overlay');
+  if (modalOverlay) {
+    modalOverlay.addEventListener('click', (e) => {
+      if (e.target === modalOverlay) {
+        closeModal();
+      }
+    });
+  }
+
   if (modalBody) {
     modalBody.addEventListener('scroll', updateScrollPrompt);
   }
 
-  // Next button handler - only if button exists
   if (modalNextBtn) {
     modalNextBtn.addEventListener('click', () => {
       if (currentStep === 'terms' && termsScrolled) {
@@ -539,14 +547,10 @@ function initScrollToAgreeModal() {
         loadPrivacyContent();
         if (modalBody) modalBody.scrollTop = 0;
       } else if (currentStep === 'privacy' && privacyScrolled) {
-        // Auto-check and close
         if (termsCheckbox) termsCheckbox.checked = true;
         closeModal();
-        // Enable submit button
         const submitBtn = document.querySelector('#registerForm button[type="submit"]');
-        if (submitBtn) {
-          submitBtn.disabled = false;
-        }
+        if (submitBtn) submitBtn.disabled = false;
       }
     });
   }
