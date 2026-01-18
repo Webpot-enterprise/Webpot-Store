@@ -10,6 +10,46 @@ let selectedService = null;
 let selectedPrice = null;
 let qrTimer = null;
 
+if (typeof openOrderModal === 'undefined') {
+  window.openOrderModal = function() {
+    const modal = document.getElementById('orderModal');
+    if (modal) {
+      modal.style.display = 'block';
+      document.body.style.overflow = 'hidden';
+    }
+  };
+}
+
+if (typeof closeOrderModal === 'undefined') {
+  window.closeOrderModal = function() {
+    const modal = document.getElementById('orderModal');
+    if (modal) {
+      modal.style.display = 'none';
+      document.body.style.overflow = 'auto';
+    }
+  };
+}
+
+if (typeof openPaymentModal === 'undefined') {
+  window.openPaymentModal = function() {
+    const modal = document.getElementById('paymentModal');
+    if (modal) {
+      modal.style.display = 'block';
+      document.body.style.overflow = 'hidden';
+    }
+  };
+}
+
+if (typeof closePaymentModal === 'undefined') {
+  window.closePaymentModal = function() {
+    const modal = document.getElementById('paymentModal');
+    if (modal) {
+      modal.style.display = 'none';
+      document.body.style.overflow = 'auto';
+    }
+  };
+}
+
 /**
  * Select a service plan
  * @param {string} service - Service name
@@ -55,7 +95,6 @@ function updateServicePrice() {
 async function submitOrder(event) {
   event.preventDefault();
   
-  // Check authentication
   if (!isAuthenticated()) {
     alert('Please login first to place an order');
     window.location.href = '/auth.html';
@@ -69,25 +108,21 @@ async function submitOrder(event) {
     return;
   }
   
-  // SECTION 11.3: Input Validation
   const name = document.getElementById('oname').value.trim();
   const email = document.getElementById('oemail').value.trim();
   const phone = document.getElementById('ophone').value.trim();
   
-  // Validate required fields
   if (!name || !email || !phone) {
     alert('Please fill in all required fields');
     return;
   }
   
-  // Validate email format
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
     alert('Please enter a valid email address');
     return;
   }
   
-  // Validate phone format (basic - at least 10 digits)
   const phoneRegex = /\d{10,}/;
   if (!phoneRegex.test(phone.replace(/\D/g, ''))) {
     alert('Please enter a valid phone number (at least 10 digits)');
@@ -104,7 +139,6 @@ async function submitOrder(event) {
     details: document.getElementById('details').value.trim()
   };
   
-  // Store order data for payment
   sessionStorage.setItem('orderData', JSON.stringify(formData));
   
   closeOrderModal();

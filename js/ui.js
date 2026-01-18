@@ -50,6 +50,17 @@ function closeOrderModal() {
 }
 
 /**
+ * Open payment modal
+ */
+function openPaymentModal() {
+  const modal = document.getElementById('paymentModal');
+  if (modal) {
+    modal.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+/**
  * Close payment modal
  */
 function closePaymentModal() {
