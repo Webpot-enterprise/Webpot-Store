@@ -41,19 +41,19 @@ function showFallbackTestimonials() {
   
   const fallbackTestimonials = [
     {
-      name: 'Raj Kumar',
+      name: 'Jash Bhanderi',
       company: 'Tech Startup',
       message: 'Webpot delivered our website on time and exceeded our expectations. The team was professional and responsive.',
       rating: 5
     },
     {
-      name: 'Priya Singh',
+      name: 'Miral Shabhaya',
       company: 'E-commerce Business',
       message: 'Great service! Our website is now converting visitors to customers. Highly recommend Webpot!',
       rating: 5
     },
     {
-      name: 'Amit Patel',
+      name: 'Diya Bhanderi',
       company: 'Small Business Owner',
       message: 'The support team is excellent. They helped us with everything we needed and made the process smooth.',
       rating: 5
