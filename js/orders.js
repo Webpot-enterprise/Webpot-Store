@@ -270,7 +270,7 @@ async function verifyAndSubmitPayment(event) {
     
     // Redirect to dashboard after success
     setTimeout(() => {
-      window.location.href = 'dashboard-webpot/user dashboard/html/index.html';
+      window.location.href = 'dashboard-webpot/user_dashboard/html/index.html';
     }, 2000);
   } else {
     alert('Error submitting order: ' + (result.error || 'Please try again.'));
@@ -294,5 +294,5 @@ function payLater() {
   }
   
   closePaymentModal();
-  window.location.href = 'dashboard-webpot/user dashboard/html/index.html';
+  window.location.href = 'dashboard-webpot/user_dashboard/html/index.html';
 }
