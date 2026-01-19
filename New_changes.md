@@ -172,3 +172,183 @@ This document:
 
 # Dashboard UI/UX Improvement:
 
+Part 1 — Fix Dashboard Script Loading (CRITICAL)
+Problem
+
+Dashboard JS files are failing to load due to incorrect paths, causing:
+
+getAuthToken is not defined
+
+isAuthenticated is not defined
+
+dashboard data never loads
+
+Task
+
+Locate user dashboard HTML file (inside dashboard-webpot/user_dashboard/html/)
+
+Update all <script src="..."> paths to correctly point to:
+
+dashboard-webpot/user_dashboard/js/
+
+Ensure scripts load in correct dependency order:
+
+config.js
+
+api.js
+
+auth.js
+
+users.js
+
+orders.js
+
+script.js
+
+Remove duplicate or conflicting script imports
+
+✅ Result:
+All auth helpers (getAuthToken, isAuthenticated, etc.) are available globally.
+
+Part 2 — Fix Dashboard Auth Guard (Frontend Only)
+Problem
+
+Dashboard tries to load data before authentication helpers are available.
+
+Task
+
+In dashboard script.js:
+
+Ensure dashboard initialization:
+
+Waits for DOMContentLoaded
+
+Verifies authentication via existing helpers
+
+If user is not authenticated:
+
+Redirect to login page
+
+Do NOT create new auth logic
+
+Use existing token helpers only
+
+Part 3 — Fix Pay Later Flow (Frontend Logic Only)
+Problem
+
+Pay Later shows a success popup but never actually creates an order.
+
+Task
+
+Locate the payment modal JS (inside frontend files, not backend).
+
+When user clicks Pay Later:
+
+Call existing API endpoint via /api?action=...
+
+Use existing API utility (api.js)
+
+Include:
+
+auth token
+
+service type
+
+service details
+
+payment_method = "pay_later"
+
+Wait for backend response
+
+Only show success modal if backend returns success
+
+On failure:
+
+Show proper error message
+
+Do NOT show confirmation UI
+
+⚠️ Do NOT invent backend actions.
+Only call actions that already exist or are expected by backend.
+
+Part 4 — Dashboard Orders Display Logic
+Problem
+
+Orders don’t appear on dashboard even when they exist.
+
+Task
+
+In user dashboard JS:
+
+Load user orders using existing API utilities
+
+Do NOT change backend API
+
+Gracefully handle:
+
+empty orders
+
+loading state
+
+error state
+
+Render orders into existing dashboard cards/sections
+
+Ensure numbers (total orders, spends) update only after data loads
+
+Part 5 — UX Integrity Improvements (No Styling Changes)
+Task
+
+Improve UX behavior without touching CSS:
+
+Disable action buttons while API calls are pending
+
+Prevent duplicate Pay Later submissions
+
+Replace fake “Loading…” text with real state logic
+
+Ensure success UI is always backed by backend success
+
+Validation Checklist (Must Pass)
+
+No 404 errors in console for JS files
+
+No ReferenceError for auth helpers
+
+Pay Later creates real order entries
+
+Orders appear on user dashboard
+
+No backend files modified
+
+No API contracts changed
+
+Output Expectations
+
+Edit frontend files only
+
+Minimal, targeted changes
+
+No sweeping rewrites
+
+Keep code readable and maintainable
+
+Add inline comments only where logic is non-obvious
+
+Execute all changes exactly as specified above.
+
+Absolute Rules (Do Not Break)
+
+❌ Do NOT edit code.gs
+
+❌ Do NOT edit Cloudflare Worker code
+
+❌ Do NOT change API request/response formats
+
+❌ Do NOT add new backend routes
+
+❌ Do NOT rename backend actions
+
+❌ Do NOT change authentication or token logic
+
+Frontend must adapt to backend exactly as-is.

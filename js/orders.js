@@ -278,21 +278,65 @@ async function verifyAndSubmitPayment(event) {
 }
 
 /**
- * Pay later and go to dashboard
+ * Pay later and create order via API
+ * Only shows success UI if backend successfully creates order
  */
-function payLater() {
+async function payLater() {
   const orderData = JSON.parse(sessionStorage.getItem('orderData') || '{}');
   
-  if (orderData.email) {
-    const pendingOrders = JSON.parse(localStorage.getItem('pendingOrders') || '[]');
-    pendingOrders.push({
-      ...orderData,
-      timestamp: new Date().toISOString(),
-      status: 'pending_payment'
-    });
-    localStorage.setItem('pendingOrders', JSON.stringify(pendingOrders));
+  if (!orderData.email) {
+    alert('Order data is missing. Please start over.');
+    window.location.href = '/auth.html';
+    return;
   }
   
-  closePaymentModal();
-  window.location.href = 'dashboard-webpot/user_dashboard/html/index.html';
+  // Disable button to prevent duplicate submissions
+  const payLaterBtn = document.querySelector('[onclick="payLater()"]');
+  if (payLaterBtn) {
+    payLaterBtn.disabled = true;
+    payLaterBtn.textContent = 'Processing...';
+  }
+  
+  try {
+    // Call API to create order with pay_later payment method
+    const response = await apiCall({
+      action: 'createOrder',
+      customer_email: orderData.email,
+      customer_name: orderData.name,
+      service_type: orderData.service,
+      service_details: orderData.details || '',
+      total_amount: orderData.amount,
+      payment_method: 'pay_later'
+    });
+    
+    if (response && response.success) {
+      // Only show success UI if backend confirmed order creation
+      closePaymentModal();
+      
+      // Show success message (backend created the order)
+      alert('Order created successfully! You can pay later from your dashboard.');
+      
+      // Clear session data
+      sessionStorage.removeItem('orderData');
+      
+      // Redirect to dashboard
+      setTimeout(() => {
+        window.location.href = 'dashboard-webpot/user_dashboard/html/index.html';
+      }, 1500);
+    } else {
+      // Backend returned error
+      const errorMsg = response?.error || 'Failed to create order. Please try again.';
+      alert('Error: ' + errorMsg);
+      closePaymentModal();
+    }
+  } catch (error) {
+    console.error('Pay Later error:', error);
+    alert('Error processing your request. Please try again.');
+  } finally {
+    // Re-enable button
+    if (payLaterBtn) {
+      payLaterBtn.disabled = false;
+      payLaterBtn.textContent = 'Pay Later';
+    }
+  }
 }

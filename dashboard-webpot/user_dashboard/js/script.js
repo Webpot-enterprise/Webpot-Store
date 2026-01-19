@@ -1,6 +1,124 @@
 // dashboard-webpot/user_dashboard/js/script.js - Dashboard initialization and data loading
 
 // ============================================
+// AUTH GUARD - PREVENT UNAUTHENTICATED ACCESS
+// ============================================
+
+/**
+ * Check if user is authenticated
+ * Redirect to login if not
+ */
+function requireDashboardAuth() {
+  // Wait for auth helpers to be available
+  if (typeof isAuthenticated !== 'function') {
+    console.error('Auth helpers not loaded yet');
+    return false;
+  }
+  
+  // Check if user has valid token
+  if (!isAuthenticated()) {
+    console.warn('User is not authenticated. Redirecting to login...');
+    clearAuthToken();
+    clearUserData();
+    window.location.href = '../../auth.html';
+    return false;
+  }
+  
+  // User is authenticated
+  return true;
+}
+
+/**
+ * Guard dashboard initialization
+ * Runs immediately on page load
+ */
+(function dashboardAuthGuard() {
+  // Check if auth helpers are available
+  if (typeof isAuthenticated === 'function' && typeof getAuthToken === 'function') {
+    if (!isAuthenticated()) {
+      window.location.href = '../../auth.html';
+    }
+  }
+})();
+
+// ============================================
+// API CALL STATE MANAGEMENT
+// ============================================
+
+/**
+ * Track API call states to prevent duplicate submissions
+ * and manage button states during loading
+ */
+const apiStateManager = {
+  pending: new Set(),
+  
+  /**
+   * Mark an API action as pending
+   * @param {string} actionKey - Unique key for the action
+   */
+  setPending(actionKey) {
+    this.pending.add(actionKey);
+    this.updateButtonStates();
+  },
+  
+  /**
+   * Mark an API action as complete
+   * @param {string} actionKey - Unique key for the action
+   */
+  setComplete(actionKey) {
+    this.pending.delete(actionKey);
+    this.updateButtonStates();
+  },
+  
+  /**
+   * Check if an action is pending
+   * @param {string} actionKey - Unique key for the action
+   * @returns {boolean} True if pending
+   */
+  isPending(actionKey) {
+    return this.pending.has(actionKey);
+  },
+  
+  /**
+   * Check if any actions are pending
+   * @returns {boolean} True if any actions are pending
+   */
+  hasAnyPending() {
+    return this.pending.size > 0;
+  },
+  
+  /**
+   * Update button states based on pending actions
+   */
+  updateButtonStates() {
+    const allButtons = document.querySelectorAll('button[data-api-action]');
+    allButtons.forEach(btn => {
+      const action = btn.getAttribute('data-api-action');
+      if (this.pending.has(action)) {
+        btn.disabled = true;
+        btn.setAttribute('data-loading-text', btn.textContent);
+        btn.textContent = 'Processing...';
+      } else {
+        btn.disabled = false;
+        const originalText = btn.getAttribute('data-loading-text');
+        if (originalText) {
+          btn.textContent = originalText;
+          btn.removeAttribute('data-loading-text');
+        }
+      }
+    });
+  },
+  
+  /**
+   * Reset all pending states
+   */
+  reset() {
+    this.pending.clear();
+    this.updateButtonStates();
+  }
+};
+
+// ============================================
 // SESSION EXPIRY TRACKER
 // ============================================
 
@@ -132,24 +250,18 @@ async function loadDashboardData() {
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
-  // Inject shared config and api files if not already loaded
-  if (typeof API_CONFIG === 'undefined') {
-    const script = document.createElement('script');
-    script.src = '../../js/config.js';
-    document.head.appendChild(script);
+  // Verify auth helpers are available
+  if (typeof isAuthenticated !== 'function' || typeof getAuthToken !== 'function') {
+    console.error('Auth helpers not available. Please ensure scripts are loaded in correct order.');
+    setTimeout(() => {
+      window.location.href = '../../auth.html';
+    }, 1000);
+    return;
   }
   
-  if (typeof apiCall === 'undefined') {
-    const script = document.createElement('script');
-    script.src = '../../js/api.js';
-    document.head.appendChild(script);
-  }
-  
-  // Small delay to allow config to load
-  setTimeout(() => {
-    loadDashboardData();
-    startSessionExpiryTracking();
-  }, 500);
+  // Load dashboard data and start tracking
+  loadDashboardData();
+  startSessionExpiryTracking();
 });
 
 // Logout from dashboard
