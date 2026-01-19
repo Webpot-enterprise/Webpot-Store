@@ -791,23 +791,24 @@ nav a:hover::after {
 }
 
 .login-btn {
-    padding: 0;
     background: transparent;
     color: var(--text-light);
-    border-radius: 0;
     text-decoration: none;
     font-weight: 600;
-    font-size: 14px;
-    transition: color 0.2s ease;
+    font-size: 1rem;
+    transition: color 0.2s ease, background 0.2s ease;
     cursor: pointer;
     border: none;
     display: inline-block;
+    padding: 0.25rem 0.25rem;
+    border-radius: 4px;
 }
 
 .login-btn:hover {
-    color: var(--accent);
+    color: #2563eb;
     transform: none;
     box-shadow: none;
+    background: transparent;
 }
 
 .dashboard-btn {
