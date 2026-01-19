@@ -511,15 +511,21 @@ function initScrollToAgreeModal() {
   if (termsLink) {
     termsLink.addEventListener('click', (e) => {
       e.preventDefault();
-      openModal();
+      // Only open modal if on registration tab
+      if (currentAuthTab === 'register') {
+        openModal();
+      }
     });
   }
 
   if (privacyLink) {
     privacyLink.addEventListener('click', (e) => {
       e.preventDefault();
-      currentStep = 'privacy';
-      openModal();
+      // Only open modal if on registration tab
+      if (currentAuthTab === 'register') {
+        currentStep = 'privacy';
+        openModal();
+      }
     });
   }
 
