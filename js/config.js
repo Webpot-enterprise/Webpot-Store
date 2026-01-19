@@ -1,6 +1,3 @@
-// Configuration for the Webpot application
-// All API and authentication settings
-
 const API_CONFIG = {
   // Cloudflare Worker Gateway URL (Primary endpoint)
   BASE_URL: 'https://api-gateway.engagewebpot.workers.dev',
