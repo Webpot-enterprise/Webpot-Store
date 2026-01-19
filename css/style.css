@@ -791,22 +791,23 @@ nav a:hover::after {
 }
 
 .login-btn {
-    padding: 8px 20px;
-    background: linear-gradient(135deg, #a0a0a0, #606060);
-    color: white;
-    border-radius: 20px;
+    padding: 0;
+    background: transparent;
+    color: var(--text-light);
+    border-radius: 0;
     text-decoration: none;
     font-weight: 600;
     font-size: 14px;
-    transition: all 0.3s ease;
+    transition: color 0.2s ease;
     cursor: pointer;
     border: none;
     display: inline-block;
 }
 
 .login-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(176, 176, 176, 0.4);
+    color: var(--accent);
+    transform: none;
+    box-shadow: none;
 }
 
 .dashboard-btn {
