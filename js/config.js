@@ -1,51 +1,57 @@
-const API_CONFIG = {
-  // Cloudflare Worker Gateway URL (Primary endpoint)
-  BASE_URL: 'https://api-gateway.engagewebpot.workers.dev',
-  CLOUDFLARE_WORKER: 'https://api-gateway.engagewebpot.workers.dev',
-  
-  // Google Apps Script Web App URL (used for direct testing only)
-  GAS_URL: 'https://script.google.com/macros/s/AKfycbxb5XesTNnxNySyUVuDBU6Vjyk2PBDia5pbyULneRBVYnGExxisZY7zXFBJ48nDekwe/exec',
-  
-  // Request timeout (milliseconds)
-  TIMEOUT: 10000,
-  
-  // Debug logging
-  DEBUG: false,
-  
-  // Authentication token storage
-  AUTH_TOKEN_KEY: 'webpot_auth_token',
-  USER_DATA_KEY: 'webpot_user_data',
-  
-  // API Actions
-  ACTIONS: {
-    LOGIN: 'login',
-    REGISTER: 'register',
-    GOOGLE_LOGIN: 'googleLogin',
-    VERIFY_TOKEN: 'verifyToken',
-    GET_USER: 'getUser',
-    UPDATE_USER: 'updateUser',
-    SUBMIT_CONTACT: 'submitContact',
-    SUBMIT_ORDER: 'submitOrder',
-    GET_TESTIMONIALS: 'getTestimonials',
-    VERIFY_PAYMENT: 'verifyPayment'
-  },
-  
-  // Feature flags
-  FEATURES: {
-    ENABLE_UPI: true,
-    ENABLE_NOTIFICATIONS: true,
-    ENABLE_TESTIMONIALS: true
+// Prevent duplicate initialization if config is already loaded
+if (window.API_CONFIG) {
+  // Config already initialized, skip
+  (() => {})(); // No-op to avoid errors
+} else {
+  window.API_CONFIG = {
+    // Cloudflare Worker Gateway URL (Primary endpoint)
+    BASE_URL: 'https://api-gateway.engagewebpot.workers.dev',
+    CLOUDFLARE_WORKER: 'https://api-gateway.engagewebpot.workers.dev',
+    
+    // Google Apps Script Web App URL (used for direct testing only)
+    GAS_URL: 'https://script.google.com/macros/s/AKfycbxb5XesTNnxNySyUVuDBU6Vjyk2PBDia5pbyULneRBVYnGExxisZY7zXFBJ48nDekwe/exec',
+    
+    // Request timeout (milliseconds)
+    TIMEOUT: 10000,
+    
+    // Debug logging
+    DEBUG: false,
+    
+    // Authentication token storage
+    AUTH_TOKEN_KEY: 'webpot_auth_token',
+    USER_DATA_KEY: 'webpot_user_data',
+    
+    // API Actions
+    ACTIONS: {
+      LOGIN: 'login',
+      REGISTER: 'register',
+      GOOGLE_LOGIN: 'googleLogin',
+      VERIFY_TOKEN: 'verifyToken',
+      GET_USER: 'getUser',
+      UPDATE_USER: 'updateUser',
+      SUBMIT_CONTACT: 'submitContact',
+      SUBMIT_ORDER: 'submitOrder',
+      GET_TESTIMONIALS: 'getTestimonials',
+      VERIFY_PAYMENT: 'verifyPayment'
+    },
+    
+    // Feature flags
+    FEATURES: {
+      ENABLE_UPI: true,
+      ENABLE_NOTIFICATIONS: true,
+      ENABLE_TESTIMONIALS: true
+    }
+  };
+
+  // Helper function to get stored auth token
+  function getAuthToken() {
+    return localStorage.getItem(API_CONFIG.AUTH_TOKEN_KEY);
   }
-};
 
-// Helper function to get stored auth token
-function getAuthToken() {
-  return localStorage.getItem(API_CONFIG.AUTH_TOKEN_KEY);
-}
-
-// Helper function to save auth token
-function setAuthToken(token) {
-  localStorage.setItem(API_CONFIG.AUTH_TOKEN_KEY, token);
+  // Helper function to save auth token
+  function setAuthToken(token) {
+    localStorage.setItem(API_CONFIG.AUTH_TOKEN_KEY, token);
+  }
 }
 
 // Helper function to remove auth token

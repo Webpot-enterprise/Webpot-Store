@@ -1,6 +1,27 @@
 // dashboard-webpot/user_dashboard/js/script.js - Dashboard initialization and data loading
 
 // ============================================
+// PAGE DETECTION - ONLY RUN ON DASHBOARD PAGES
+// ============================================
+
+// Guard entire dashboard script - only execute if this is a dashboard page
+const isDashboardPage = () => {
+  const pathname = window.location.pathname;
+  return pathname.includes('/dashboard') || pathname.includes('/user_dashboard');
+};
+
+// Exit early if not on a dashboard page
+if (!isDashboardPage()) {
+  console.log('Not on dashboard page, skipping dashboard initialization');
+  // Prevent rest of script from executing
+  if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {};
+  }
+  // In a browser, we need to prevent DOMContentLoaded handlers
+  // This comment marks where dashboard code should have executed
+}
+
+// ============================================
 // AUTH GUARD - PREVENT UNAUTHENTICATED ACCESS
 // ============================================
 
@@ -8,10 +29,15 @@
  * Check if user is authenticated
  * Redirect to login if not
  */
+/**
+ * Centralized auth guard for dashboard
+ * Single source of truth for authentication checks
+ * Waits for scripts to load before checking auth state
+ */
 function requireDashboardAuth() {
-  // Wait for auth helpers to be available
-  if (typeof isAuthenticated !== 'function') {
-    console.error('Auth helpers not loaded yet');
+  // Check if auth helpers are available (scripts loaded)
+  if (typeof isAuthenticated !== 'function' || typeof getAuthToken !== 'function') {
+    console.warn('Auth helpers not yet available, waiting for scripts to load...');
     return false;
   }
   
@@ -20,26 +46,14 @@ function requireDashboardAuth() {
     console.warn('User is not authenticated. Redirecting to login...');
     clearAuthToken();
     clearUserData();
-    window.location.href = '../../auth.html';
+    // Redirect to root-level auth page (not dashboard-relative path)
+    window.location.href = '/auth.html';
     return false;
   }
   
   // User is authenticated
   return true;
 }
-
-/**
- * Guard dashboard initialization
- * Runs immediately on page load
- */
-(function dashboardAuthGuard() {
-  // Check if auth helpers are available
-  if (typeof isAuthenticated === 'function' && typeof getAuthToken === 'function') {
-    if (!isAuthenticated()) {
-      window.location.href = '../../auth.html';
-    }
-  }
-})();
 
 // ============================================
 // API CALL STATE MANAGEMENT
@@ -188,7 +202,8 @@ function updateSessionExpiryIndicator() {
   if (remaining === 'expired') {
     clearAuthToken();
     clearUserData();
-    window.location.href = '../../auth.html';
+    // Redirect to root-level auth page on session expiry
+    window.location.href = '/auth.html';
     return;
   }
   
@@ -224,7 +239,8 @@ async function loadDashboardData() {
   
   const user = getCurrentUser();
   if (!user || !user.user_id) {
-    window.location.href = '../../index.html';
+    // Redirect to homepage if user data is invalid
+    window.location.href = '/index.html';
     return;
   }
   
@@ -250,12 +266,22 @@ async function loadDashboardData() {
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
-  // Verify auth helpers are available
-  if (typeof isAuthenticated !== 'function' || typeof getAuthToken !== 'function') {
-    console.error('Auth helpers not available. Please ensure scripts are loaded in correct order.');
+  // Guard: Only run on dashboard pages
+  if (!isDashboardPage()) {
+    console.log('Skipping dashboard initialization - not on dashboard page');
+    return;
+  }
+  
+  // Verify auth - use centralized guard
+  if (!requireDashboardAuth()) {
+    console.warn('Dashboard auth check failed. Will retry when helpers are available.');
+    // Retry after a brief delay to allow scripts to load
     setTimeout(() => {
-      window.location.href = '../../auth.html';
-    }, 1000);
+      if (requireDashboardAuth()) {
+        loadDashboardData();
+        startSessionExpiryTracking();
+      }
+    }, 500);
     return;
   }
   
@@ -266,6 +292,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Logout from dashboard
 document.addEventListener('DOMContentLoaded', function() {
+  // Guard: Only run on dashboard pages
+  if (!isDashboardPage()) {
+    return;
+  }
+  
   const logoutBtn = document.querySelector('.logout-btn');
   if (logoutBtn) {
     logoutBtn.addEventListener('click', logoutUserFromDashboard);

@@ -1,271 +1,49 @@
-You are working on the USER DASHBOARD of a live production website.
+Refactor the user dashboard frontend authentication flow to fix an incorrect redirect that causes a GitHub Pages 404 after dashboard load.
 
-ABSOLUTE RULES:
-- Do NOT modify backend code (Apps Script, Cloudflare Worker, APIs).
-- Do NOT change request/response formats.
-- Do NOT add new backend features.
-- Do NOT invent new data fields.
-- Do NOT remove existing functionality.
-- All changes must be frontend-only and backward compatible.
-- Use the existing folder structure as the source of truth.
-- Prefer refactors over hacks.
-- Avoid DOM-mutation-driven logic.
+Context:
 
-========================================
-GOAL
-========================================
-Upgrade the User Dashboard UI/UX to feel intentional, clear, and action-oriented,
-without altering backend behavior.
+The dashboard correctly loads at /dashboard-webpot/user_dashboard/html/index.html
 
-========================================
-1. INFORMATION HIERARCHY
-========================================
-Reorganize the dashboard into three clear vertical zones:
+Immediately after load, the page redirects to /dashboard-webpot/auth.html, which does not exist and triggers a GitHub Pages 404
 
-1) STATUS / SUMMARY (top)
-2) PRIMARY ACTIONS (middle)
-3) DETAILS & HISTORY (bottom)
+This redirect happens due to premature or incorrect auth guard logic in frontend scripts
 
-Ensure visual hierarchy clearly communicates:
-- What is my current status?
-- What should I do next?
-- Where can I see details?
+Requirements:
 
-========================================
-2. ACTION-ORIENTED STAT CARDS
-========================================
-Refactor stat cards so they are not passive numbers.
+Locate and remove any hardcoded redirects to /dashboard-webpot/auth.html
 
-Each card must:
-- Show the metric
-- Indicate status (e.g., pending, active, completed)
-- Provide a clear CTA (View Orders, Complete Payment, Invite Users)
+Replace them with a centralized auth guard function that:
 
-Avoid cards that only display numbers with no affordance.
+Waits until all required auth/config scripts are loaded
 
-========================================
-3. PRIMARY CTA ZONE
-========================================
-Introduce a dedicated “Next Action” section.
+Checks authentication state only after initialization completes
 
-This section should:
-- Highlight the most likely next step (e.g., Start New Project, Complete Payment)
-- Be visually distinct from metrics
-- Reduce user confusion after landing on the dashboard
+Ensure authentication failure redirects only to the correct login page path (root-level auth page), not a dashboard-relative path
 
-Never leave the user without a clear next action.
+Prevent redirects during initial render caused by transient undefined helpers or race conditions
 
-========================================
-4. ORDERS VISIBILITY & EMPTY STATES
-========================================
-Improve orders visibility without backend changes.
+Make the dashboard resilient so missing optional data (notifications, testimonials, marketing blocks) does NOT trigger logout or redirect
 
-- Group orders by status where possible
-- If no orders exist, show a clear empty-state message with guidance
-- Avoid blank sections or silent failures
-- Do NOT fake orders or statuses
+Ensure the dashboard stays mounted if a valid auth token exists in storage
 
-========================================
-5. PROGRESSIVE DISCLOSURE
-========================================
-Reduce cognitive overload.
+Add a single, clearly named requireDashboardAuth() guard that is called once on load
 
-- Show only essential profile info by default (name, email, status)
-- Hide secondary details behind “View Profile” / “Edit Profile”
-- Do not dump all profile fields on initial load
+Remove duplicated auth checks across multiple files and make this guard the single source of truth
 
-========================================
-6. EXPLICIT STATUS INDICATORS
-========================================
-Make system state visible.
+Constraints:
 
-Add clear indicators for:
-- Account status
-- Payment status
-- Order progress (even simple step indicators)
+Do NOT modify Cloudflare Worker code
 
-Never force users to infer system state.
+Do NOT modify Google Apps Script (code.gs)
 
-========================================
-7. SESSION AWARENESS (UX ONLY)
-========================================
-Improve trust and clarity.
+Do NOT change API contracts
 
-- Display last login time if available
-- If session expiry logic exists, show non-intrusive warnings
-- Do NOT implement new auth logic
+Only update frontend JS and HTML within the dashboard structure
 
-========================================
-8. NAVIGATION SIMPLIFICATION
-========================================
-Ensure navigation clarity.
+Goal:
 
-- Current section must be visually obvious
-- Remove admin-only affordances from user dashboard
-- Sidebar should not overwhelm on smaller screens
-- Optional: collapse sidebar to icons on narrow viewports
+The dashboard must load and remain stable
 
-========================================
-9. FEEDBACK & LOADING STATES
-========================================
-Improve perceived performance.
+No redirects should occur unless authentication is definitively invalid
 
-- Replace “Loading…” text with skeleton loaders where appropriate
-- Show inline success/error feedback for user actions
-- Avoid global alert spam
-
-========================================
-10. CONSISTENCY ACROSS APP
-========================================
-Ensure dashboard behavior matches:
-- Auth pages
-- Pricing pages
-
-Maintain consistency in:
-- Button hierarchy
-- Spacing rhythm
-- Interaction patterns
-
-========================================
-IMPLEMENTATION CONSTRAINTS
-========================================
-- Do not introduce new frameworks
-- Do not refactor unrelated pages
-- Keep logic readable and maintainable
-- Avoid cumulative DOM mutations
-- Prefer centralized state where applicable
-
-========================================
-SUCCESS CRITERIA
-========================================
-- Dashboard feels structured and purposeful
-- Users always know what to do next
-- No backend regressions
-- No visual overload
-- No broken navigation
-
-
- ""AND""
-
-
-You are upgrading the USER DASHBOARD UI color system.
-
-THIS IS A VISUAL REFACTOR ONLY.
-Do NOT touch:
-- Backend code
-- API calls
-- Auth/session logic
-- Business logic
-- Pricing calculations
-- DOM structure unless required for styling consistency
-
-========================================
-COLOR PALETTE (SOURCE OF TRUTH)
-========================================
-
-Primary Background:
-- #0B0E14 (Deep Midnight)
-
-Surface / Card Background:
-- #161B22 (Elevated grey-blue surface)
-
-Accent / Primary Action:
-- #00F2FE (Electric Cyan)
-- #7000FF (Vivid Violet)
-Use accents intentionally, never together in the same component.
-
-Text Colors:
-- Primary Text: #E6EDF3
-- Secondary Text: rgba(230, 237, 243, 0.7)
-- Muted Text: rgba(230, 237, 243, 0.45)
-
-========================================
-GLOBAL APPLICATION RULES
-========================================
-
-- Apply palette ONLY to USER DASHBOARD files
-- Do NOT affect admin dashboard
-- Do NOT affect auth pages
-- Do NOT affect pricing page
-- Do NOT hardcode colors inline unless unavoidable
-- Prefer CSS variables where possible
-
-========================================
-BACKGROUND & LAYOUT
-========================================
-
-- Set main dashboard background to #0B0E14
-- Remove pure white backgrounds
-- Maintain sufficient contrast for readability
-- Avoid pitch-black (#000000)
-
-========================================
-CARDS & SURFACES
-========================================
-
-- All dashboard cards use #161B22
-- Subtle elevation via:
-  - soft shadow
-  - border using rgba(255,255,255,0.04–0.08)
-- Rounded corners must remain consistent
-
-========================================
-ACCENT COLOR USAGE
-========================================
-
-Use accent colors ONLY for:
-- Primary CTA buttons
-- Active navigation state
-- Focus states (inputs, tabs)
-- Important status indicators
-
-Rules:
-- Cyan (#00F2FE): primary user actions
-- Violet (#7000FF): highlights, badges, secondary emphasis
-- Never overuse accents
-- Never apply accent to large background areas
-
-========================================
-TEXT & TYPOGRAPHY
-========================================
-
-- All primary text uses #E6EDF3
-- Headings slightly brighter or bolder, not different color
-- Secondary labels slightly muted
-- Avoid low-contrast greys
-
-========================================
-ICONS & DIVIDERS
-========================================
-
-- Icons inherit text color by default
-- Accent icons only when interactive
-- Dividers should be subtle:
-  rgba(255,255,255,0.06)
-
-========================================
-STATES & FEEDBACK
-========================================
-
-- Hover: slight brightness or glow using accent color
-- Active: stronger accent presence
-- Disabled: opacity reduction, never color change
-- Loading states must not flash white
-
-========================================
-RESPONSIVE CONSISTENCY
-========================================
-
-- Colors must remain consistent across breakpoints
-- No mobile-only color overrides
-- Dark theme remains intact on all devices
-
-========================================
-SUCCESS CRITERIA
-========================================
-
-- Dashboard feels cohesive and premium
-- No white flashes or mismatched surfaces
-- Clear visual hierarchy
-- Accents guide attention, not overwhelm
-- Matches futuristic, dark-tech brand language
+GitHub Pages 404 must never appear during normal dashboard navigation

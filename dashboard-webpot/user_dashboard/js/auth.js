@@ -1,13 +1,5 @@
-// dashboard-webpot/user_dashboard/js/auth.js - Authentication check for dashboard
-
-// Redirect to login if not authenticated
-function requireDashboardAuth() {
-  if (!isAuthenticated()) {
-    window.location.href = '../../auth.html';
-    return false;
-  }
-  return true;
-}
+// dashboard-webpot/user_dashboard/js/auth.js - Dashboard-specific auth utilities
+// Note: requireDashboardAuth() is defined in script.js as the single source of truth
 
 // Get current user data
 function getCurrentUser() {
@@ -24,5 +16,6 @@ function getCurrentUserId() {
 function logoutUserFromDashboard() {
   clearAuthToken();
   clearUserData();
-  window.location.href = '../../index.html';
+  // Redirect to root-level homepage, not dashboard-relative path
+  window.location.href = '/index.html';
 }
