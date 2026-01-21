@@ -19,74 +19,39 @@ async function fetchUserProfile(userId) {
 }
 
 // Fetch user's orders
+// STUB: Backend does not yet support read orders. Only order creation (Pay Later) is supported.
+// TODO: Once backend implements getOrders/getUserOrders, replace with real API call
 async function fetchUserOrders(userId) {
-  try {
-    const res = await apiCall('/orders', {
-      method: 'GET',
-      action: 'getOrders'
-    });
-    if (res.success && res.data.orders) {
-      return res.data.orders.filter(o => o.user_id === userId || o.customer_email === getUserEmail());
-    }
-    return [];
-  } catch (e) {
-    console.error('Error fetching orders:', e);
-    return [];
-  }
+  console.warn('[STUB] fetchUserOrders called but backend read API not available yet');
+  // Return empty array - orders will display empty state
+  return [];
 }
 
 // Fetch user's sessions
+// STUB: Backend does not support session read API.
+// TODO: Once backend implements getSessions, replace with real API call
 async function fetchUserSessions(userId) {
-  try {
-    const res = await apiCall('/sessions', {
-      method: 'GET',
-      action: 'getSessions'
-    });
-    if (res.success && res.data.sessions) {
-      return res.data.sessions.filter(s => s.user_id === userId);
-    }
-    return [];
-  } catch (e) {
-    console.error('Error fetching sessions:', e);
-    return [];
-  }
+  console.warn('[STUB] fetchUserSessions called but backend read API not available yet');
+  // Return empty array - sessions will show placeholder
+  return [];
 }
 
 // Fetch active auth tokens
+// STUB: Backend does not support auth token read API.
+// TODO: Once backend implements getAuthTokens, replace with real API call
 async function fetchAuthTokens(userId) {
-  try {
-    const res = await apiCall('/auth', {
-      method: 'GET',
-      action: 'getAuthTokens'
-    });
-    if (res.success && res.data.tokens) {
-      return res.data.tokens.filter(t => t.user_id === userId && new Date(t.expires_at) > new Date());
-    }
-    return [];
-  } catch (e) {
-    console.error('Error fetching tokens:', e);
-    return [];
-  }
+  console.warn('[STUB] fetchAuthTokens called but backend read API not available yet');
+  // Return empty array
+  return [];
 }
 
 // Fetch activity logs
+// STUB: Backend does not support activity log read API.
+// TODO: Once backend implements getLogs, replace with real API call
 async function fetchActivityLogs(userId, limit = 20) {
-  try {
-    const res = await apiCall('/logs', {
-      method: 'GET',
-      action: 'getLogs'
-    });
-    if (res.success && res.data.logs) {
-      return res.data.logs
-        .filter(l => l.user_id === userId)
-        .slice(0, limit);
-    }
-    return [];
-  } catch (e) {
-    console.error('Error fetching logs:', e);
-    return [];
-  }
-}
+  console.warn('[STUB] fetchActivityLogs called but backend read API not available yet');
+  // Return empty array - activity will show placeholder
+  return [];}
 
 // Get user email from auth token data
 function getUserEmail() {

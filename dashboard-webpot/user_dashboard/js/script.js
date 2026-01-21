@@ -244,22 +244,27 @@ async function loadDashboardData() {
     return;
   }
   
-  // Update profile
+  // Profile loading is supported by backend
   updateProfileSection(user);
   
-  // Load orders
-  showLoading('ordersContainer');
+  // ============================================
+  // OPTIONAL DATA - Backend APIs not yet available
+  // ============================================
+  // These calls return stubs (empty arrays) because the backend
+  // does not yet support read APIs for orders, sessions, and logs.
+  // The frontend gracefully displays empty state messages.
+  // TODO: Uncomment once backend implements these read APIs
+  
+  // Fetch orders (stub - always returns [])
   const orders = await fetchUserOrders(user.user_id);
   updateStatsCards(orders);
   renderOrders(orders);
   
-  // Load sessions
-  showLoading('sessionsContainer');
+  // Fetch sessions (stub - always returns [])
   const sessions = await fetchUserSessions(user.user_id);
   renderSessions(sessions);
   
-  // Load activity log
-  showLoading('activityLog');
+  // Fetch activity log (stub - always returns [])
   const logs = await fetchActivityLogs(user.user_id);
   renderActivityLog(logs);
 }

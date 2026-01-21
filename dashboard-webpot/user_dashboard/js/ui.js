@@ -65,7 +65,13 @@ function renderOrders(orders) {
   allOrders = orders || [];
   
   if (!orders || orders.length === 0) {
-    container.innerHTML = '<div class="empty-state"><p>No orders found</p></div>';
+    // Intentional empty state - backend read API not yet available
+    container.innerHTML = `
+      <div class="empty-state">
+        <p>Orders will appear here once available.</p>
+        <small>Order history is coming soon. You can still create orders using Pay Later.</small>
+      </div>
+    `;
     return;
   }
   
@@ -95,7 +101,13 @@ function renderSessions(sessions) {
   if (!container) return;
   
   if (!sessions || sessions.length === 0) {
-    container.innerHTML = '<div class="empty-state"><p>No active sessions</p></div>';
+    // Intentional empty state - session tracking not yet available
+    container.innerHTML = `
+      <div class="empty-state">
+        <p>Session history will appear here.</p>
+        <small>Device and login session tracking is coming soon.</small>
+      </div>
+    `;
     return;
   }
   
@@ -125,7 +137,13 @@ function renderActivityLog(logs) {
   if (!container) return;
   
   if (!logs || logs.length === 0) {
-    container.innerHTML = '<div class="empty-state"><p>No activity yet</p></div>';
+    // Intentional empty state - activity logging not yet available
+    container.innerHTML = `
+      <div class="empty-state">
+        <p>No activity data available.</p>
+        <small>Activity tracking is coming soon.</small>
+      </div>
+    `;
     return;
   }
   
