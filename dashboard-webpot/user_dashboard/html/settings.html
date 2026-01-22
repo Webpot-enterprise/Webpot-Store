@@ -4,17 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Settings - WebPot Dashboard</title>
-    <link rel="stylesheet" href="../css/style.css">
-    <link rel="stylesheet" href="../css/settings.css">
+    <link rel="stylesheet" href="/dashboard-webpot/user_dashboard/css/style.css">
+    <link rel="stylesheet" href="/dashboard-webpot/user_dashboard/css/settings.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <!-- Navigation Bar -->
     <nav class="navbar">
         <div class="nav-container">
-            <div class="logo">
-                <img src="../../logo.png" alt="WebPot Logo" class="logo-image">
-                <span class="logo-text-label">Settings</span>
+            <div class="logo" onclick="window.location.href='/'" style="cursor: pointer;">
+                <img src="/dashboard-webpot/user_dashboard/logo.png" alt="WebPot Logo" class="logo-image">
+                <span class="logo-text-label">Back to Webpot</span>
             </div>
             <div class="nav-menu">
                 <a href="index.html" class="nav-link">Dashboard</a>
@@ -34,7 +34,7 @@
                     <span class="notification-badge">3</span>
                 </button>
                 <div class="user-avatar">
-                    <img id="navbarProfileImage" src="../assets/default-profile.png" alt="User">
+                    <img id="navbarProfileImage" src="/dashboard-webpot/user_dashboard/assets/default pfp.webp" alt="User">
                 </div>
             </div>
         </div>
@@ -325,13 +325,13 @@
     <!-- File input removed for clean settings page -->
 
     <!-- Load scripts in order: config → auth → api (global) → dashboard auth → dashboard api → ui → main → page-specific -->
-    <script src="../../js/config.js"></script>
-    <script src="../../js/auth.js"></script>
-    <script src="../../js/api.js"></script>
-    <script src="../js/auth.js"></script>
-    <script src="../js/api.js"></script>
-    <script src="../js/ui.js"></script>
-    <script src="../js/script.js"></script>
-    <script src="../js/settings.js"></script>
+    <script src="/dashboard-webpot/js/config.js"></script>
+    <script src="/dashboard-webpot/js/auth.js"></script>
+    <script src="/dashboard-webpot/js/api.js"></script>
+    <script src="/dashboard-webpot/user_dashboard/js/auth.js"></script>
+    <script src="/dashboard-webpot/user_dashboard/js/api.js"></script>
+    <script src="/dashboard-webpot/user_dashboard/js/ui.js"></script>
+    <script src="/dashboard-webpot/user_dashboard/js/script.js"></script>
+    <script src="/dashboard-webpot/user_dashboard/js/settings.js"></script>
 </body>
 </html>
