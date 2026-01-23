@@ -167,6 +167,28 @@
                 </div>
             </section>
 
+            <!-- POPEYE: Referral Card Section -->
+            <section class="section referral-section" id="referralSection" style="display: none;">
+                <div class="referral-card">
+                    <h3 style="margin-top: 0; color: #58a6ff;">✨ Your Referral Code</h3>
+                    <p style="color: rgba(230, 237, 243, 0.7); font-size: 14px; margin: 12px 0;">Share your unique code and earn rewards</p>
+                    <div class="referral-code-block">
+                        <span class="referral-code" id="referralCode">LOADING...</span>
+                        <button class="copy-referral-btn" onclick="copyReferralCode()">Copy</button>
+                    </div>
+                    <div class="referral-stats">
+                        <div class="referral-stat">
+                            <span class="referral-stat-label">Times Used</span>
+                            <span class="referral-stat-value" id="referralUsageCount">0</span>
+                        </div>
+                        <div class="referral-stat">
+                            <span class="referral-stat-label">Status</span>
+                            <span class="referral-stat-value" id="referralStatus">Active</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <!-- Sessions Section -->
             <section class="section sessions-section">
                 <div class="section-header">
@@ -194,6 +216,19 @@
         </main>
     </div>
 
+    <!-- POPEYE: Notification Center Panel -->
+    <div class="notification-panel" id="notificationPanel">
+        <div class="notification-panel-header">
+            <h4 class="notification-panel-title">Notifications</h4>
+            <button class="notification-panel-close" onclick="toggleNotificationPanel()">✕</button>
+        </div>
+        <div class="notification-panel-content" id="notificationContent">
+            <div style="padding: 24px; text-align: center; color: rgba(230, 237, 243, 0.6);">
+                <p>No notifications yet</p>
+            </div>
+        </div>
+    </div>
+
     <!-- Load scripts in order: config → auth → api (global) → dashboard auth → dashboard api → ui → main -->
     <script src="/js/config.js"></script>
     <script src="/js/auth.js"></script>
@@ -204,4 +239,3 @@
     <script src="/dashboard-webpot/user_dashboard/js/script.js"></script>
 </body>
 </html>
-

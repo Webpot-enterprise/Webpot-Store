@@ -56,6 +56,62 @@ function requireDashboardAuth() {
 }
 
 // ============================================
+// POPEYE: LIGHTWEIGHT GLOBAL STATE LAYER
+// ============================================
+
+/**
+ * Centralized dashboard state - Single source of truth
+ * Existing code continues to work independently
+ * New Popeye features consume state incrementally
+ */
+window.DASHBOARD_STATE = {
+  user: null,
+  orders: [],
+  stats: { totalOrders: 0, totalSpent: 0, pendingOrders: 0 },
+  notifications: [],
+  referrals: null,
+  activity: [],
+  session: { expiresAt: null },
+  loading: { orders: false, notifications: false, activity: false },
+  errors: { orders: null, notifications: null, activity: null }
+};
+
+/**
+ * Safe state updater - merge partial updates
+ * Triggers 'dashboard-state-changed' event for reactive UI
+ */
+function updateDashboardState(key, value) {
+  const oldValue = window.DASHBOARD_STATE[key];
+  if (typeof value === 'object' && value !== null && typeof oldValue === 'object') {
+    window.DASHBOARD_STATE[key] = { ...oldValue, ...value };
+  } else {
+    window.DASHBOARD_STATE[key] = value;
+  }
+  document.dispatchEvent(new CustomEvent('dashboard-state-changed', {
+    detail: { key, value: window.DASHBOARD_STATE[key] }
+  }));
+}
+
+/**
+ * Get state value safely
+ */
+function getDashboardState(key) {
+  return window.DASHBOARD_STATE[key] || null;
+}
+
+/**
+ * Calculate order statistics from orders array
+ */
+function calculateOrderStats(orders) {
+  if (!orders || !orders.length) {
+    return { totalOrders: 0, totalSpent: 0, pendingOrders: 0 };
+  }
+  const spent = orders.reduce((sum, o) => sum + (parseFloat(o.total_amount) || 0), 0);
+  const pending = orders.filter(o => o.order_status === 'pending' || o.order_status === 'processing').length;
+  return { totalOrders: orders.length, totalSpent: spent, pendingOrders: pending };
+}
+
+// ============================================
 // API CALL STATE MANAGEMENT
 // ============================================
 
@@ -244,6 +300,14 @@ async function loadDashboardData() {
     return;
   }
   
+  // POPEYE: Populate state with user data
+  updateDashboardState('user', {
+    id: user.user_id,
+    name: user.full_name || user.name,
+    email: user.email,
+    avatar: user.profile_image
+  });
+  
   // Profile loading is supported by backend
   updateProfileSection(user);
   
@@ -260,6 +324,11 @@ async function loadDashboardData() {
   updateStatsCards(orders);
   renderOrders(orders);
   
+  // POPEYE: Populate state and calculate stats
+  updateDashboardState('orders', orders);
+  const stats = calculateOrderStats(orders);
+  updateDashboardState('stats', stats);
+  
   // Fetch sessions (stub - always returns [])
   const sessions = await fetchUserSessions(user.user_id);
   renderSessions(sessions);
@@ -267,6 +336,9 @@ async function loadDashboardData() {
   // Fetch activity log (stub - always returns [])
   const logs = await fetchActivityLogs(user.user_id);
   renderActivityLog(logs);
+  
+  // POPEYE: Populate activity state
+  updateDashboardState('activity', logs);
 }
 
 // Initialize on page load
@@ -285,6 +357,7 @@ document.addEventListener('DOMContentLoaded', function() {
       if (requireDashboardAuth()) {
         loadDashboardData();
         startSessionExpiryTracking();
+        initializePopeyeFeatures();
       }
     }, 500);
     return;
@@ -293,7 +366,36 @@ document.addEventListener('DOMContentLoaded', function() {
   // Load dashboard data and start tracking
   loadDashboardData();
   startSessionExpiryTracking();
+  initializePopeyeFeatures();
 });
+
+/**
+ * POPEYE: Initialize all Popeye feature enhancements
+ * Safe fallback: Features degrade gracefully if data unavailable
+ */
+function initializePopeyeFeatures() {
+  console.log('[Popeye] Initializing enhancements...');
+  
+  // Setup notification button and panel
+  setupNotificationButton();
+  
+  // Initialize referral card
+  initializeReferrals();
+  
+  // Listen to state changes for reactive updates
+  document.addEventListener('dashboard-state-changed', (e) => {
+    const { key, value } = e.detail;
+    
+    if (key === 'notifications') {
+      populateNotificationPanel(value);
+      updateNotificationBadge(value.length);
+    }
+    
+    if (key === 'orders') {
+      renderOrdersWithTimeline(value);
+    }
+  });
+}
 
 // Logout from dashboard
 document.addEventListener('DOMContentLoaded', function() {
