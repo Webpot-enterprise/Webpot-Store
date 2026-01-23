@@ -258,9 +258,9 @@
     <!-- Navigation Bar -->
     <nav class="navbar">
         <div class="nav-container">
-            <div class="logo">
-                <img src="../logo.png" alt="WebPot Logo" class="logo-image">
-                <span class="logo-text-label">Quick Start</span>
+            <div class="logo" onclick="window.location.href='/'" style="cursor: pointer;">
+                <img src="/dashboard-webpot/logo.png" alt="WebPot Logo" class="logo-image">
+                <span class="logo-text-label">Back to Webpot</span>
             </div>
             <div class="nav-menu">
                 <a href="index.html" class="nav-link">Dashboard</a>
@@ -273,7 +273,7 @@
                     <span class="notification-badge">3</span>
                 </button>
                 <div class="user-avatar">
-                    <img id="navbarProfileImage" src="../assets/default pfp.webp" alt="User">
+                    <img id="navbarProfileImage" src="/dashboard-webpot/default pfp.webp" alt="User">
                 </div>
             </div>
         </div>
@@ -467,9 +467,9 @@ async function loadOrders(filter = 'all') {
     </div>
 
     <!-- Load scripts in order: config → auth → api (global) → dashboard auth → dashboard api → ui → main -->
-    <script src="/dashboard-webpot/js/config.js"></script>
-    <script src="/dashboard-webpot/js/auth.js"></script>
-    <script src="/dashboard-webpot/js/api.js"></script>
+    <script src="/js/config.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/api.js"></script>
     <script src="/dashboard-webpot/user_dashboard/js/auth.js"></script>
     <script src="/dashboard-webpot/user_dashboard/js/api.js"></script>
     <script src="/dashboard-webpot/user_dashboard/js/ui.js"></script>

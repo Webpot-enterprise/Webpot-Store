@@ -92,6 +92,11 @@ function updatePasswordStrengthUI(password) {
   const label = document.getElementById('passwordStrengthLabel');
   const registerBtn = document.querySelector('#registerForm button[type="submit"]');
 
+  // Check if password strength UI elements exist (only on pages that have them)
+  if (!container || !fill || !label) {
+    return; // Exit silently - this page doesn't have password strength UI
+  }
+
   if (!password) {
     container.style.display = 'none';
     if (registerBtn) registerBtn.disabled = true;

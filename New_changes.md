@@ -1,189 +1,310 @@
-Context
+Webpot User Dashboard — Functional & System Specification
+1. Purpose of the Dashboard
 
-This project is a static frontend dashboard hosted on GitHub Pages under /dashboard-webpot/.
-Backend APIs (Apps Script + Cloudflare Worker) are already working and must NOT be modified.
+The Webpot User Dashboard is a secured, authenticated customer portal that allows a logged-in user to manage their relationship with Webpot.
 
-Current problems:
+It acts as:
 
-Dashboard JS files fail to load due to incorrect paths
+The customer’s control panel
 
-Auth helpers load after dependent code → dashboard auth check loops forever
+A single source of truth for orders, payments, and services
 
-Orders, totals, profile, and stats never render despite backend working
+A replacement for manual communication (email / WhatsApp updates)
 
-Logo links and nav labels are incorrect UX-wise
+A foundation for future automation and scaling
 
-Your task is to fix frontend-only issues without touching backend code.
+The dashboard must only be accessible after successful authentication and must operate entirely on user-scoped backend data.
 
-And:
+2. Core Principles
+2.1 Authentication-First Architecture
 
-1️⃣ Fix ALL Dashboard JS & Asset Paths
+Every dashboard page is protected
 
-All dashboard HTML files are located under:
+Access requires a valid session token
 
-/dashboard-webpot/user_dashboard/html/
+Token is verified on load
 
+If invalid or expired → redirect to auth page
 
-All JS files are located under:
+There is no public state inside the dashboard.
 
-/dashboard-webpot/js/
+2.2 Backend-Driven Rendering
 
+UI does not contain hardcoded user data
 
-Update every <script src> in all dashboard HTML files to use absolute paths, for example:
+All numbers, lists, and profile data come from APIs
 
-<script src="/dashboard-webpot/js/config.js"></script>
-<script src="/dashboard-webpot/js/api.js"></script>
-<script src="/dashboard-webpot/js/auth.js"></script>
-<script src="/dashboard-webpot/js/orders.js"></script>
-<script src="/dashboard-webpot/js/script.js"></script>
+Dashboard renders based on real backend state
 
+The frontend is a renderer, not a data source.
 
-Fix all asset paths (logo.png, profile image, icons) to use:
+2.3 User-Scoped Data Isolation
 
-/dashboard-webpot/user_dashboard/assets/
+Every API request is tied to a user_id
 
+A user can only see their own data
 
-Remove any relative paths like ../js/, ./js/, or user_dashboard/js/
+Orders, referrals, notifications, and profile info are filtered server-side
 
-2️⃣ Enforce Correct Script Load Order (CRITICAL)
+This is critical for security and correctness.
 
-Load scripts in this exact order in all dashboard pages:
+3. High-Level System Flow
 
-config.js
+User logs in (email/password or Google)
 
-api.js
+Backend issues a session token
 
-auth.js
+Token is stored client-side
 
-orders.js (only on orders page)
+User is redirected to dashboard
 
-script.js (last)
+Dashboard:
 
-Ensure no dashboard logic runs before auth helpers exist
+Verifies token
 
-In script.js, gate dashboard initialization like this:
+Fetches user profile
 
-Wait until window.isAuthenticated and getUserData() are available
+Fetches dashboard data
 
-Retry auth check with a short timeout (max retries = 10)
+UI renders dynamically
 
-If still unavailable → redirect to /auth.html
+4. Dashboard Structure
+4.1 Global Layout (Persistent Across Pages)
 
-3️⃣ Fix Auth Helper Availability Loop
+Every dashboard page shares the same layout:
 
-Remove infinite “Auth helpers not yet available” warnings
+Top navigation bar
 
-Convert auth initialization into a single async bootstrap function
+Left sidebar navigation
 
-Ensure:
+Main content area
 
-Token is read from localStorage
+Top Navigation Bar
 
-verifyToken API is called once
+Webpot logo (click → main website)
 
-User data is cached globally
+Navigation links
 
-After auth success → trigger:
+Notification icon (with unread count)
 
-dashboard stats load
+User avatar + dropdown
 
-profile load
+Sidebar Navigation
 
-orders load (if page = orders)
+Dashboard (overview)
 
-4️⃣ Make Dashboard Data Actually Render
+Orders
 
-On Dashboard page:
+Settings
 
-Fetch user-specific order summary
+5. Dashboard Pages & Behavior
+5.1 Dashboard Overview Page
 
-Populate:
+Purpose:
+Give the user a quick summary of their account status.
 
-Total Orders
+Displays:
 
-Total Spends
+Total number of orders
 
-Referrals count
+Total amount spent
 
-On Orders page:
+Referral count
 
-Fetch orders filtered by logged-in user_id
+User profile summary
 
-Render rows dynamically into the table
+Behavior:
 
-Show proper empty state if no orders exist
+Data is fetched on page load
 
-Remove all placeholder “Loading…” states once data resolves
+Shows loading states while fetching
 
-5️⃣ Prevent Silent Failures
+Displays zero or empty states if no data exists
 
-Replace console.log-only failures with:
+This page is read-only and informational.
 
-Visible UI fallback messages
+5.2 Orders Page
 
-Toast or inline warnings (non-blocking)
+Purpose:
+Allow the user to view and manage their service orders.
 
-If API fails → dashboard still loads with empty state
+Each order includes:
 
-6️⃣ Fix Dashboard Redirect Bugs
+Order ID
 
-Prevent any redirect to:
+Customer name & email
 
-/dashboard-webpot/auth.html
+Service plan
 
+Total amount
 
-Auth redirects must always go to:
+Due amount
 
-/auth.html
+Order status
 
-7️⃣ UX Tweaks (Required)
+Delivery date
 
-Clicking WebPot Logo should redirect to:
+Features:
 
-/
+Filter by order status
 
+Search orders
 
-Rename nav item:
+Summary metrics:
 
-Dashboard → Back to Webpot
+Total orders
 
+Pending orders
 
-Ensure Orders & Settings nav remain dashboard-local
+Delivered orders
 
-8️⃣ Clean Console Errors
+Total revenue
 
-Remove:
+Behavior:
 
-Duplicate variable declarations
+Orders are fetched from backend using user session
 
-Re-declared constants
+Data updates automatically when backend changes
 
-Ensure each JS file uses a single global namespace
+No order can belong to another user
 
-No global name collisions (API_CONFIG, orders, etc.)
+This is the core operational page of the dashboard.
 
-❌ DO NOT
+5.3 User Profile Section
 
-Modify Cloudflare Worker
+Purpose:
+Represent the user’s identity inside the system.
 
-Modify Apps Script
+Contains:
 
-Change API routes or payload formats
+Full name
 
-Add new backend endpoints
+Email address
 
-✅ FINAL RESULT SHOULD BE
+Authentication provider
 
-Dashboard loads with zero red console errors
+Account metadata
 
-Auth resolves once and only once
+Capabilities:
 
-Orders appear correctly
+View profile info
 
-Stats populate correctly
+Edit profile (future scope)
 
-Navigation works cleanly
+Profile data is always fetched from backend, never cached blindly.
 
-No random GitHub 404 pages
+5.4 Notifications System
 
-Dashboard feels stable and intentional
+Purpose:
+Deliver system-initiated updates to the user.
+
+Examples:
+
+Order created
+
+Payment reminders
+
+Service updates
+
+Admin messages
+
+Behavior:
+
+Notifications are fetched after authentication
+
+Unread count is shown in navbar
+
+Non-blocking (dashboard still loads if notifications fail)
+
+5.5 Settings Page
+
+Purpose:
+Account configuration and preferences.
+
+Scope:
+
+Profile updates
+
+Security actions
+
+Preferences
+
+Logout
+
+This page is designed for future extensibility.
+
+6. Backend Responsibilities
+
+The backend must provide:
+
+Authentication
+
+User registration
+
+Login (local + Google)
+
+Token issuance
+
+Token validation
+
+Session expiry
+
+Data Management
+
+Users table
+
+Orders table
+
+Referral codes
+
+Notifications
+
+Logs
+
+Security
+
+User-scoped access
+
+Token hashing
+
+Expiration handling
+
+Request validation
+
+7. Frontend Responsibilities
+
+The frontend must:
+
+Enforce authentication on every dashboard page
+
+Load scripts in correct order
+
+Fetch data only after auth is confirmed
+
+Render UI from API responses
+
+Handle empty, loading, and error states gracefully
+
+Never assume backend success
+
+8. What the Dashboard Is Not
+
+It is not a static site
+
+It is not a demo UI
+
+It is not client-side state driven
+
+It is not multi-tenant without backend filtering
+
+9. Mental Model for the Developer
+
+You should think of this dashboard as:
+
+“A mini SaaS customer portal, where the backend is the source of truth and the frontend is a dynamic viewer.”
+
+If backend data changes, the dashboard must reflect it automatically.
+
+10. Final One-Line Description (Hand-Off Ready)
+
+The Webpot User Dashboard is an authenticated, backend-driven customer portal that allows users to view and manage their orders, profile, referrals, and notifications in real time, with strict user-scoped security and a scalable SaaS-style architecture.
