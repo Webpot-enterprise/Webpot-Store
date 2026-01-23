@@ -17,6 +17,30 @@ async function apiCall(endpoint, options = {}) {
     action = null
   } = options;
 
+  // ========================================================================
+  // STRICT VALIDATION: action must be a string (if provided)
+  // ========================================================================
+  if (action !== null && typeof action !== 'string') {
+    const errorMsg = `[API] Invalid action parameter. Expected string, got ${typeof action}: ${String(action)}`;
+    console.error(errorMsg);
+    return {
+      success: false,
+      error: "Invalid Request",
+      message: "Action must be a string value"
+    };
+  }
+
+  // Reject empty string actions
+  if (action && typeof action === 'string' && action.trim() === '') {
+    const errorMsg = '[API] Invalid action parameter: empty string is not allowed';
+    console.error(errorMsg);
+    return {
+      success: false,
+      error: "Invalid Request",
+      message: "Action cannot be an empty string"
+    };
+  }
+
   // Build the full URL
   let url = `${API_CONFIG.BASE_URL}/api${endpoint}`;
   

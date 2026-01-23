@@ -1,76 +1,3 @@
-Cloudfare Worker code:
-
-const GAS_URL =
-  "https://script.google.com/macros/s/AKfycbxb5XesTNnxNySyUVuDBU6Vjyk2PBDia5pbyULneRBVYnGExxisZY7zXFBJ48nDekwe/exec";
-
-const ALLOWED_ORIGINS = [
-  "https://webpot.shop",
-  "https://www.webpot.shop",
-  "https://yourusername.github.io"
-];
-
-export default {
-  async fetch(request) {
-    const url = new URL(request.url);
-    const origin = request.headers.get("Origin");
-
-    if (request.method === "OPTIONS") {
-      return corsPreflight(origin);
-    }
-
-    if (!url.pathname.startsWith("/api/")) {
-      return cors(new Response(JSON.stringify({ error: "Not Found" }), { status: 404 }), origin);
-    }
-
-    const gasURL = new URL(GAS_URL);
-    url.searchParams.forEach((v, k) => gasURL.searchParams.append(k, v));
-
-    const ip = request.headers.get("CF-Connecting-IP") || "";
-    const ua = request.headers.get("User-Agent") || "";
-
-    gasURL.searchParams.append("ip", ip);
-    gasURL.searchParams.append("ua", ua);
-
-    const options = {
-      method: request.method,
-      headers: { "Content-Type": "application/json" }
-    };
-
-    if (request.method !== "GET") {
-      options.body = await request.text();
-    }
-
-    const res = await fetch(gasURL.toString(), options);
-    return cors(res, origin);
-  }
-};
-
-function corsPreflight(origin) {
-  return new Response(null, {
-    status: 204,
-    headers: corsHeaders(origin)
-  });
-}
-
-function cors(response, origin) {
-  const headers = new Headers(response.headers);
-  Object.entries(corsHeaders(origin)).forEach(([k, v]) => headers.set(k, v));
-  return new Response(response.body, { status: response.status, headers });
-}
-
-function corsHeaders(origin) {
-  return {
-    "Access-Control-Allow-Origin": ALLOWED_ORIGINS.includes(origin) ? origin : "null",
-    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type",
-    "Content-Security-Policy":
-      "default-src 'self'; script-src 'self' https://accounts.google.com https://apis.google.com https://www.gstatic.com; frame-src https://accounts.google.com;"
-  };
-}
-
-
-Google sheets apps script code:
-
 const SHEET_ID = "1wreXWGm1j4CCO7Id00ypwU3dd4fGFxlLs03_0RsPh78";
 const SPREADSHEET = SpreadsheetApp.openById(SHEET_ID);
 
@@ -93,27 +20,60 @@ function doPost(e) {
 function handleRequest(e) {
   try {
     const action = e.parameter?.action || null;
+    
+    // DEFENSIVE: Strict validation guard for action parameter
+    // Ensures action exists, is a string, and is not empty
+    if (!action) {
+      return json({
+        error: "Invalid action",
+        received_action: action,
+        typeof_received_action: typeof action
+      }, 400);
+    }
+    
+    if (typeof action !== "string") {
+      return json({
+        error: "Invalid action",
+        received_action: action,
+        typeof_received_action: typeof action
+      }, 400);
+    }
+    
+    if (action.trim() === "") {
+      return json({
+        error: "Invalid action",
+        received_action: action,
+        typeof_received_action: typeof action
+      }, 400);
+    }
+    
     const body = safeParseJSON(e.postData);
     const meta = extractMeta(e);
 
     switch (action) {
       case "register":
         return registerUserApi(body, meta);
-
       case "login":
         return loginUserApi(body, meta);
-
       case "googleLogin":
         return googleLoginApi(body, meta);
-
       case "verifyToken":
         return verifyTokenApi(body);
-
       case "contact":
         return contactApi(body, meta);
 
+      /* NEW */
+      case "createOrder":
+        return createOrderApi(body, meta);
+      case "getUserOrders":
+        return getUserOrdersApi(body);
+
       default:
-        return json({ error: "Invalid action" }, 400);
+        // DEFENSIVE: Unknown action - return diagnostic info for debugging
+        return json({
+          error: "Unknown action",
+          action: action
+        }, 400);
     }
   } catch (err) {
     console.error(err);
@@ -133,11 +93,9 @@ function registerUserApi(body, meta) {
   if (!full_name || !email || !password) {
     return json({ error: "Missing fields" }, 400);
   }
-
   if (!isValidEmail(email)) {
     return json({ error: "Invalid email" }, 400);
   }
-
   if (findUserByEmail(email)) {
     return json({ error: "Email already registered" }, 400);
   }
@@ -159,7 +117,6 @@ function registerUserApi(body, meta) {
   });
 
   generateReferralCode(user_id);
-
   logAction(user_id, "register", meta);
 
   const token = issueToken(user_id);
@@ -177,7 +134,6 @@ function loginUserApi(body, meta) {
   if (!user || user.auth_provider !== "local") {
     return json({ error: "Invalid credentials" }, 401);
   }
-
   if (user.password_hash !== hash(password)) {
     return json({ error: "Invalid credentials" }, 401);
   }
@@ -232,7 +188,63 @@ function googleLoginApi(body, meta) {
 }
 
 /* ================================
-   CONTACT FORM
+   ORDERS
+================================ */
+
+function createOrderApi(body, meta) {
+  if (!body.token) {
+    return json({ error: "Missing token" }, 400);
+  }
+
+  const user_id = validateToken(body.token);
+  if (!user_id) {
+    return json({ error: "Invalid token" }, 401);
+  }
+
+  const order_id = uid("ORDER");
+  const now = new Date();
+
+  appendRow("Orders", {
+    order_id,
+    user_id,
+    customer_email: clean(body.customer_email || ""),
+    customer_name: clean(body.customer_name || ""),
+    order_date: now,
+    total_amount: Number(body.total_amount || 0),
+    currency: body.currency || "INR",
+    order_status: "pending",
+    service_type: clean(body.service_type || ""),
+    service_details: clean(body.service_details || ""),
+    delivery_date: "",
+    payment_method: body.payment_method || "pay_later",
+    referral_code_used: clean(body.referral_code || ""),
+    confirmation_sent: false
+  });
+
+  logAction(user_id, "create_order", meta);
+
+  return json({ success: true, order_id });
+}
+
+function getUserOrdersApi(body) {
+  if (!body.token) {
+    return json({ error: "Missing token" }, 400);
+  }
+
+  const user_id = validateToken(body.token);
+  if (!user_id) {
+    return json({ error: "Invalid token" }, 401);
+  }
+
+  const orders = readSheet("Orders")
+    .filter(o => o.user_id === user_id)
+    .sort((a, b) => new Date(b.order_date) - new Date(a.order_date));
+
+  return json({ orders });
+}
+
+/* ================================
+   CONTACT
 ================================ */
 
 function contactApi(body, meta) {
@@ -334,6 +346,38 @@ function logAction(user_id, action, meta) {
    HELPERS
 ================================ */
 
+function findUserByEmail(email) {
+  return readSheet("Users").find(u => u.email === email) || null;
+}
+
+function findUserByGoogleId(id) {
+  return readSheet("Users").find(u => u.google_auth_id === id) || null;
+}
+
+function getUserByIdInternal(user_id) {
+  return readSheet("Users").find(u => u.user_id === user_id) || null;
+}
+
+function updateUser(user_id, updates) {
+  const sh = SPREADSHEET.getSheetByName("Users");
+  const data = sh.getDataRange().getValues();
+  const headers = data[0];
+  const rowIndex = data.findIndex(
+    r => r[headers.indexOf("user_id")] === user_id
+  );
+  if (rowIndex === -1) return;
+
+  Object.keys(updates).forEach(key => {
+    const col = headers.indexOf(key);
+    if (col !== -1) {
+      sh.getRange(rowIndex + 1, col + 1).setValue(updates[key]);
+    }
+  });
+
+  sh.getRange(rowIndex + 1, headers.indexOf("updated_at") + 1)
+    .setValue(new Date());
+}
+
 function readSheet(name) {
   const sh = SPREADSHEET.getSheetByName(name);
   const values = sh.getDataRange().getValues();
@@ -357,7 +401,7 @@ function safeParseJSON(postData) {
   }
 }
 
-function json(obj, code = 200) {
+function json(obj) {
   return ContentService
     .createTextOutput(JSON.stringify(obj))
     .setMimeType(ContentService.MimeType.JSON);

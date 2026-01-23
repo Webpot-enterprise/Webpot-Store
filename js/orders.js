@@ -298,15 +298,22 @@ async function payLater() {
   }
   
   try {
-    // Call API to create order with pay_later payment method
-    const response = await apiCall({
-      action: 'createOrder',
+    // Build payload with correct structure
+    const payloadData = {
       customer_email: orderData.email,
       customer_name: orderData.name,
       service_type: orderData.service,
       service_details: orderData.details || '',
       total_amount: orderData.amount,
       payment_method: 'pay_later'
+    };
+
+    // Call API with proper signature: apiCall(endpoint, {method, action, body})
+    // This ensures action is a STRING, never an object
+    const response = await apiCall("/orders", {
+      method: "POST",
+      action: "createOrder",
+      body: payloadData
     });
     
     if (response && response.success) {
