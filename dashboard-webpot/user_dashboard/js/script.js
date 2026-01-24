@@ -2,33 +2,44 @@
 // SINGLE dashboard bootstrap & orchestration file
 
 /* ============================================
-   PAGE GUARD — HARD STOP
+   HARD PAGE GUARD — REAL STOP
 ============================================ */
 
-(function () {
-  const pathname = window.location.pathname;
-  const isDashboard =
-    pathname.includes('/dashboard') ||
-    pathname.includes('/user_dashboard');
-
-  if (!isDashboard) {
-    return; // 🚫 HARD EXIT — nothing below runs
-  }
+const __IS_DASHBOARD__ = (() => {
+  const p = window.location.pathname;
+  return p.includes('/dashboard') || p.includes('/user_dashboard');
 })();
 
+if (!__IS_DASHBOARD__) {
+  console.log('[Dashboard] Not a dashboard page — aborting script');
+  throw new Error('Dashboard script aborted');
+}
+
 /* ============================================
-   GLOBAL DASHBOARD STATE
+   GLOBAL DASHBOARD STATE (SINGLE SOURCE)
 ============================================ */
 
 window.DASHBOARD_STATE = {
   user: null,
   orders: [],
-  stats: {},
   notifications: [],
   referrals: null,
   activity: [],
   session: { expiresAt: null }
 };
+
+/* ============================================
+   SAFE STATE UPDATE
+============================================ */
+
+function setDashboardState(key, value) {
+  DASHBOARD_STATE[key] = value;
+  document.dispatchEvent(
+    new CustomEvent('dashboard:state-updated', {
+      detail: { key, value }
+    })
+  );
+}
 
 /* ============================================
    DASHBOARD BOOTSTRAP
@@ -40,7 +51,7 @@ async function bootstrapDashboard() {
     typeof isAuthenticated !== 'function' ||
     typeof getAuthToken !== 'function'
   ) {
-    console.error('Auth helpers not loaded');
+    console.error('[Dashboard] Auth helpers missing');
     return;
   }
 
@@ -59,15 +70,15 @@ async function bootstrapDashboard() {
     return;
   }
 
-  DASHBOARD_STATE.user = user;
+  setDashboardState('user', user);
 
-  // 4️⃣ Start session expiry tracking
+  // 4️⃣ Session expiry
   startSessionExpiryTracking();
 
   // 5️⃣ Load data
-  await loadDashboardData();
+  await loadDashboardData(user.user_id);
 
-  // 6️⃣ Initialize enhancements
+  // 6️⃣ Enhancements
   initializeEnhancements();
 }
 
@@ -84,7 +95,7 @@ function updateSessionExpiryIndicator() {
   const el = document.getElementById('sessionExpiryText');
   if (!el) return;
 
-  const expiry = getTokenExpiry();
+  const expiry = getTokenExpiry?.();
   if (!expiry) return;
 
   const diff = expiry - Date.now();
@@ -98,32 +109,35 @@ function updateSessionExpiryIndicator() {
   const mins = Math.floor(diff / 60000);
   const hrs = Math.floor(mins / 60);
   el.textContent =
-    hrs > 0 ? `Session expires in ${hrs}h ${mins % 60}m`
-            : `Session expires in ${mins}m`;
+    hrs > 0
+      ? `Session expires in ${hrs}h ${mins % 60}m`
+      : `Session expires in ${mins}m`;
 }
 
 /* ============================================
    DATA LOADING
 ============================================ */
 
-async function loadDashboardData() {
+async function loadDashboardData(userId) {
   try {
-    const orders = await fetchUserOrders();
-    DASHBOARD_STATE.orders = orders;
+    const orders = await fetchUserOrders(userId);
+    setDashboardState('orders', orders);
 
-    updateStatsCards(orders);
+    updateStatsCards?.(orders);
     renderOrders?.(orders);
   } catch (err) {
-    console.warn('Failed to load orders', err);
+    console.error('[Dashboard] Failed to load orders', err);
   }
 
   try {
     updateProfileSection?.(DASHBOARD_STATE.user);
-  } catch {}
+  } catch (err) {
+    console.warn('[Dashboard] Profile render failed', err);
+  }
 }
 
 /* ============================================
-   ENHANCEMENTS (SAFE)
+   ENHANCEMENTS
 ============================================ */
 
 function initializeEnhancements() {
