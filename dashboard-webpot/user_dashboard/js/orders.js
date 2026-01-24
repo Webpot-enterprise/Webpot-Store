@@ -1,93 +1,76 @@
-// dashboard-webpot/user_dashboard/js/orders.js - Orders page management
+// dashboard-webpot/user_dashboard/js/orders.js
+// Orders page behavior — data-driven, safe, scoped
 
-// ============================================
-// NOTE: API FUNCTION DEFINITIONS ARE IN api.js
-// ============================================
-// fetchUserOrders() - defined in api.js
-// updateStatsCards() - defined in ui.js
-// renderOrders() - defined in ui.js
-//
-// This file handles orders-specific page behavior only.
-// See api.js for backend communication
-// See ui.js for rendering logic
+/* ============================================
+   PAGE GUARD
+============================================ */
 
-// ============================================
-// ORDERS DISPLAY & FILTERING
-// ============================================
+(function () {
+  const page = document.body?.dataset?.page;
+  if (page !== 'orders') {
+    return; // 🚫 Only run on orders page
+  }
+})();
+
+/* ============================================
+   ORDER FILTERING (DATA-DRIVEN)
+============================================ */
 
 /**
- * Filter orders by status
- * @param {string} status - Status filter value ('all', 'pending', 'processing', etc.)
+ * Filter orders by status and re-render
+ * @param {string} status
  */
 function filterOrdersByStatus(status) {
-  const orders = document.querySelectorAll('.order-card');
-  
-  orders.forEach(card => {
-    const badge = card.querySelector('.status-badge');
-    const cardStatus = badge?.textContent.toLowerCase() || '';
-    
-    if (status === 'all' || cardStatus.includes(status.toLowerCase())) {
-      card.style.display = 'block';
-    } else {
-      card.style.display = 'none';
-    }
-  });
+  if (!window.DASHBOARD_STATE || !Array.isArray(DASHBOARD_STATE.orders)) {
+    return;
+  }
+
+  let filtered = DASHBOARD_STATE.orders;
+
+  if (status !== 'all') {
+    filtered = filtered.filter(o =>
+      (o.order_status || '').toLowerCase() === status.toLowerCase()
+    );
+  }
+
+  if (typeof renderOrders === 'function') {
+    renderOrders(filtered);
+  }
 }
 
+/* ============================================
+   ORDER ACTIONS
+============================================ */
+
 /**
- * View order details in modal
- * @param {string} orderId - Order ID
+ * View order details (simple fallback)
+ * @param {string} orderId
  */
 function viewOrderDetails(orderId) {
-  const card = document.querySelector(`[data-order-id="${orderId}"]`);
-  if (!card) return;
-  
-  const details = card.querySelector('.order-details').textContent;
-  alert(`Order Details:\n${details}`);
+  const order = DASHBOARD_STATE.orders.find(o => o.order_id === orderId);
+  if (!order) return;
+
+  alert(
+    `Order ID: ${order.order_id}\n` +
+    `Service: ${order.service_type}\n` +
+    `Status: ${order.order_status}\n` +
+    `Amount: ${order.total_amount} ${order.currency}`
+  );
 }
 
 /**
- * Complete payment for pending order
- * @param {string} orderId - Order ID
+ * Redirect to payment page for pending order
+ * @param {string} orderId
  */
 function completePayment(orderId) {
-  // Redirect to payment page with order ID
-  window.location.href = `../../templates/payment.html?order_id=${orderId}`;
+  window.location.href =
+    `/templates/payment.html?order_id=${encodeURIComponent(orderId)}`;
 }
 
-// ============================================
-// UTILITY FUNCTIONS
-// ============================================
+/* ============================================
+   INIT
+============================================ */
 
-/**
- * Show loading state in container
- * @param {string} containerId - Container element ID
- */
-function showLoading(containerId) {
-  const container = document.getElementById(containerId);
-  if (container) {
-    container.innerHTML = '<div class="loading"><p>Loading...</p></div>';
-  }
-}
-
-/**
- * Show error state in container
- * @param {string} containerId - Container element ID
- * @param {string} message - Error message
- */
-function showError(containerId, message) {
-  const container = document.getElementById(containerId);
-  if (container) {
-    container.innerHTML = `<div class="error"><p>${message}</p></div>`;
-  }
-}
-
-// ============================================
-// PAGE INITIALIZATION
-// ============================================
-
-document.addEventListener('DOMContentLoaded', function() {
-  // Auth guard is handled in script.js
-  // Just ensure orders page specific functionality is ready
-  console.log('Orders page initialized');
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('Orders page ready');
 });

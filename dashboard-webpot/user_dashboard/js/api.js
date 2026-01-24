@@ -1,60 +1,71 @@
-// dashboard-webpot/user_dashboard/js/api.js - Dashboard API integration
+// dashboard-webpot/user_dashboard/js/api.js
+// Dashboard API integration — aligned with Apps Script backend
 
-// Fetch user profile data
-async function fetchUserProfile(userId) {
+/* ============================================
+   USER DATA
+============================================ */
+
+/**
+ * Get current user email safely
+ */
+function getUserEmail() {
+  const user = typeof getUserData === 'function' ? getUserData() : null;
+  return user && user.email ? user.email : '';
+}
+
+/* ============================================
+   ORDERS
+============================================ */
+
+/**
+ * Fetch orders for the currently authenticated user
+ * Backend-supported via action=getUserOrders
+ */
+async function fetchUserOrders() {
   try {
-    const res = await apiCall('/users', {
-      method: 'GET',
-      action: 'getUserById',
-      body: { user_id: userId }
-    });
-    if (res.success && res.data.user) {
-      return res.data.user;
+    const token = typeof getAuthToken === 'function'
+      ? getAuthToken()
+      : null;
+
+    if (!token) {
+      console.warn('No auth token available for fetchUserOrders');
+      return [];
     }
-    return null;
-  } catch (e) {
-    console.error('Error fetching user profile:', e);
-    return null;
+
+    const res = await apiCall('getUserOrders', { token });
+
+    if (res && Array.isArray(res.orders)) {
+      return res.orders;
+    }
+
+    console.warn('Unexpected getUserOrders response:', res);
+    return [];
+  } catch (err) {
+    console.error('Failed to fetch user orders:', err);
+    return [];
   }
 }
 
-// Fetch user's orders
-// STUB: Backend does not yet support read orders. Only order creation (Pay Later) is supported.
-// TODO: Once backend implements getOrders/getUserOrders, replace with real API call
-async function fetchUserOrders(userId) {
-  console.warn('[STUB] fetchUserOrders called but backend read API not available yet');
-  // Return empty array - orders will display empty state
+/* ============================================
+   SESSIONS (PLACEHOLDER)
+============================================ */
+
+/**
+ * Backend does not yet expose session read APIs.
+ * Safe placeholder for future use.
+ */
+async function fetchUserSessions() {
   return [];
 }
 
-// Fetch user's sessions
-// STUB: Backend does not support session read API.
-// TODO: Once backend implements getSessions, replace with real API call
-async function fetchUserSessions(userId) {
-  console.warn('[STUB] fetchUserSessions called but backend read API not available yet');
-  // Return empty array - sessions will show placeholder
+/* ============================================
+   ACTIVITY LOGS (PLACEHOLDER)
+============================================ */
+
+/**
+ * Backend does not yet expose log read APIs.
+ * Safe placeholder for future use.
+ */
+async function fetchActivityLogs() {
   return [];
-}
-
-// Fetch active auth tokens
-// STUB: Backend does not support auth token read API.
-// TODO: Once backend implements getAuthTokens, replace with real API call
-async function fetchAuthTokens(userId) {
-  console.warn('[STUB] fetchAuthTokens called but backend read API not available yet');
-  // Return empty array
-  return [];
-}
-
-// Fetch activity logs
-// STUB: Backend does not support activity log read API.
-// TODO: Once backend implements getLogs, replace with real API call
-async function fetchActivityLogs(userId, limit = 20) {
-  console.warn('[STUB] fetchActivityLogs called but backend read API not available yet');
-  // Return empty array - activity will show placeholder
-  return [];}
-
-// Get user email from auth token data
-function getUserEmail() {
-  const userData = getUserData();
-  return userData ? userData.email : '';
 }
