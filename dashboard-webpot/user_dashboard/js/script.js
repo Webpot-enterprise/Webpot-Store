@@ -72,13 +72,13 @@ async function bootstrapDashboard() {
 
   setDashboardState('user', user);
 
-  // 4️⃣ Session expiry
+  // 4️⃣ Start session expiry tracking
   startSessionExpiryTracking();
 
-  // 5️⃣ Load data
-  await loadDashboardData(user.user_id);
+  // 5️⃣ Load dashboard data
+  await loadDashboardData();
 
-  // 6️⃣ Enhancements
+  // 6️⃣ Initialize UI enhancements
   initializeEnhancements();
 }
 
@@ -108,6 +108,7 @@ function updateSessionExpiryIndicator() {
 
   const mins = Math.floor(diff / 60000);
   const hrs = Math.floor(mins / 60);
+
   el.textContent =
     hrs > 0
       ? `Session expires in ${hrs}h ${mins % 60}m`
@@ -118,9 +119,9 @@ function updateSessionExpiryIndicator() {
    DATA LOADING
 ============================================ */
 
-async function loadDashboardData(userId) {
+async function loadDashboardData() {
   try {
-    const orders = await fetchUserOrders(userId);
+    const orders = await fetchUserOrders();
     setDashboardState('orders', orders);
 
     updateStatsCards?.(orders);
