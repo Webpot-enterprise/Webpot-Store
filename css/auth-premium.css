@@ -536,6 +536,51 @@ body {
   font-size: 14px;
   line-height: 1.8;
   color: rgba(232, 240, 248, 0.85);
+  transition: opacity 0.15s ease;
+}
+
+/* Links inside modal content - neon glass theme */
+.auth-modal-body a {
+  color: #00d4ff;
+  text-decoration: none;
+  font-weight: 500;
+  position: relative;
+  transition: all 0.25s ease;
+  border-bottom: 1px solid rgba(0, 212, 255, 0.3);
+}
+
+.auth-modal-body a:hover {
+  color: #06d6d0;
+  border-bottom-color: #06d6d0;
+  text-shadow: 0 0 8px rgba(0, 212, 255, 0.4);
+}
+
+.auth-modal-body a:active {
+  color: #00b8cc;
+}
+
+.auth-modal-body h1,
+.auth-modal-body h2,
+.auth-modal-body h3 {
+  color: #00d4ff;
+  margin-top: 20px;
+  margin-bottom: 12px;
+  text-shadow: 0 0 8px rgba(0, 212, 255, 0.1);
+}
+
+.auth-modal-body p {
+  color: rgba(232, 240, 248, 0.8);
+  margin-bottom: 12px;
+}
+
+.auth-modal-body ul,
+.auth-modal-body ol {
+  margin: 12px 0 12px 20px;
+  color: rgba(232, 240, 248, 0.8);
+}
+
+.auth-modal-body li {
+  margin-bottom: 8px;
 }
 
 .auth-modal-body::-webkit-scrollbar {
@@ -565,6 +610,13 @@ body {
   font-weight: 600;
   letter-spacing: 0.5px;
   transition: all 0.3s ease;
+}
+
+.scroll-prompt.scroll-complete {
+  background: rgba(34, 197, 94, 0.08);
+  border-top-color: rgba(34, 197, 94, 0.2);
+  color: #22c55e;
+  font-weight: 700;
 }
 
 .scroll-prompt.hidden {

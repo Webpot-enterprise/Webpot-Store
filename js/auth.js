@@ -56,9 +56,15 @@ function switchTab(tab, loginBtn, registerBtn, loginForm, registerForm) {
 let termsAgrementState = {
   currentStep: null, // 'terms' or 'privacy'
   termsScrolled: false,
-  privacyScrolled: false
+  privacyScrolled: false,
+  autoTransitionTimer: null // for canceling auto-transition if user scrolls up
 };
 
+/**
+ * Load Terms or Privacy content into modal
+ * Removes duplicate back-links and header navigation
+ * Updates modal title and button state
+ */
 async function loadModalContent(step) {
   const modalBody = document.getElementById('modalBody');
   const modalTitle = document.getElementById('modalTitle');
@@ -75,14 +81,40 @@ async function loadModalContent(step) {
     
     const html = await response.text();
     
-    // Extract main content (remove scripts, styles, etc.)
+    // Parse and clean content
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, 'text/html');
-    const mainContent = doc.body.innerHTML;
     
-    // Update modal
-    modalBody.innerHTML = mainContent;
-    modalBody.scrollTop = 0;
+    // Remove navigation header and back links
+    const navHeader = doc.querySelector('.nav-header');
+    if (navHeader) navHeader.remove();
+    
+    const backLinks = doc.querySelectorAll('.back-btn, .back-link');
+    backLinks.forEach(link => link.remove());
+    
+    // Get container and extract only content (skip h1 title)
+    const container = doc.querySelector('.terms-container, .privacy-container');
+    let contentHTML = '';
+    if (container) {
+      // Extract inner content
+      contentHTML = container.innerHTML;
+      // Remove the h1 title if present (we'll use modal title instead)
+      const h1 = container.querySelector('h1');
+      if (h1) {
+        contentHTML = contentHTML.replace(h1.outerHTML, '');
+      }
+    }
+    
+    // Fade out effect
+    modalBody.style.opacity = '0.7';
+    
+    // Small delay for visual transition
+    setTimeout(() => {
+      modalBody.innerHTML = contentHTML || '<p>Unable to load content.</p>';
+      modalBody.scrollTop = 0;
+      modalBody.style.opacity = '1';
+    }, 150);
+    
     termsAgrementState.currentStep = step;
     
     if (step === 'terms') {
@@ -91,12 +123,14 @@ async function loadModalContent(step) {
       nextBtn.disabled = true;
       termsAgrementState.termsScrolled = false;
       scrollPrompt.style.display = 'block';
+      scrollPrompt.textContent = '📖 Scroll to the bottom to continue';
     } else {
       modalTitle.textContent = 'Privacy Policy';
       nextBtn.textContent = 'I Agree';
       nextBtn.disabled = true;
       termsAgrementState.privacyScrolled = false;
       scrollPrompt.style.display = 'block';
+      scrollPrompt.textContent = '📖 Scroll to the bottom to continue';
     }
   } catch (error) {
     console.error('Error loading modal content:', error);
@@ -104,6 +138,10 @@ async function loadModalContent(step) {
   }
 }
 
+/**
+ * Detect when user scrolls to bottom of modal
+ * Handles auto-transition and scroll state tracking
+ */
 function handleModalScroll() {
   const modalBody = document.getElementById('modalBody');
   const scrollPrompt = document.getElementById('scrollPrompt');
@@ -111,18 +149,48 @@ function handleModalScroll() {
 
   if (!modalBody) return;
 
+  // Calculate if user is at bottom (within 10px tolerance)
   const isScrolledToBottom = 
     modalBody.scrollHeight - modalBody.scrollTop - modalBody.clientHeight < 10;
 
   if (isScrolledToBottom) {
+    // Clear any pending auto-transition
+    if (termsAgrementState.autoTransitionTimer) {
+      clearTimeout(termsAgrementState.autoTransitionTimer);
+    }
+
+    // Update UI to show scroll is complete
     scrollPrompt.style.display = 'none';
+    scrollPrompt.textContent = '✓ Scroll complete';
+    scrollPrompt.classList.add('scroll-complete');
+    
     nextBtn.disabled = false;
 
+    // Track which document was scrolled
     if (termsAgrementState.currentStep === 'terms') {
       termsAgrementState.termsScrolled = true;
+      
+      // Auto-transition to Privacy after 2 seconds
+      termsAgrementState.autoTransitionTimer = setTimeout(() => {
+        loadModalContent('privacy');
+      }, 2000);
     } else if (termsAgrementState.currentStep === 'privacy') {
       termsAgrementState.privacyScrolled = true;
+      
+      // Auto-complete after 2 seconds
+      termsAgrementState.autoTransitionTimer = setTimeout(() => {
+        completeTermsAgreement();
+      }, 2000);
     }
+  } else if (termsAgrementState.autoTransitionTimer) {
+    // User scrolled up - cancel auto-transition
+    clearTimeout(termsAgrementState.autoTransitionTimer);
+    termsAgrementState.autoTransitionTimer = null;
+    
+    // Reset scroll prompt
+    scrollPrompt.classList.remove('scroll-complete');
+    scrollPrompt.textContent = '📖 Scroll to the bottom to continue';
+    scrollPrompt.style.display = 'block';
   }
 }
 
@@ -138,6 +206,10 @@ function openTermsModal() {
   // Reset state
   termsAgrementState.termsScrolled = false;
   termsAgrementState.privacyScrolled = false;
+  if (termsAgrementState.autoTransitionTimer) {
+    clearTimeout(termsAgrementState.autoTransitionTimer);
+    termsAgrementState.autoTransitionTimer = null;
+  }
 
   // Show modal
   modal.removeAttribute('hidden');
@@ -166,6 +238,12 @@ function closeTermsModal() {
     modalBody.removeEventListener('scroll', handleModalScroll);
   }
 
+  // Cancel any pending auto-transition
+  if (termsAgrementState.autoTransitionTimer) {
+    clearTimeout(termsAgrementState.autoTransitionTimer);
+    termsAgrementState.autoTransitionTimer = null;
+  }
+
   // Uncheck checkbox if modal closed without completing
   if (!termsAgrementState.privacyScrolled) {
     checkbox.checked = false;
@@ -179,6 +257,13 @@ function closeTermsModal() {
 
 function completeTermsAgreement() {
   const checkbox = document.getElementById('termsCheckbox');
+  
+  // Cancel any pending timer
+  if (termsAgrementState.autoTransitionTimer) {
+    clearTimeout(termsAgrementState.autoTransitionTimer);
+    termsAgrementState.autoTransitionTimer = null;
+  }
+  
   checkbox.checked = true;
   closeTermsModal();
 }
