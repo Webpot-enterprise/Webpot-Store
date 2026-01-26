@@ -165,6 +165,12 @@ async function loginUser(email, password) {
     // Store auth token
     localStorage.setItem(API_CONFIG.AUTH_TOKEN_KEY, result.data.token);
     
+    // Store token expiry (24 hours from now)
+    const expiryTime = Date.now() + (24 * 60 * 60 * 1000);
+    if (typeof setTokenExpiry === 'function') {
+      setTokenExpiry(expiryTime);
+    }
+    
     // Store user data if available
     if (result.data.user) {
       localStorage.setItem(API_CONFIG.USER_DATA_KEY, JSON.stringify(result.data.user));
@@ -190,6 +196,12 @@ async function registerUser(name, email, password) {
     // Store auth token
     localStorage.setItem(API_CONFIG.AUTH_TOKEN_KEY, result.data.token);
     
+    // Store token expiry (24 hours from now)
+    const expiryTime = Date.now() + (24 * 60 * 60 * 1000);
+    if (typeof setTokenExpiry === 'function') {
+      setTokenExpiry(expiryTime);
+    }
+    
     // Store user data if available
     if (result.data.user) {
       localStorage.setItem(API_CONFIG.USER_DATA_KEY, JSON.stringify(result.data.user));
@@ -212,6 +224,12 @@ async function googleLogin(credential) {
   if (result.success && result.data?.token) {
     // Store auth token
     localStorage.setItem(API_CONFIG.AUTH_TOKEN_KEY, result.data.token);
+    
+    // Store token expiry (24 hours from now)
+    const expiryTime = Date.now() + (24 * 60 * 60 * 1000);
+    if (typeof setTokenExpiry === 'function') {
+      setTokenExpiry(expiryTime);
+    }
     
     // Store user data if available
     if (result.data.user) {

@@ -2,6 +2,41 @@
 // PURE UI RENDERING — no state ownership, no side effects
 
 /* ============================================
+   UTILITIES
+============================================ */
+
+function formatDate(date) {
+  try {
+    return new Date(date).toLocaleString();
+  } catch {
+    return '-';
+  }
+}
+
+function formatCurrency(amount) {
+  return '₹' + (parseFloat(amount) || 0).toFixed(2);
+}
+
+function getRelativeTime(timestamp) {
+  if (!timestamp) return '-';
+  
+  try {
+    const date = new Date(timestamp);
+    const seconds = Math.floor((Date.now() - date) / 1000);
+    
+    if (seconds < 60) return 'Just now';
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    return `${days}d ago`;
+  } catch {
+    return '-';
+  }
+}
+
+/* ============================================
    PROFILE
 ============================================ */
 
@@ -194,5 +229,39 @@ function updateNotificationBadge(count = 0) {
   if (badge) {
     badge.style.display = count ? 'inline-flex' : 'none';
     badge.textContent = count > 9 ? '9+' : count;
+  }
+}
+
+/* ============================================
+   NOTIFICATION BUTTON SETUP
+============================================ */
+
+function setupNotificationButton() {
+  const btn = document.querySelector('.notification-btn');
+  if (!btn) return;
+
+  btn.addEventListener('click', () => {
+    // Toggle notification panel if exists
+    const panel = document.getElementById('notificationPanel');
+    if (panel) {
+      panel.style.display = 
+        panel.style.display === 'none' ? 'block' : 'none';
+    }
+  });
+}
+
+/* ============================================
+   REFERRALS
+============================================ */
+
+function initializeReferrals() {
+  // Safe placeholder for referral functionality
+  const referralSection = document.getElementById('referralSection');
+  if (!referralSection) return;
+
+  // If no referral data available, hide or show empty state
+  const referralCode = document.getElementById('referralCode');
+  if (referralCode && !referralCode.textContent) {
+    referralCode.textContent = 'N/A';
   }
 }

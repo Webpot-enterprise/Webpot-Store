@@ -11,6 +11,79 @@
  */
 
 // ============================================
+// AUTH SUCCESS TOAST
+// ============================================
+
+function showAuthSuccessToast(message = 'Logged in successfully, redirecting...') {
+  // Create toast container if it doesn't exist
+  let toast = document.getElementById('authSuccessToast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'authSuccessToast';
+    toast.style.cssText = `
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(10, 14, 26, 0.95);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(0, 212, 255, 0.3);
+      border-radius: 12px;
+      padding: 32px 40px;
+      text-align: center;
+      color: #00d4ff;
+      font-size: 16px;
+      font-weight: 600;
+      z-index: 9999;
+      box-shadow: 0 0 40px rgba(0, 212, 255, 0.15);
+      animation: authToastFadeIn 0.3s ease;
+    `;
+    document.body.appendChild(toast);
+  }
+
+  toast.textContent = message;
+  toast.style.display = 'block';
+
+  // Add animation keyframes if not already present
+  if (!document.getElementById('authToastStyles')) {
+    const style = document.createElement('style');
+    style.id = 'authToastStyles';
+    style.innerHTML = `
+      @keyframes authToastFadeIn {
+        from {
+          opacity: 0;
+          transform: translate(-50%, -55%);
+        }
+        to {
+          opacity: 1;
+          transform: translate(-50%, -50%);
+        }
+      }
+      @keyframes authToastFadeOut {
+        from {
+          opacity: 1;
+          transform: translate(-50%, -50%);
+        }
+        to {
+          opacity: 0;
+          transform: translate(-50%, -45%);
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  // Auto-hide after 2 seconds
+  setTimeout(() => {
+    toast.style.animation = 'authToastFadeOut 0.3s ease';
+    setTimeout(() => {
+      toast.style.display = 'none';
+      toast.style.animation = 'authToastFadeIn 0.3s ease';
+    }, 300);
+  }, 2000);
+}
+
+// ============================================
 // GOOGLE SIGN-IN HANDLER
 // ============================================
 
@@ -19,10 +92,11 @@ async function onGoogleSignIn(response) {
     const result = await googleLogin(response.credential);
     
     if (result.success) {
-      // Redirect to dashboard or home page
+      // Show success toast and redirect to home
+      showAuthSuccessToast('Logged in successfully, redirecting...');
       setTimeout(() => {
-        window.location.href = './dashboard-webpot/user_dashboard/html/index.html';
-      }, 500);
+        window.location.href = './index.html';
+      }, 2500);
     } else {
       // Show error message
       const errorMsg = result.message || 'Google login failed. Please try again.';
@@ -402,10 +476,11 @@ async function submitLoginForm(e) {
     const result = await loginUser(email, password);
     
     if (result.success) {
-      // Redirect to dashboard on successful login
+      // Show success toast and redirect to home
+      showAuthSuccessToast('Logged in successfully, redirecting...');
       setTimeout(() => {
-        window.location.href = './dashboard-webpot/user_dashboard/html/index.html';
-      }, 500);
+        window.location.href = './index.html';
+      }, 2500);
     } else {
       // Show API error
       const errorMsg = result.message || 'Login failed. Please try again.';
@@ -461,10 +536,11 @@ async function submitRegisterForm(e) {
     const result = await registerUser(name, email, password);
     
     if (result.success) {
-      // Redirect to dashboard on successful registration
+      // Show success toast and redirect to home
+      showAuthSuccessToast('Logged in successfully, redirecting...');
       setTimeout(() => {
-        window.location.href = './dashboard-webpot/user_dashboard/html/index.html';
-      }, 500);
+        window.location.href = './index.html';
+      }, 2500);
     } else {
       // Show API error
       const errorMsg = result.message || 'Registration failed. Please try again.';

@@ -19,6 +19,7 @@ if (window.API_CONFIG) {
     
     // Authentication token storage
     AUTH_TOKEN_KEY: 'webpot_auth_token',
+    AUTH_TOKEN_EXPIRY_KEY: 'webpot_auth_token_expiry',
     USER_DATA_KEY: 'webpot_user_data',
     
     // API Actions
@@ -78,6 +79,32 @@ function clearUserData() {
 // Check if user is authenticated
 function isAuthenticated() {
   return getAuthToken() !== null;
+}
+
+// Get token expiry time (24 hours from now, or from storage if available)
+function getTokenExpiry() {
+  try {
+    const expiryStr = localStorage.getItem(API_CONFIG.AUTH_TOKEN_EXPIRY_KEY);
+    if (expiryStr) {
+      const expiry = parseInt(expiryStr, 10);
+      return isNaN(expiry) ? null : expiry;
+    }
+    return null;
+  } catch (err) {
+    return null;
+  }
+}
+
+// Save token expiry time
+function setTokenExpiry(expiryTime) {
+  try {
+    localStorage.setItem(
+      API_CONFIG.AUTH_TOKEN_EXPIRY_KEY || 'webpot_auth_token_expiry',
+      String(expiryTime)
+    );
+  } catch (err) {
+    console.warn('Failed to save token expiry:', err);
+  }
 }
 
 // Redirect to login if not authenticated

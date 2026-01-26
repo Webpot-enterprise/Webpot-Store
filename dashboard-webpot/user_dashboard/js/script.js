@@ -95,13 +95,25 @@ function updateSessionExpiryIndicator() {
   const el = document.getElementById('sessionExpiryText');
   if (!el) return;
 
-  const expiry = getTokenExpiry?.();
-  if (!expiry) return;
+  // Safe access to getTokenExpiry with optional chaining
+  const getTokenExpiryFn = typeof getTokenExpiry === 'function' 
+    ? getTokenExpiry 
+    : null;
+
+  const expiry = getTokenExpiryFn?.();
+  if (!expiry || typeof expiry !== 'number') {
+    // Token expiry not available, skip update
+    return;
+  }
 
   const diff = expiry - Date.now();
   if (diff <= 0) {
-    clearAuthToken();
-    clearUserData();
+    if (typeof clearAuthToken === 'function') {
+      clearAuthToken();
+    }
+    if (typeof clearUserData === 'function') {
+      clearUserData();
+    }
     window.location.href = '/auth.html';
     return;
   }
