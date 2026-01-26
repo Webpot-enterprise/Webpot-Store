@@ -50,6 +50,140 @@ function switchTab(tab, loginBtn, registerBtn, loginForm, registerForm) {
 }
 
 // ============================================
+// TERMS & PRIVACY MODAL FLOW
+// ============================================
+
+let termsAgrementState = {
+  currentStep: null, // 'terms' or 'privacy'
+  termsScrolled: false,
+  privacyScrolled: false
+};
+
+async function loadModalContent(step) {
+  const modalBody = document.getElementById('modalBody');
+  const modalTitle = document.getElementById('modalTitle');
+  const scrollPrompt = document.getElementById('scrollPrompt');
+  const nextBtn = document.getElementById('modalNextBtn');
+
+  if (!modalBody) return;
+
+  const filePath = step === 'terms' ? './html/terms.html' : './html/privacy.html';
+  
+  try {
+    const response = await fetch(filePath);
+    if (!response.ok) throw new Error(`Failed to load ${step}`);
+    
+    const html = await response.text();
+    
+    // Extract main content (remove scripts, styles, etc.)
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    const mainContent = doc.body.innerHTML;
+    
+    // Update modal
+    modalBody.innerHTML = mainContent;
+    modalBody.scrollTop = 0;
+    termsAgrementState.currentStep = step;
+    
+    if (step === 'terms') {
+      modalTitle.textContent = 'Terms & Conditions';
+      nextBtn.textContent = 'Next: Privacy Policy';
+      nextBtn.disabled = true;
+      termsAgrementState.termsScrolled = false;
+      scrollPrompt.style.display = 'block';
+    } else {
+      modalTitle.textContent = 'Privacy Policy';
+      nextBtn.textContent = 'I Agree';
+      nextBtn.disabled = true;
+      termsAgrementState.privacyScrolled = false;
+      scrollPrompt.style.display = 'block';
+    }
+  } catch (error) {
+    console.error('Error loading modal content:', error);
+    modalBody.innerHTML = '<p>Error loading content. Please try again.</p>';
+  }
+}
+
+function handleModalScroll() {
+  const modalBody = document.getElementById('modalBody');
+  const scrollPrompt = document.getElementById('scrollPrompt');
+  const nextBtn = document.getElementById('modalNextBtn');
+
+  if (!modalBody) return;
+
+  const isScrolledToBottom = 
+    modalBody.scrollHeight - modalBody.scrollTop - modalBody.clientHeight < 10;
+
+  if (isScrolledToBottom) {
+    scrollPrompt.style.display = 'none';
+    nextBtn.disabled = false;
+
+    if (termsAgrementState.currentStep === 'terms') {
+      termsAgrementState.termsScrolled = true;
+    } else if (termsAgrementState.currentStep === 'privacy') {
+      termsAgrementState.privacyScrolled = true;
+    }
+  }
+}
+
+function openTermsModal() {
+  const checkbox = document.getElementById('termsCheckbox');
+  const modal = document.getElementById('termsModal');
+
+  if (!modal) return;
+
+  // Prevent default checkbox behavior
+  checkbox.checked = false;
+
+  // Reset state
+  termsAgrementState.termsScrolled = false;
+  termsAgrementState.privacyScrolled = false;
+
+  // Show modal
+  modal.removeAttribute('hidden');
+
+  // Load Terms & Conditions
+  loadModalContent('terms');
+
+  // Attach scroll listener
+  const modalBody = document.getElementById('modalBody');
+  if (modalBody) {
+    modalBody.addEventListener('scroll', handleModalScroll);
+  }
+}
+
+function closeTermsModal() {
+  const modal = document.getElementById('termsModal');
+  const modalBody = document.getElementById('modalBody');
+  const checkbox = document.getElementById('termsCheckbox');
+
+  if (modal) {
+    modal.setAttribute('hidden', '');
+  }
+
+  // Remove scroll listener
+  if (modalBody) {
+    modalBody.removeEventListener('scroll', handleModalScroll);
+  }
+
+  // Uncheck checkbox if modal closed without completing
+  if (!termsAgrementState.privacyScrolled) {
+    checkbox.checked = false;
+  }
+
+  // Reset state
+  termsAgrementState.currentStep = null;
+  termsAgrementState.termsScrolled = false;
+  termsAgrementState.privacyScrolled = false;
+}
+
+function completeTermsAgreement() {
+  const checkbox = document.getElementById('termsCheckbox');
+  checkbox.checked = true;
+  closeTermsModal();
+}
+
+// ============================================
 // PASSWORD STRENGTH LOGIC (CORE)
 // ============================================
 
@@ -211,4 +345,36 @@ document.addEventListener('DOMContentLoaded', () => {
     updatePasswordStrengthUI(e.target.value);
     clearErrorMessage('registerPasswordError');
   });
+
+  // Terms & Privacy Modal Listeners
+  const termsCheckbox = document.getElementById('termsCheckbox');
+  const modalCloseBtn = document.querySelector('.auth-modal-close');
+  const modalOverlay = document.getElementById('termsModal');
+  const modalNextBtn = document.getElementById('modalNextBtn');
+
+  termsCheckbox?.addEventListener('click', (e) => {
+    e.preventDefault();
+    openTermsModal();
+  });
+
+  modalCloseBtn?.addEventListener('click', (e) => {
+    e.preventDefault();
+    closeTermsModal();
+  });
+
+  modalOverlay?.addEventListener('click', (e) => {
+    if (e.target === modalOverlay) {
+      closeTermsModal();
+    }
+  });
+
+  modalNextBtn?.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (termsAgrementState.currentStep === 'terms') {
+      loadModalContent('privacy');
+    } else if (termsAgrementState.currentStep === 'privacy') {
+      completeTermsAgreement();
+    }
+  });
 });
+
