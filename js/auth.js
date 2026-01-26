@@ -11,6 +11,34 @@
  */
 
 // ============================================
+// GOOGLE SIGN-IN HANDLER
+// ============================================
+
+async function onGoogleSignIn(response) {
+  try {
+    const result = await googleLogin(response.credential);
+    
+    if (result.success) {
+      // Redirect to dashboard or home page
+      setTimeout(() => {
+        window.location.href = './dashboard-webpot/user_dashboard/html/index.html';
+      }, 500);
+    } else {
+      // Show error message
+      const errorMsg = result.message || 'Google login failed. Please try again.';
+      if (currentAuthTab === 'login') {
+        showFieldError('loginError', errorMsg);
+      } else {
+        showFieldError('registerError', errorMsg);
+      }
+    }
+  } catch (error) {
+    console.error('Google sign-in error:', error);
+    showFieldError('loginError', 'An error occurred during Google sign-in');
+  }
+}
+
+// ============================================
 // TAB SWITCHING
 // ============================================
 
@@ -358,8 +386,8 @@ async function submitLoginForm(e) {
   e.preventDefault();
   clearAllErrors('loginForm');
 
-  const email = loginEmail.value.trim();
-  const password = loginPassword.value.trim();
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value.trim();
 
   if (!validateEmail(email)) {
     showFieldError('loginEmailError', 'Invalid email');
@@ -370,7 +398,23 @@ async function submitLoginForm(e) {
     return;
   }
 
-  await loginUser(email, password);
+  try {
+    const result = await loginUser(email, password);
+    
+    if (result.success) {
+      // Redirect to dashboard on successful login
+      setTimeout(() => {
+        window.location.href = './dashboard-webpot/user_dashboard/html/index.html';
+      }, 500);
+    } else {
+      // Show API error
+      const errorMsg = result.message || 'Login failed. Please try again.';
+      showFieldError('loginError', errorMsg);
+    }
+  } catch (error) {
+    console.error('Login error:', error);
+    showFieldError('loginError', 'An error occurred. Please try again.');
+  }
 }
 
 // ============================================
@@ -381,11 +425,11 @@ async function submitRegisterForm(e) {
   e.preventDefault();
   clearAllErrors('registerForm');
 
-  const name = registerName.value.trim();
-  const email = registerEmail.value.trim();
-  const password = registerPassword.value;
-  const confirm = registerConfirmPassword.value;
-  const checkbox = termsCheckbox;
+  const name = document.getElementById('registerName').value.trim();
+  const email = document.getElementById('registerEmail').value.trim();
+  const password = document.getElementById('registerPassword').value;
+  const confirm = document.getElementById('registerConfirmPassword').value;
+  const checkbox = document.getElementById('termsCheckbox');
 
   if (!validateName(name)) {
     showFieldError('registerNameError', 'Name too short');
@@ -413,7 +457,23 @@ async function submitRegisterForm(e) {
     return;
   }
 
-  await registerUser(name, email, password);
+  try {
+    const result = await registerUser(name, email, password);
+    
+    if (result.success) {
+      // Redirect to dashboard on successful registration
+      setTimeout(() => {
+        window.location.href = './dashboard-webpot/user_dashboard/html/index.html';
+      }, 500);
+    } else {
+      // Show API error
+      const errorMsg = result.message || 'Registration failed. Please try again.';
+      showFieldError('registerError', errorMsg);
+    }
+  } catch (error) {
+    console.error('Registration error:', error);
+    showFieldError('registerError', 'An error occurred. Please try again.');
+  }
 }
 
 // ============================================

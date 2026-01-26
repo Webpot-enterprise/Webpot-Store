@@ -147,6 +147,81 @@ async function apiCall(endpoint, options = {}) {
 }
 
 // ============================================================================
+// AUTHENTICATION ENDPOINTS
+// ============================================================================
+
+// User login with email and password
+async function loginUser(email, password) {
+  const result = await apiCall("/auth/login", {
+    method: "POST",
+    action: "login",
+    body: {
+      email: email.trim(),
+      password: password
+    }
+  });
+
+  if (result.success && result.data?.token) {
+    // Store auth token
+    localStorage.setItem(API_CONFIG.AUTH_TOKEN_KEY, result.data.token);
+    
+    // Store user data if available
+    if (result.data.user) {
+      localStorage.setItem(API_CONFIG.USER_DATA_KEY, JSON.stringify(result.data.user));
+    }
+  }
+
+  return result;
+}
+
+// User registration with name, email, and password
+async function registerUser(name, email, password) {
+  const result = await apiCall("/auth/register", {
+    method: "POST",
+    action: "register",
+    body: {
+      name: name.trim(),
+      email: email.trim(),
+      password: password
+    }
+  });
+
+  if (result.success && result.data?.token) {
+    // Store auth token
+    localStorage.setItem(API_CONFIG.AUTH_TOKEN_KEY, result.data.token);
+    
+    // Store user data if available
+    if (result.data.user) {
+      localStorage.setItem(API_CONFIG.USER_DATA_KEY, JSON.stringify(result.data.user));
+    }
+  }
+
+  return result;
+}
+
+// Google OAuth login
+async function googleLogin(credential) {
+  const result = await apiCall("/auth/google", {
+    method: "POST",
+    action: "googleLogin",
+    body: {
+      credential: credential
+    }
+  });
+
+  if (result.success && result.data?.token) {
+    // Store auth token
+    localStorage.setItem(API_CONFIG.AUTH_TOKEN_KEY, result.data.token);
+    
+    // Store user data if available
+    if (result.data.user) {
+      localStorage.setItem(API_CONFIG.USER_DATA_KEY, JSON.stringify(result.data.user));
+    }
+  }
+
+  return result;
+}
+
 // SPECIFIC API ENDPOINTS (Examples)
 // ============================================================================
 
