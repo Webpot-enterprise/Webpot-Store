@@ -453,8 +453,77 @@ function clearAllErrors(formId) {
 }
 
 // ============================================
-// LOGIN
+// LOGIN WITH OTP VERIFICATION
 // ============================================
+
+// Store OTP session state
+let otpSession = {
+  otpToken: null,
+  email: null,
+  resendCooldownTime: 0,
+  maxAttempts: 5,
+  attempts: 0
+};
+
+function showOtpSection() {
+  const credSection = document.getElementById('loginCredentialsSection');
+  const otpSection = document.getElementById('loginOtpSection');
+  
+  if (credSection && otpSection) {
+    credSection.style.display = 'none';
+    otpSection.style.display = 'block';
+    
+    // Auto-focus OTP input
+    const otpInput = document.getElementById('otpInput');
+    if (otpInput) {
+      setTimeout(() => otpInput.focus(), 100);
+    }
+  }
+}
+
+function hideOtpSection() {
+  const credSection = document.getElementById('loginCredentialsSection');
+  const otpSection = document.getElementById('loginOtpSection');
+  
+  if (credSection && otpSection) {
+    otpSection.style.display = 'none';
+    credSection.style.display = 'block';
+  }
+  
+  // Reset OTP state
+  otpSession = {
+    otpToken: null,
+    email: null,
+    resendCooldownTime: 0,
+    maxAttempts: 5,
+    attempts: 0
+  };
+}
+
+function startResendCooldown() {
+  const resendBtn = document.getElementById('resendOtpBtn');
+  const cooldownDisplay = document.getElementById('resendCooldown');
+  const timerSpan = document.getElementById('cooldownTimer');
+  
+  if (!resendBtn || !cooldownDisplay || !timerSpan) return;
+  
+  resendBtn.disabled = true;
+  cooldownDisplay.style.display = 'inline';
+  
+  let seconds = 30;
+  timerSpan.textContent = seconds;
+  
+  const interval = setInterval(() => {
+    seconds--;
+    timerSpan.textContent = seconds;
+    
+    if (seconds <= 0) {
+      clearInterval(interval);
+      resendBtn.disabled = false;
+      cooldownDisplay.style.display = 'none';
+    }
+  }, 1000);
+}
 
 async function submitLoginForm(e) {
   e.preventDefault();
@@ -472,23 +541,144 @@ async function submitLoginForm(e) {
     return;
   }
 
+  // Disable form while processing
+  const submitBtn = document.getElementById('loginSubmitBtn');
+  const originalText = submitBtn.textContent;
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Sending OTP...';
+
   try {
-    const result = await loginUser(email, password);
+    // Step 1: Validate credentials and request OTP
+    const result = await requestOtp(email, password);
     
-    if (result.success) {
-      // Show success toast and redirect to home
-      showAuthSuccessToast('Logged in successfully, redirecting...');
-      setTimeout(() => {
-        window.location.href = './index.html';
-      }, 2500);
+    if (result.success && result.data?.otp_required) {
+      // OTP sent successfully
+      otpSession.otpToken = result.data.otp_token;
+      otpSession.email = email;
+      otpSession.attempts = 0;
+      
+      showOtpSection();
+      startResendCooldown();
+      
+      // Show info message
+      showFieldError('otpError', 'OTP sent to your email. Check your inbox!');
+      const errorEl = document.getElementById('otpError');
+      if (errorEl) {
+        errorEl.style.color = '#22c55e';
+      }
     } else {
-      // Show API error
-      const errorMsg = result.message || 'Login failed. Please try again.';
+      // Credential validation failed
+      const errorMsg = result.message || 'Invalid credentials. Please try again.';
       showFieldError('loginError', errorMsg);
     }
   } catch (error) {
     console.error('Login error:', error);
     showFieldError('loginError', 'An error occurred. Please try again.');
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = originalText;
+  }
+}
+
+async function submitVerifyOtp(e) {
+  e.preventDefault();
+  
+  if (!otpSession.otpToken) {
+    showFieldError('otpError', 'Session expired. Please login again.');
+    return;
+  }
+
+  const otpCode = document.getElementById('otpInput').value.trim();
+  
+  if (!otpCode || !/^\d{6}$/.test(otpCode)) {
+    showFieldError('otpError', 'Please enter a valid 6-digit OTP');
+    return;
+  }
+
+  if (otpSession.attempts >= otpSession.maxAttempts) {
+    showFieldError('otpError', 'Too many attempts. Please request a new OTP.');
+    return;
+  }
+
+  // Disable button while verifying
+  const verifyBtn = document.getElementById('verifyOtpBtn');
+  const originalText = verifyBtn.textContent;
+  verifyBtn.disabled = true;
+  verifyBtn.textContent = 'Verifying...';
+
+  try {
+    // Step 2: Verify OTP and get auth token
+    const result = await verifyOtp(otpSession.otpToken, otpCode);
+    
+    if (result.success && result.data?.token) {
+      // OTP verified - user is now logged in
+      showAuthSuccessToast('Logged in successfully, redirecting...');
+      setTimeout(() => {
+        window.location.href = './index.html';
+      }, 2500);
+    } else {
+      // OTP verification failed
+      otpSession.attempts++;
+      const remaining = otpSession.maxAttempts - otpSession.attempts;
+      
+      if (remaining <= 0) {
+        showFieldError('otpError', 'Too many incorrect attempts. Request a new OTP.');
+      } else {
+        const errorMsg = result.message || 'Invalid OTP. Please try again.';
+        showFieldError('otpError', `${errorMsg} (${remaining} attempts remaining)`);
+      }
+    }
+  } catch (error) {
+    console.error('OTP verification error:', error);
+    otpSession.attempts++;
+    showFieldError('otpError', 'An error occurred. Please try again.');
+  } finally {
+    verifyBtn.disabled = false;
+    verifyBtn.textContent = originalText;
+  }
+}
+
+async function submitResendOtp(e) {
+  e.preventDefault();
+  
+  if (!otpSession.email) {
+    showFieldError('otpError', 'Session expired. Please login again.');
+    return;
+  }
+
+  const resendBtn = document.getElementById('resendOtpBtn');
+  const originalText = resendBtn.textContent;
+  resendBtn.disabled = true;
+  resendBtn.textContent = 'Sending...';
+
+  try {
+    // Get the password from session (would need to store it temporarily)
+    // For now, we'll request OTP without password (backend should validate OTP token)
+    const result = await requestOtpResend(otpSession.otpToken);
+    
+    if (result.success) {
+      showFieldError('otpError', 'OTP resent to your email!');
+      const errorEl = document.getElementById('otpError');
+      if (errorEl) {
+        errorEl.style.color = '#22c55e';
+      }
+      
+      // Reset attempt counter and cooldown
+      otpSession.attempts = 0;
+      startResendCooldown();
+      
+      // Clear input
+      document.getElementById('otpInput').value = '';
+    } else {
+      const errorMsg = result.message || 'Failed to resend OTP. Please try again.';
+      showFieldError('otpError', errorMsg);
+    }
+  } catch (error) {
+    console.error('Resend OTP error:', error);
+    showFieldError('otpError', 'An error occurred. Please try again.');
+  } finally {
+    resendBtn.disabled = false;
+    resendBtn.textContent = originalText;
   }
 }
 
@@ -536,10 +726,10 @@ async function submitRegisterForm(e) {
     const result = await registerUser(name, email, password);
     
     if (result.success) {
-      // Show success toast and redirect to home
-      showAuthSuccessToast('Logged in successfully, redirecting...');
+      // Show success toast and redirect to email verification page
+      showAuthSuccessToast('Registration submitted. Check your email...');
       setTimeout(() => {
-        window.location.href = './index.html';
+        window.location.href = './check-email.html';
       }, 2500);
     } else {
       // Show API error
@@ -561,6 +751,37 @@ document.addEventListener('DOMContentLoaded', () => {
 
   loginForm?.addEventListener('submit', submitLoginForm);
   registerForm?.addEventListener('submit', submitRegisterForm);
+
+  // OTP event listeners
+  const verifyOtpBtn = document.getElementById('verifyOtpBtn');
+  const resendOtpBtn = document.getElementById('resendOtpBtn');
+  const backToLoginBtn = document.getElementById('backToLoginBtn');
+  const otpInput = document.getElementById('otpInput');
+
+  verifyOtpBtn?.addEventListener('click', submitVerifyOtp);
+  resendOtpBtn?.addEventListener('click', submitResendOtp);
+  
+  backToLoginBtn?.addEventListener('click', (e) => {
+    e.preventDefault();
+    hideOtpSection();
+    clearAllErrors('loginForm');
+  });
+
+  // OTP input: allow only numbers and auto-format
+  otpInput?.addEventListener('input', (e) => {
+    e.target.value = e.target.value.replace(/[^0-9]/g, '');
+    clearErrorMessage('otpError');
+  });
+
+  // OTP input: auto-submit when 6 digits are entered
+  otpInput?.addEventListener('keyup', (e) => {
+    if (e.target.value.length === 6) {
+      // Auto-submit after brief delay
+      setTimeout(() => {
+        submitVerifyOtp(e);
+      }, 100);
+    }
+  });
 
   registerPassword?.addEventListener('input', (e) => {
     updatePasswordStrengthUI(e.target.value);

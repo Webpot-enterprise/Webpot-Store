@@ -150,8 +150,8 @@ async function apiCall(endpoint, options = {}) {
 // AUTHENTICATION ENDPOINTS
 // ============================================================================
 
-// User login with email and password
-async function loginUser(email, password) {
+// User login with email and password (Step 1: Request OTP)
+async function requestOtp(email, password) {
   const result = await apiCall("/auth/login", {
     method: "POST",
     action: "login",
@@ -161,8 +161,24 @@ async function loginUser(email, password) {
     }
   });
 
+  // Note: This returns { otp_required: true, otp_token: "..." }
+  // It does NOT store the token yet (OTP verification required)
+  return result;
+}
+
+// Verify OTP and complete login (Step 2: Verify OTP and get token)
+async function verifyOtp(otpToken, otpCode) {
+  const result = await apiCall("/auth/verifyOtp", {
+    method: "POST",
+    action: "verifyOtp",
+    body: {
+      otp_token: otpToken,
+      otp_code: otpCode.trim()
+    }
+  });
+
   if (result.success && result.data?.token) {
-    // Store auth token
+    // Only now store the auth token after OTP verification
     localStorage.setItem(API_CONFIG.AUTH_TOKEN_KEY, result.data.token);
     
     // Store token expiry (24 hours from now)
@@ -178,6 +194,26 @@ async function loginUser(email, password) {
   }
 
   return result;
+}
+
+// Resend OTP to user's email
+async function requestOtpResend(otpToken) {
+  const result = await apiCall("/auth/resendOtp", {
+    method: "POST",
+    action: "resendOtp",
+    body: {
+      otp_token: otpToken
+    }
+  });
+
+  return result;
+}
+
+// User login with email and password (DEPRECATED - now uses OTP flow)
+async function loginUser(email, password) {
+  // This function is now deprecated and replaced by requestOtp + verifyOtp
+  // However, keeping it for backward compatibility
+  return requestOtp(email, password);
 }
 
 // User registration with name, email, and password

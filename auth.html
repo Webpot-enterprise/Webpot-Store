@@ -32,19 +32,50 @@
     <form id="loginForm" class="auth-form active">
       <h2>Welcome Back</h2>
 
-      <input id="loginEmail" type="email" placeholder="Email" required>
-      <input id="loginPassword" type="password" placeholder="Password" required>
+      <!-- Email & Password Section -->
+      <div id="loginCredentialsSection">
+        <input id="loginEmail" type="email" placeholder="Email" required>
+        <input id="loginPassword" type="password" placeholder="Password" required>
 
-      <button type="submit">Sign In</button>
-      <div id="loginError" class="auth-error-message"></div>
+        <button type="submit" id="loginSubmitBtn">Sign In</button>
+        <div id="loginError" class="auth-error-message"></div>
 
-      <div class="auth-divider">or</div>
+        <div class="auth-divider">or</div>
 
-      <!-- ✅ LOGIN GOOGLE BUTTON -->
-      <div class="g_id_signin"
-        data-type="standard"
-        data-size="large"
-        data-text="signin_with">
+        <!-- ✅ LOGIN GOOGLE BUTTON -->
+        <div class="g_id_signin"
+          data-type="standard"
+          data-size="large"
+          data-text="signin_with">
+        </div>
+      </div>
+
+      <!-- OTP Verification Section (Hidden until triggered) -->
+      <div id="loginOtpSection" style="display: none;">
+        <h3>Verify Your Identity</h3>
+        <p style="text-align: center; color: #999; font-size: 14px; margin-bottom: 20px;">
+          We've sent a 6-digit code to your email
+        </p>
+
+        <input id="otpInput" type="text" placeholder="Enter 6-digit OTP" maxlength="6" pattern="[0-9]{6}" required style="text-align: center; letter-spacing: 8px; font-size: 20px; font-weight: bold;">
+
+        <button type="button" id="verifyOtpBtn" style="margin-top: 12px;">Verify OTP</button>
+        <div id="otpError" class="auth-error-message"></div>
+
+        <!-- Resend OTP -->
+        <div style="margin-top: 16px; text-align: center;">
+          <button type="button" id="resendOtpBtn" style="background: none; border: none; color: #00d4ff; cursor: pointer; text-decoration: underline; font-size: 14px;">
+            Resend OTP
+          </button>
+          <span id="resendCooldown" style="display: none; color: #999; font-size: 12px; margin-left: 8px;">
+            (Wait <span id="cooldownTimer">30</span>s)
+          </span>
+        </div>
+
+        <!-- Back to login -->
+        <button type="button" id="backToLoginBtn" style="margin-top: 16px; background: none; border: none; color: #999; cursor: pointer; font-size: 12px;">
+          ← Back to Login
+        </button>
       </div>
     </form>
 
