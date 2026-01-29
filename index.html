@@ -2,753 +2,149 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Webpot - Coming Soon</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Webpot - Web Development Services</title>
+    <link rel="stylesheet" href="./css/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        /* Countdown Module Styles */
+        .countdown-banner {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            color: #333;
-        }
-
-        .container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            padding: 60px 40px;
-            max-width: 700px;
+            padding: 30px 20px;
             text-align: center;
-            animation: slideUp 0.8s ease;
+            margin: 20px 0;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.2);
         }
 
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(40px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .logo {
-            font-size: 48px;
+        .countdown-banner h2 {
+            color: white;
+            font-size: 20px;
             margin-bottom: 20px;
-            animation: pulse 2s infinite;
+            font-weight: 600;
         }
 
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
+        .countdown-display {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
         }
 
-        h1 {
-            font-size: 32px;
-            color: #1a1a1a;
-            margin-bottom: 10px;
+        .countdown-unit {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 8px;
+            padding: 12px 16px;
+            min-width: 70px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+        }
+
+        .countdown-value {
+            font-size: 24px;
             font-weight: 700;
-        }
-
-        .subtitle {
-            font-size: 18px;
-            color: #666;
-            margin-bottom: 40px;
-            font-weight: 500;
-        }
-
-        .countdown-wrapper {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 15px;
-            padding: 40px 30px;
-            margin-bottom: 40px;
+            color: #00d4ff;
+            font-family: 'Courier New', monospace;
+            text-shadow: 0 0 8px rgba(0, 212, 255, 0.5);
+            line-height: 1;
         }
 
         .countdown-label {
-            font-size: 16px;
-            color: rgba(255, 255, 255, 0.9);
-            margin-bottom: 20px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-        }
-
-        .countdown {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .time-unit {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
-            border-radius: 10px;
-            padding: 20px 10px;
-            border: 1px solid rgba(255, 255, 255, 0.25);
-            transition: all 0.3s ease;
-        }
-
-        .time-unit:hover {
-            background: rgba(255, 255, 255, 0.25);
-            transform: translateY(-5px);
-        }
-
-        .time-value {
-            font-size: 32px;
-            font-weight: 700;
-            color: #00d4ff;
-            line-height: 1;
-            margin-bottom: 8px;
-            font-family: 'Courier New', monospace;
-            text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
-        }
-
-        .time-label {
-            font-size: 12px;
+            font-size: 11px;
             color: rgba(255, 255, 255, 0.8);
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
+            margin-top: 6px;
             font-weight: 600;
         }
 
-        .countdown-info {
+        .countdown-message {
+            color: rgba(255, 255, 255, 0.9);
             font-size: 13px;
-            color: rgba(255, 255, 255, 0.8);
-            margin-top: 15px;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            justify-content: center;
-            margin-bottom: 20px;
-        }
-
-        .btn {
-            padding: 14px 32px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            min-width: 180px;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
-        }
-
-        .btn-secondary {
-            background: #f5f5f5;
-            color: #667eea;
-            border: 2px solid #667eea;
-            min-width: 180px;
-        }
-
-        .btn-secondary:hover {
-            background: #667eea;
-            color: white;
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.2);
-        }
-
-        .features {
-            text-align: left;
-            background: #f9f9f9;
-            border-radius: 12px;
-            padding: 30px;
-            margin-bottom: 20px;
-        }
-
-        .features h3 {
-            font-size: 18px;
-            color: #1a1a1a;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .features ul {
-            list-style: none;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-
-        .features li {
-            display: flex;
-            align-items: center;
-            font-size: 14px;
-            color: #666;
-        }
-
-        .features li:before {
-            content: "✓";
-            color: #667eea;
-            font-weight: bold;
-            margin-right: 10px;
-            font-size: 18px;
-        }
-
-        .footer-note {
-            font-size: 13px;
-            color: #999;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
-        }
-
-        .footer-note a {
-            color: #667eea;
-            text-decoration: none;
-        }
-
-        .footer-note a:hover {
-            text-decoration: underline;
-        }
-
-        @media (max-width: 600px) {
-            .container {
-                padding: 40px 25px;
-            }
-
-            h1 {
-                font-size: 26px;
-            }
-
-            .subtitle {
-                font-size: 16px;
-            }
-
-            .countdown {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 12px;
-            }
-
-            .time-value {
-                font-size: 24px;
-            }
-
-            .time-label {
-                font-size: 11px;
-            }
-
-            .countdown-wrapper {
-                padding: 30px 20px;
-            }
-
-            .action-buttons {
-                flex-direction: column;
-            }
-
-            .btn {
-                width: 100%;
-                min-width: unset;
-            }
-
-            .features ul {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .divider {
-            width: 60px;
-            height: 4px;
-            background: linear-gradient(90deg, #667eea, #764ba2);
-            margin: 20px auto;
-            border-radius: 2px;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="logo">🚀</div>
-        
-        <h1>Webpot Is Undergoing Remodelling</h1>
-        <p class="divider"></p>
-        <p class="subtitle">Set Countdown:</p>
-
-        <div class="countdown-wrapper">
-            <div class="countdown-label">⏱️ Time Remaining</div>
-            <div class="countdown">
-                <div class="time-unit">
-                    <div class="time-value" id="days">05</div>
-                    <div class="time-label">Days</div>
-                </div>
-                <div class="time-unit">
-                    <div class="time-value" id="hours">00</div>
-                    <div class="time-label">Hours</div>
-                </div>
-                <div class="time-unit">
-                    <div class="time-value" id="minutes">00</div>
-                    <div class="time-label">Minutes</div>
-                </div>
-                <div class="time-unit">
-                    <div class="time-value" id="seconds">00</div>
-                    <div class="time-label">Seconds</div>
-                </div>
-            </div>
-            <div class="countdown-info">We're working hard to bring you something amazing! 🎨</div>
-        </div>
-
-        <div class="features">
-            <h3>What's Coming</h3>
-            <ul>
-                <li>Modern Design</li>
-                <li>Faster Performance</li>
-                <li>Enhanced Features</li>
-                <li>Better User Experience</li>
-                <li>Mobile Optimized</li>
-                <li>Advanced Tools</li>
-            </ul>
-        </div>
-
-        <div class="action-buttons">
-            <a href="./auth.html" class="btn btn-primary">Login</a>
-            <button class="btn btn-secondary" onclick="notifyMe()">Notify Me</button>
-        </div>
-
-        <div class="footer-note">
-            <p>In the meantime, you can access your <a href="./dashboard-webpot/user_dashboard/html/index.html">dashboard</a> or <a href="./auth.html">sign up</a> for early access.</p>
-        </div>
-    </div>
-
-    <script>
-        // Set the target date for 5 days from now
-        function startCountdown() {
-            const targetDate = new Date();
-            targetDate.setDate(targetDate.getDate() + 5);
-            targetDate.setHours(0, 0, 0, 0);
-
-            function updateCountdown() {
-                const now = new Date().getTime();
-                const distance = targetDate.getTime() - now;
-
-                if (distance < 0) {
-                    document.getElementById('days').textContent = '00';
-                    document.getElementById('hours').textContent = '00';
-                    document.getElementById('minutes').textContent = '00';
-                    document.getElementById('seconds').textContent = '00';
-                    return;
-                }
-
-                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-                // Format with leading zeros
-                document.getElementById('days').textContent = String(days).padStart(2, '0');
-                document.getElementById('hours').textContent = String(hours).padStart(2, '0');
-                document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
-                document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
-            }
-
-            // Update immediately and then every second
-            updateCountdown();
-            setInterval(updateCountdown, 1000);
-        }
-
-        function notifyMe() {
-            alert('Thank you! We will notify you when Webpot is ready.');
-        }
-
-        // Start countdown when page loads
-        document.addEventListener('DOMContentLoaded', startCountdown);
-    </script>
-</body>
-</html>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            color: #333;
-        }
-
-        .container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            padding: 60px 40px;
-            max-width: 700px;
-            text-align: center;
-            animation: slideUp 0.8s ease;
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(40px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .logo {
-            font-size: 48px;
-            margin-bottom: 20px;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
-
-        h1 {
-            font-size: 32px;
-            color: #1a1a1a;
-            margin-bottom: 10px;
-            font-weight: 700;
-        }
-
-        .subtitle {
-            font-size: 18px;
-            color: #666;
-            margin-bottom: 40px;
             font-weight: 500;
         }
 
-        .countdown-wrapper {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 15px;
-            padding: 40px 30px;
-            margin-bottom: 40px;
-        }
-
-        .countdown-label {
-            font-size: 16px;
-            color: rgba(255, 255, 255, 0.9);
-            margin-bottom: 20px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-        }
-
-        .countdown {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .time-unit {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
-            border-radius: 10px;
-            padding: 20px 10px;
-            border: 1px solid rgba(255, 255, 255, 0.25);
-            transition: all 0.3s ease;
-        }
-
-        .time-unit:hover {
-            background: rgba(255, 255, 255, 0.25);
-            transform: translateY(-5px);
-        }
-
-        .time-value {
-            font-size: 32px;
-            font-weight: 700;
-            color: #00d4ff;
-            line-height: 1;
-            margin-bottom: 8px;
-            font-family: 'Courier New', monospace;
-            text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
-        }
-
-        .time-label {
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.8);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: 600;
-        }
-
-        .countdown-info {
-            font-size: 13px;
-            color: rgba(255, 255, 255, 0.8);
-            margin-top: 15px;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            justify-content: center;
-            margin-bottom: 20px;
-        }
-
-        .btn {
-            padding: 14px 32px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            min-width: 180px;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
-        }
-
-        .btn-secondary {
-            background: #f5f5f5;
-            color: #667eea;
-            border: 2px solid #667eea;
-            min-width: 180px;
-        }
-
-        .btn-secondary:hover {
-            background: #667eea;
-            color: white;
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.2);
-        }
-
-        .features {
-            text-align: left;
-            background: #f9f9f9;
-            border-radius: 12px;
-            padding: 30px;
-            margin-bottom: 20px;
-        }
-
-        .features h3 {
-            font-size: 18px;
-            color: #1a1a1a;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .features ul {
-            list-style: none;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-
-        .features li {
-            display: flex;
-            align-items: center;
-            font-size: 14px;
-            color: #666;
-        }
-
-        .features li:before {
-            content: "✓";
-            color: #667eea;
-            font-weight: bold;
-            margin-right: 10px;
-            font-size: 18px;
-        }
-
-        .footer-note {
-            font-size: 13px;
-            color: #999;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
-        }
-
-        .footer-note a {
-            color: #667eea;
-            text-decoration: none;
-        }
-
-        .footer-note a:hover {
-            text-decoration: underline;
-        }
-
-        @media (max-width: 600px) {
-            .container {
-                padding: 40px 25px;
+        @media (max-width: 768px) {
+            .countdown-unit {
+                min-width: 60px;
+                padding: 10px 12px;
             }
 
-            h1 {
-                font-size: 26px;
+            .countdown-value {
+                font-size: 18px;
             }
 
-            .subtitle {
+            .countdown-label {
+                font-size: 10px;
+            }
+
+            .countdown-banner h2 {
+                font-size: 18px;
+                margin-bottom: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .countdown-unit {
+                min-width: 50px;
+                padding: 8px 10px;
+            }
+
+            .countdown-value {
                 font-size: 16px;
             }
 
-            .countdown {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 12px;
+            .countdown-label {
+                font-size: 9px;
             }
 
-            .time-value {
-                font-size: 24px;
+            .countdown-banner {
+                padding: 20px 15px;
+                margin: 15px 0;
             }
 
-            .time-label {
-                font-size: 11px;
+            .countdown-banner h2 {
+                font-size: 16px;
+                margin-bottom: 12px;
             }
-
-            .countdown-wrapper {
-                padding: 30px 20px;
-            }
-
-            .action-buttons {
-                flex-direction: column;
-            }
-
-            .btn {
-                width: 100%;
-                min-width: unset;
-            }
-
-            .features ul {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .divider {
-            width: 60px;
-            height: 4px;
-            background: linear-gradient(90deg, #667eea, #764ba2);
-            margin: 20px auto;
-            border-radius: 2px;
         }
     </style>
 </head>
-<body>
-    <div class="container">
-        <div class="logo">🚀</div>
-        
-        <h1>Webpot Is Undergoing Remodelling</h1>
-        <p class="divider"></p>
-        <p class="subtitle">Set Countdown:</p>
-
-        <div class="countdown-wrapper">
-            <div class="countdown-label">⏱️ Time Remaining</div>
-            <div class="countdown">
-                <div class="time-unit">
-                    <div class="time-value" id="days">5</div>
-                    <div class="time-label">Days</div>
-                </div>
-                <div class="time-unit">
-                    <div class="time-value" id="hours">0</div>
-                    <div class="time-label">Hours</div>
-                </div>
-                <div class="time-unit">
-                    <div class="time-value" id="minutes">0</div>
-                    <div class="time-label">Minutes</div>
-                </div>
-                <div class="time-unit">
-                    <div class="time-value" id="seconds">0</div>
-                    <div class="time-label">Seconds</div>
-                </div>
+<body class="mobile-optimized">
+    <!-- Countdown Banner Module -->
+    <div class="countdown-banner" id="countdownBanner">
+        <h2>Webpot Is Undergoing Remodelling. Set Countdown:</h2>
+        <div class="countdown-display">
+            <div class="countdown-unit">
+                <div class="countdown-value" id="countdownDays">05</div>
+                <div class="countdown-label">Days</div>
             </div>
-            <div class="countdown-info">We're working hard to bring you something amazing! 🎨</div>
+            <div class="countdown-unit">
+                <div class="countdown-value" id="countdownHours">00</div>
+                <div class="countdown-label">Hours</div>
+            </div>
+            <div class="countdown-unit">
+                <div class="countdown-value" id="countdownMinutes">00</div>
+                <div class="countdown-label">Minutes</div>
+            </div>
+            <div class="countdown-unit">
+                <div class="countdown-value" id="countdownSeconds">00</div>
+                <div class="countdown-label">Seconds</div>
+            </div>
         </div>
-
-        <div class="features">
-            <h3>What's Coming</h3>
-            <ul>
-                <li>Modern Design</li>
-                <li>Faster Performance</li>
-                <li>Enhanced Features</li>
-                <li>Better User Experience</li>
-                <li>Mobile Optimized</li>
-                <li>Advanced Tools</li>
-            </ul>
-        </div>
-
-        <div class="action-buttons">
-            <a href="./auth.html" class="btn btn-primary">Login</a>
-            <button class="btn btn-secondary" onclick="notifyMe()">Notify Me</button>
-        </div>
-
-        <div class="footer-note">
-            <p>In the meantime, you can access your <a href="./dashboard-webpot/user_dashboard/html/index.html">dashboard</a> or <a href="./auth.html">sign up</a> for early access.</p>
-        </div>
+        <div class="countdown-message">We're working hard to bring you something amazing! 🎨</div>
     </div>
 
-    <script>
-        // Set the target date for 5 days from now
-        function startCountdown() {
-            const targetDate = new Date();
-            targetDate.setDate(targetDate.getDate() + 5);
-            targetDate.setHours(0, 0, 0, 0);
-
-            function updateCountdown() {
-                const now = new Date().getTime();
-                const distance = targetDate.getTime() - now;
-
-                if (distance < 0) {
-                    document.getElementById('days').textContent = '0';
-                    document.getElementById('hours').textContent = '0';
-                    document.getElementById('minutes').textContent = '0';
-                    document.getElementById('seconds').textContent = '0';
-                    return;
-                }
-
-                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-                // Format with leading zeros
-                document.getElementById('days').textContent = String(days).padStart(2, '0');
-                document.getElementById('hours').textContent = String(hours).padStart(2, '0');
-                document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
-                document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
-            }
-
-            // Update immediately and then every second
-            updateCountdown();
-            setInterval(updateCountdown, 1000);
-        }
-
-        function notifyMe() {
-            alert('Thank you! We will notify you when Webpot is ready.');
-        }
-
-        // Start countdown when page loads
-        document.addEventListener('DOMContentLoaded', startCountdown);
-    </script>
-</body>
-</html>
+    <!-- Header -->
+    <header>
+        <nav>
+            <div class="logo">
+                <img src="logo.png" alt="Webpot Logo" class="logo-img">
+                <span>Webpot</span>
+            </div>
+            <button class="menu-toggle" id="menuToggle" onclick="toggleMenu()">☰</button>
+            <ul class="nav-menu" id="navMenu">
                 <li><a href="#home" onclick="closeMenu()">Home</a></li>
                 <li><a href="#about" onclick="closeMenu()">About Us</a></li>
                 <li><a href="#services" onclick="closeMenu()">Services</a></li>
@@ -1155,6 +551,51 @@
     
     <!-- Main Application Entry Point -->
     <script src="./js/script.js"></script>
-    
+
+    <!-- Countdown Module Script -->
+    <script>
+        /**
+         * Countdown Timer Module
+         * Calculates and displays a 5-day countdown in real-time
+         */
+        function initializeCountdown() {
+            const targetDate = new Date();
+            targetDate.setDate(targetDate.getDate() + 5);
+            targetDate.setHours(0, 0, 0, 0);
+
+            function updateCountdownDisplay() {
+                const now = new Date().getTime();
+                const distance = targetDate.getTime() - now;
+
+                if (distance < 0) {
+                    document.getElementById('countdownDays').textContent = '00';
+                    document.getElementById('countdownHours').textContent = '00';
+                    document.getElementById('countdownMinutes').textContent = '00';
+                    document.getElementById('countdownSeconds').textContent = '00';
+                    return;
+                }
+
+                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                document.getElementById('countdownDays').textContent = String(days).padStart(2, '0');
+                document.getElementById('countdownHours').textContent = String(hours).padStart(2, '0');
+                document.getElementById('countdownMinutes').textContent = String(minutes).padStart(2, '0');
+                document.getElementById('countdownSeconds').textContent = String(seconds).padStart(2, '0');
+            }
+
+            updateCountdownDisplay();
+            setInterval(updateCountdownDisplay, 1000);
+        }
+
+        // Start countdown when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeCountdown);
+        } else {
+            initializeCountdown();
+        }
+    </script>
 </body>
 </html>
