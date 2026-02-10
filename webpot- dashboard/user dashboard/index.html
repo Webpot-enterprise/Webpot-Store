@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Webpot Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="" />
+</head>
+
+<body>
+
+    <!-- GLASS NAVBAR -->
+    <nav class="dashboard-navbar">
+        <div class="nav-left">
+            <img src="webpot-logo-black.png" alt="Webpot Logo" class="logo" />
+            <span>Webpot</span>
+        </div>
+
+        <div class="nav-links">
+            <a class="active">Dashboard</a>
+            <a href="orders.html">Orders</a>
+            <a href="settings.html">Settings</a>
+            <a href="../index.html" class="back-to-webpot">
+  ← Back to Webpot
+</a>
+
+        </div>
+    </nav>
+
+    <!-- MAIN -->
+    <main class="dashboard-container">
+
+        <!-- STATS -->
+        <section class="stats-grid">
+            <div class="stat-card" data-stat="total-orders">
+                <h4>Total Orders</h4>
+                <!-- PHP: {{ total_orders }} -->
+                <p>5</p>
+            </div>
+            <div class="stat-card" data-stat="total-spends">
+                <h4>Total Spends</h4>
+                <!-- PHP: {{ total_spends }} -->
+                <p>₹24,999</p>
+            </div>
+            <div class="stat-card" data-stat="total-referrals">
+                <h4>Referrals</h4>
+                <!-- PHP: {{ total_referrals }} -->
+                <p>2</p>
+            </div>
+        </section>
+
+        <!-- PROFILE -->
+        <section class="profile-card">
+            <h3>User Profile</h3>
+            <div class="profile-grid">
+                <div data-field="user-name"><strong>Name:</strong> <!-- PHP: {{ user_name }} --> Suprince Kakadiya </div>
+                <div data-field="user-email"><strong>Email:</strong> <!-- PHP: {{ user_email }} --> Kakadiyasuprince@gmail.com</div>
+                <div data-field="user-phone"><strong>Phone:</strong> <!-- PHP: {{ user_phone }} --> +91 9408191506</div>
+                <div data-field="referral-code">
+                    <strong>Referral Code:</strong>
+                    <!-- PHP: {{ referral_code }} -->
+                    <span class="ref-code">WEBPOT123</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ORDERS -->
+        <section class="orders-card">
+            <h3>Your Orders</h3>
+
+            <table class="orders-table">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Service</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr data-order-id="WP001" data-order-status="pending">
+                        <td>#WP001</td>
+                        <td>Starter Website</td>
+                        <td>
+                            <span class="status-badge pending">Pending</span>
+                        </td>
+
+                    </tr>
+
+                    <tr data-order-id="WP002" data-order-status="processing">
+                        <td>#WP002</td>
+                        <td>Business Website</td>
+                        <td><span class="status-badge processing">Processing</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+        <!-- INVOICE & PAYMENTS -->
+        <section class="dashboard-card">
+            <h3>Invoices & Payments 💳</h3>
+
+            <table class="invoice-table">
+                <thead>
+                    <tr>
+                        <th>Invoice ID</th>
+                        <th>Service</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Invoice</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr data-invoice-id="INV-001" data-invoice-status="paid">
+                        <td>#INV-001</td>
+                        <td>Starter Website</td>
+                        <td>₹4,999</td>
+                        <td><span class="pay-badge paid">Paid</span></td>
+                        <td>
+                            <a href="invoices/inv-001.pdf" class="btn-link">Download</a>
+                        </td>
+                    </tr>
+
+                    <tr data-invoice-id="INV-002" data-invoice-status="due">
+                        <td>#INV-002</td>
+                        <td>Business Website</td>
+                        <td>₹9,999</td>
+                        <td><span class="pay-badge due">Due</span></td>
+                        <td>
+                            <a href="#" class="btn-link disabled">Pending</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+        <!-- ACCOUNT SECURITY -->
+        
+    </main>
+    <!-- FOOTER (SAME AS MAIN PAGE) -->
+    <footer class="footer-dark">
+        <div class="footer-dark-container">
+
+            <!-- BRAND -->
+            <div class="footer-brand">
+                <div class="footer-logo">
+                    <img src="webpot-logo-black.png" alt="Webpot Logo">
+                    <span>Webpot</span>
+                </div>
+
+                <p>
+                    Advanced web & digital solutions crafted to help
+                    businesses grow, engage, and scale online.
+                </p>
+
+                <div class="footer-socials">
+                    <a href="https://www.instagram.com/" target="_blank" aria-label="Instagram">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                    <a href="https://wa.me/919408191506" target="_blank" aria-label="WhatsApp">
+                        <i class="fab fa-whatsapp"></i>
+                    </a>
+                    <a href="https://github.com/" target="_blank" aria-label="GitHub">
+                        <i class="fab fa-github"></i>
+                    </a>
+                    <a href="https://www.linkedin.com/" target="_blank" aria-label="LinkedIn">
+                        <i class="fab fa-linkedin-in"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- QUICK LINKS -->
+            <div class="footer-links">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="../index.html">Home</a></li>
+                    <li><a href="../index.html#services">Services</a></li>
+                    <li><a href="../index.html#solutions">Solutions</a></li>
+                    <li><a href="../index.html#contact">Contact</a></li>
+                </ul>
+            </div>
+
+            <!-- LEGAL -->
+            <div class="footer-links">
+                <h4>Legal</h4>
+                <ul>
+                    <li><a href="privacy.html">Privacy Policy</a></li>
+                    <li><a href="terms.html">Terms of Service</a></li>
+                </ul>
+            </div>
+
+            <!-- CONTACT -->
+            <div class="footer-contact">
+                <h4>Contact</h4>
+                <p>
+                    📞 <a href="tel:+919408191506">+91 9408191506</a>
+                </p>
+                <p>
+                    📧 <a href="mailto:engagewebpot@gmail.com"> engagewebpot@gmail.com</a>
+                </p>
+                <p>📍 Vapi, Gujarat, India</p>
+            </div>
+
+        </div>
+
+        <div class="footer-bottom-dark">
+            <p>© 2026 Webpot. All rights reserved.</p>
+        </div>
+    </footer>
+
+
+    <script src="script.js"></script>
+</body>
+
+</html>

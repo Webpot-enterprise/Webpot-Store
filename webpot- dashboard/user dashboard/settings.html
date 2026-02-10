@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Settings | Webpot</title>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+    <!-- Dashboard / Settings Theme -->
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="dashboard-navbar">
+        <div class="nav-left">
+            <img src="webpot-logo-black.png" alt="Webpot Logo" class="logo" />
+            <span>Webpot</span>
+        </div>
+
+        <div class="nav-links">
+            <a href="index.html">Dashboard</a>
+            <a href="orders.html">Orders</a>
+            <a class="active">Settings</a>
+            <a href="../mainpage.html" class="back-to-webpot">← Back to Webpot</a>
+        </div>
+    </nav>
+
+    <!-- MAIN -->
+    <main class="dashboard-container">
+
+        <!-- PAGE HEADER -->
+
+        <section class="dashboard-card">
+            <h2>Account Settings ⚙️</h2>
+            <p style="opacity:0.7;margin-top:8px;">
+                Manage your account information and security preferences
+            </p>
+        </section>
+        <!-- SETTINGS SLIDER -->
+        <div class="settings-slider">
+            <button class="slider-btn active" data-slide="account">
+                Account Info
+            </button>
+            <button class="slider-btn" data-slide="legal">
+                Legal Services
+            </button>
+        </div>
+        <!-- ACCOUNT INFO SLIDE -->
+        <div class="settings-slide active" id="account">
+
+            <!-- PROFILE INFO -->
+            <section class="dashboard-card">
+                <h3>Profile Information 👤</h3>
+
+                <form method="POST" action="update_profile.php" class="profile-form">
+                    <div class="profile-grid">
+                        <div>
+                            <label>Full Name</label>
+                            <input type="text" name="fullname" placeholder="Your full name" />
+                        </div>
+
+                        <div>
+                            <label>Email Address</label>
+                            <input type="email" name="email" placeholder="your@email.com" />
+                        </div>
+
+                        <div>
+                            <label>Phone Number</label>
+                            <input type="tel" name="phone" placeholder="+91 XXXXX XXXXX" />
+                        </div>
+
+                        <div>
+                            <label>Referral Code</label>
+                            <div class="ref-code">WEBPOT123</div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-primary" style="margin-top:20px;">
+                        Save Changes
+                    </button>
+                </form>
+            </section>
+
+            <section class="dashboard-card">
+                <h3>Account Security 🔐</h3>
+
+                <!-- CHANGE PASSWORD -->
+                <form method="POST" action="change_password.php" class="security-form">
+                    <div class="security-block">
+                        <h4>Change Password</h4>
+                        <div class="security-grid">
+                            <input type="password" name="current_password" placeholder="Current Password" required>
+                            <input type="password" name="new_password" placeholder="New Password" required>
+                            <input type="password" name="confirm_password" placeholder="Confirm New Password" required>
+                        </div>
+                        <button type="submit" class="btn-primary">Update Password</button>
+                    </div>
+                </form>
+
+                <!-- ACTIVE SESSIONS -->
+                <div class="security-block">
+                    <h4>Active Sessions</h4>
+
+                    <div class="session-item">
+                        <span>Chrome • Windows • India</span>
+                        <span class="session-active">Active</span>
+                    </div>
+
+                    <div class="session-item">
+                        <span>Mobile • Android • India</span>
+                        <span class="session-old">2 days ago</span>
+                    </div>
+
+                    <form method="POST" action="logout_all.php" style="display:inline;">
+                        <button type="submit" class="btn-danger">Logout All Devices</button>
+                    </form>
+                </div>
+            </section>
+        </div>
+        <!-- LEGAL SLIDE -->
+        <div class="settings-slide" id="legal">
+            <section class="dashboard-card">
+                <h3>Legal Services 📜</h3>
+
+                <p style="opacity:0.7;margin-bottom:24px;">
+                    Review our policies and legal information.
+                </p>
+
+                <div class="legal-actions">
+                    <a href="../../terms and conditions.html#terms" class="btn-primary">
+                        View Terms of Service
+                    </a>
+
+                    <a href="../../privacy policy.html#privacy" class="btn-primary">
+                        View Privacy Policy
+                    </a>
+                </div>
+            </section>
+        </div>
+    </main>
+    <!-- FOOTER -->
+    <footer class="footer-dark">
+        <div class="footer-dark-container">
+
+            <!-- BRAND -->
+            <div class="footer-brand">
+                <div class="footer-logo">
+                    <img src="webpot-logo-black.png" alt="Webpot Logo">
+                    <span>Webpot</span>
+                </div>
+
+                <p>
+                    Advanced web & digital solutions crafted to help
+                    businesses grow, engage, and scale online.
+                </p>
+
+                <div class="footer-socials">
+                    <a href="https://www.instagram.com/" target="_blank" aria-label="Instagram">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                    <a href="https://wa.me/919408191506" target="_blank" aria-label="WhatsApp">
+                        <i class="fab fa-whatsapp"></i>
+                    </a>
+                    <a href="https://github.com/" target="_blank" aria-label="GitHub">
+                        <i class="fab fa-github"></i>
+                    </a>
+                    <a href="https://www.linkedin.com/" target="_blank" aria-label="LinkedIn">
+                        <i class="fab fa-linkedin-in"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- QUICK LINKS -->
+            <div class="footer-links">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="../index.html">Home</a></li>
+                    <li><a href="../index.html#services">Services</a></li>
+                    <li><a href="../index.html#solutions">Solutions</a></li>
+                    <li><a href="../index.html#contact">Contact</a></li>
+
+                </ul>
+            </div>
+
+            <!-- LEGAL -->
+            <div class="footer-links">
+                <h4>Legal</h4>
+                <ul>
+                    <li><a href="privacy.html">Privacy Policy</a></li>
+                    <li><a href="terms.html">Terms of Service</a></li>
+                </ul>
+            </div>
+
+            <!-- CONTACT -->
+            <div class="footer-contact">
+                <h4>Contact</h4>
+                <p>
+                    📞 <a href="tel:+919408191506">+91 9408191506</a>
+                </p>
+                <p>
+                    📧 <a href="mailto:engagewebpot@gmail.com"> engagewebpot@gmail.com</a>
+                </p>
+                <p>📍 Vapi, Gujarat, India</p>
+            </div>
+
+        </div>
+
+        <div class="footer-bottom-dark">
+            <p>© 2026 Webpot. All rights reserved.</p>
+        </div>
+    </footer>
+    <script>
+  const sliderButtons = document.querySelectorAll(".slider-btn");
+  const slides = document.querySelectorAll(".settings-slide");
+
+  sliderButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      sliderButtons.forEach(b => b.classList.remove("active"));
+      slides.forEach(s => s.classList.remove("active"));
+
+      btn.classList.add("active");
+      document.getElementById(btn.dataset.slide).classList.add("active");
+    });
+  });
+</script>
+
+
+</body>
+
+</html>

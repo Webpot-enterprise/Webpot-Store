@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Order a Website | Webpot</title>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Global Styles -->
+  <link rel="stylesheet" href="orders.css">
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+</head>
+
+<body>
+
+  <!-- ================= NAVBAR ================= -->
+  <header class="navbar">
+    <div class="nav-container">
+      <div class="logo">
+        <img src="webpot-logo-black.png" alt="Webpot Logo">
+        <span>Webpot</span>
+      </div>
+      <nav>
+        <a href="index.html#home">Home</a>
+        <a href="index.html#about">About</a>
+        <a href="index.html#services">Services</a>
+        <a href="orders.html">Solutions</a>
+        <a href="index.html#contact">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ================= HERO / GUIDANCE ================= -->
+  <section class="order-hero">
+    <h1>Choose the Right Website for Your Business</h1>
+    <p class="hero-sub">
+      Not sure which plan to choose? Don’t worry.  
+      <strong>Starter</strong> is perfect for getting online,  
+      <strong>Basic</strong> is best for growing businesses, and  
+      <strong>Premium</strong> is built for brands that want scale & performance.
+    </p>
+    <a href="#plans" class="btn-primary">View Plans</a>
+  </section>
+
+  <!-- ================= PLANS ================= -->
+  <section id="plans" class="plans-section">
+
+    <!-- STARTER -->
+    <div class="plan-card">
+      <h2>Starter Website</h2>
+      <p class="plan-desc">
+        Ideal for individuals, startups, and small businesses who want a clean
+        and professional online presence.
+      </p>
+
+      <ul class="plan-list">
+        <li>✔ Single-page website</li>
+        <li>✔ Mobile responsive design</li>
+        <li>✔ Basic SEO setup</li>
+        <li>✔ Contact form</li>
+        <li>✔ Fast loading & clean UI</li>
+      </ul>
+
+      <p class="plan-price">₹20,000 <span>/ yearly</span></p>
+
+      <div class="plan-actions">
+        <a href="starter.html" class="btn-outline">Get More Information</a>
+        <a href="#order-form" class="btn-primary" onclick="selectPlan('Starter')">
+          Get Started
+        </a>
+      </div>
+    </div>
+
+    <!-- BASIC -->
+    <div class="plan-card featured">
+      <span class="plan-badge">Most Popular</span>
+
+      <h2>Basic Business Website</h2>
+      <p class="plan-desc">
+        Best for businesses that need credibility, multiple pages,
+        and lead generation.
+      </p>
+
+      <ul class="plan-list">
+        <li>✔ Up to 5 pages</li>
+        <li>✔ Modern UI / UX design</li>
+        <li>✔ Advanced SEO</li>
+        <li>✔ Inquiry & lead forms</li>
+        <li>✔ Analytics integration</li>
+      </ul>
+
+      <p class="plan-price">₹28,000 <span>/ yearly</span></p>
+
+      <div class="plan-actions">
+        <a href="basic.html" class="btn-outline1">Get More Information</a>
+        <a href="#order-form" class="btn-primary" onclick="selectPlan('Basic')">
+          Get Started
+        </a>
+      </div>
+    </div>
+
+    <!-- PREMIUM -->
+    <div class="plan-card">
+      <span class="plan-badge premium">Best Value</span>
+
+      <h2>Premium Web Solution</h2>
+      <p class="plan-desc">
+        Designed for brands that want performance, scalability,
+        and a premium digital experience.
+      </p>
+
+      <ul class="plan-list">
+        <li>✔ Unlimited pages</li>
+        <li>✔ Custom UI / UX & animations</li>
+        <li>✔ SEO + analytics + schema</li>
+        <li>✔ Blog / e-commerce ready</li>
+        <li>✔ Priority support</li>
+      </ul>
+
+      <p class="plan-price">₹35,000 <span>/ yearly</span></p>
+
+      <div class="plan-actions">
+        <a href="premium.html" class="btn-outline">Get More Information</a>
+        <a href="#order-form" class="btn-primary" onclick="selectPlan('Premium')">
+          Get Started
+        </a>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ================= COMPARISON TABLE ================= -->
+  <section class="comparison-section">
+    <h2>Compare Plans</h2>
+
+    <div class="comparison-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Features</th>
+            <th>Starter</th>
+            <th>Basic</th>
+            <th>Premium</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Pages</td>
+            <td>1</td>
+            <td>Up to 5</td>
+            <td>Unlimited</td>
+          </tr>
+          <tr>
+            <td>SEO</td>
+            <td>Basic</td>
+            <td>Advanced</td>
+            <td>Advanced + Schema</td>
+          </tr>
+          <tr>
+            <td>Animations</td>
+            <td>—</td>
+            <td>Limited</td>
+            <td>Advanced</td>
+          </tr>
+          <tr>
+            <td>Support</td>
+            <td>Email</td>
+            <td>Priority</td>
+            <td>Dedicated</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ================= ORDER FORM ================= -->
+  <section id="order-form" class="order-form-section">
+    <div class="order-form-container">
+      <h2>Quick Order Form</h2>
+      <p class="section-subtitle">
+        Tell us about your requirements and we’ll get back to you shortly.
+      </p>
+
+      <form class="order-form">
+        <select id="planSelect" required>
+          <option value="">Select Your Plan</option>
+          <option value="Starter">Starter</option>
+          <option value="Basic">Basic</option>
+          <option value="Premium">Premium</option>
+        </select>
+
+        <input type="text" placeholder="Your Name" required>
+        <input type="tel" placeholder="Phone Number" required>
+        <input type="email" placeholder="Email Address" required>
+
+        <textarea rows="4" placeholder="Describe how you want your website, features, pages, references, etc."></textarea>
+
+        <button type="submit" class="btn-primary">Submit Order</button>
+      </form>
+    </div>
+  </section>
+
+  
+  <!-- ================= FOOTER ================= -->
+  <footer class="footer-dark">
+    <div class="footer-dark-container">
+
+      <!-- BRAND -->
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <img src="webpot-logo-white.png" alt="Webpot Logo">
+          <span>Webpot</span>
+        </div>
+
+        <p>
+          Advanced web & digital solutions crafted to help
+          businesses grow, engage, and scale online.
+        </p>
+
+        <div class="footer-socials">
+          <a href="https://www.instagram.com/offical.webpot/" target="_blank" aria-label="Instagram">
+            <i class="fab fa-instagram"></i>
+          </a>
+          <a href="https://wa.me/919408191506" target="_blank" aria-label="WhatsApp">
+            <i class="fab fa-whatsapp"></i>
+          </a>
+          <a href="https://www.linkedin.com/" target="_blank" aria-label="LinkedIn">
+            <i class="fab fa-linkedin-in"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- QUICK LINKS -->
+      <div class="footer-links">
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="index.html#home">› Home</a></li>
+          <li><a href="index.html#about">› About</a></li>
+          <li><a href="index.html#services">› Services</a></li>
+          <li><a href="index.html#solutions">› Solutions</a></li>
+          <li><a href="index.html#contact">› Contact</a></li>
+        </ul>
+      </div>
+
+      <!-- SERVICES -->
+      <div class="footer-links">
+        <h4>Our Services</h4>
+        <ul>
+          <li>› Web Development</li>
+          <li>› Discord Server Setup</li>
+          <li>› UI / UX Design</li>
+          <li>› SEO Optimization</li>
+        </ul>
+      </div>
+
+      <!-- CONTACT -->
+      <div class="footer-contact">
+        <h4>Contact Us</h4>
+
+        <p>
+          📍
+          <a href="https://maps.app.goo.gl/1Te5pJnbPiemVQZW6" target="_blank" rel="noopener">
+            Vapi, Gujarat, India
+          </a>
+        </p>
+
+        <p>📞 <a href="tel:+919408191506">+91 9408191506</a></p>
+        <p>📧 <a href="mailto:info@webpot.co.in">info@webpot.co.in</a></p>
+      </div>
+
+    </div>
+
+    <div class="footer-bottom-dark">
+      <p>© 2026 Webpot. All rights reserved.</p>
+      <div class="footer-bottom-links">
+        <a href="privacy policy.html">Privacy Policy</a>
+        <a href="terms and conditions.html">Terms & Conditions</a>
+      </div>
+    </div>
+  </footer>
+  <!-- ================= SCRIPT ================= -->
+  <script>
+    function selectPlan(plan) {
+      document.getElementById("planSelect").value = plan;
+    }
+  </script>
+
+</body>
+</html>

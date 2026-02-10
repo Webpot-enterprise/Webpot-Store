@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Orders | Webpot</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-left">
+            <img src="webpot-logo-black.png" alt="Webpot Logo" class="logo">
+            <span>Webpot</span>
+        </div>
+
+        <div class="nav-right">
+            <a href="index.html" class="nav-link">Dashboard</a>
+            <a class="nav-link active">Orders</a>
+            <a href="settings.html" class="nav-link">Settings</a>
+            <a href="../index.html" class="back-link">← Back to Webpot</a>
+        </div>
+    </nav>
+    <!-- MAIN -->
+    <main class="main-content">
+
+        <!-- HEADER -->
+        <!-- ORDERS HEADER -->
+        <section class="orders-header-glass">
+            <div class="orders-header-top">
+                <h1>Orders Management</h1>
+
+                <a href="index.html" class="back-dashboard-btn">
+                    ← Back to Dashboard
+                </a>
+            </div>
+
+            <div class="orders-header-controls">
+                <!-- FILTER -->
+                <div class="control-group">
+                    <label for="orderFilter">Filter by Status:</label>
+                    <select id="orderFilter" class="order-filter">
+                        <option value="all">All Status</option>
+                        <option value="pending">Pending</option>
+                        <option value="processing">Processing</option>
+                        <option value="delivered">Delivered</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                </div>
+
+                <!-- SEARCH -->
+                <div class="control-group">
+                    <label for="orderSearch">Search:</label>
+                    <input type="text" id="orderSearch" class="order-search"
+                        placeholder="Search by order ID or service..." />
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ORDERS TABLE -->
+        <section class="table-wrapper">
+            <table class="orders-table">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Service</th>
+                        <th>Order Date</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Delivery</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr data-order-id="WP001" data-order-status="pending" data-order-amount="12000">
+                        <td>#WP001</td>
+                        <td>Starter Website</td>
+                        <td>12 Aug 2026</td>
+                        <td>₹12,000</td>
+                        <td>
+                            <span class="status-badge pending">Pending</span>
+                        </td>
+                        <td>7 Days</td>
+                    </tr>
+
+                    <tr data-order-id="WP002" data-order-status="processing" data-order-amount="18000">
+                        <td>#WP002</td>
+                        <td>Business Website</td>
+                        <td>18 Aug 2026</td>
+                        <td>₹18,000</td>
+                        <td>
+                            <span class="status-badge processing">Processing</span>
+                        </td>
+                        <td>10 Days</td>
+                    </tr>
+
+                    <tr data-order-id="WP003" data-order-status="delivered" data-order-amount="25000">
+                        <td>#WP003</td>
+                        <td>Premium Website</td>
+                        <td>01 Sep 2026</td>
+                        <td>₹25,000</td>
+                        <td>
+                            <span class="status-badge delivered">Delivered</span>
+                        </td>
+                        <td>Completed</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+    </main>
+    <!-- ORDER SUMMARY STATS -->
+    <section class="orders-summary">
+        <div class="summary-box" data-summary="total-orders">
+            <span>Total Orders</span>
+            <strong id="sumTotal">0</strong>
+        </div>
+
+        <div class="summary-box pending" data-summary="pending-orders">
+            <span>Pending</span>
+            <strong id="sumPending">0</strong>
+        </div>
+
+        <div class="summary-box processing" data-summary="processing-orders">
+            <span>Processing</span>
+            <strong id="sumProcessing">0</strong>
+        </div>
+
+        <div class="summary-box delivered" data-summary="delivered-orders">
+            <span>Delivered</span>
+            <strong id="sumDelivered">0</strong>
+        </div>
+
+        <div class="summary-box revenue" data-summary="total-revenue">
+            <span>Total Invested</span>
+            <strong id="sumRevenue">₹0</strong>
+        </div>
+    </section>
+
+
+    <!-- FOOTER (SAME AS MAIN SITE) -->
+    <footer class="footer-dark">
+        <div class="footer-dark-container">
+
+            <!-- BRAND -->
+            <div class="footer-brand">
+                <div class="footer-logo">
+                    <img src="webpot-logo-black.png" alt="Webpot Logo">
+                    <span>Webpot</span>
+                </div>
+
+                <p>
+                    Advanced web & digital solutions crafted to help
+                    businesses grow, engage, and scale online.
+                </p>
+
+                <div class="footer-socials">
+                    <a href="https://www.instagram.com/" target="_blank" aria-label="Instagram">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                    <a href="https://wa.me/919408191506" target="_blank" aria-label="WhatsApp">
+                        <i class="fab fa-whatsapp"></i>
+                    </a>
+                    <a href="https://github.com/" target="_blank" aria-label="GitHub">
+                        <i class="fab fa-github"></i>
+                    </a>
+                    <a href="https://www.linkedin.com/" target="_blank" aria-label="LinkedIn">
+                        <i class="fab fa-linkedin-in"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- QUICK LINKS -->
+            <div class="footer-links">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="../index.html">Home</a></li>
+                    <li><a href="../index.html#services">Services</a></li>
+                    <li><a href="../index.html#solutions">Solutions</a></li>
+                    <li><a href="../index.html#contact">Contact</a></li>
+                </ul>
+            </div>
+
+            <!-- LEGAL -->
+            <div class="footer-links">
+                <h4>Legal</h4>
+                <ul>
+                    <li><a href="privacy.html">Privacy Policy</a></li>
+                    <li><a href="terms.html">Terms of Service</a></li>
+                </ul>
+            </div>
+
+            <!-- CONTACT -->
+            <div class="footer-contact">
+                <h4>Contact</h4>
+                <p>
+                    📞 <a href="tel:+919408191506">+91 9408191506</a>
+                </p>
+                <p>
+                    📧 <a href="mailto:engagewebpot@gmail.com"> engagewebpot@gmail.com</a>
+                </p>
+                <p>📍 Vapi, Gujarat, India</p>
+            </div>
+
+        </div>
+
+        <div class="footer-bottom-dark">
+            <p>© 2026 Webpot. All rights reserved.</p>
+        </div>
+    </footer>
+
+</body>
+
+</html>

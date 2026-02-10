@@ -1,0 +1,158 @@
+/* =====================================================
+   WEBPOT – LEGAL PAGES STYLES
+   Used for:
+   - Privacy Policy
+   - Terms & Conditions
+   ===================================================== */
+
+
+/* =====================================================
+   PAGE BASE
+   ===================================================== */
+.legal-page {
+  padding-top: 90px; /* offset for fixed navbar */
+  background: #f8fafc;
+}
+
+
+/* =====================================================
+   LEGAL LAYOUT
+   ===================================================== */
+.legal-wrapper {
+  max-width: 1100px;
+  margin: 0 auto 90px;
+  padding: 0 20px;
+
+  display: flex;
+  justify-content: center;
+}
+
+.legal-content {
+  width: 100%;
+  max-width: 900px;
+
+  background: #ffffff;
+  border-radius: 28px;
+  padding: 48px 46px;
+
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 25px 50px rgba(15, 23, 42, 0.08);
+}
+
+
+/* =====================================================
+   LEGAL HEADINGS
+   ===================================================== */
+.legal-content h2 {
+  font-size: 2.2rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.legal-content .updated {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin-bottom: 32px;
+}
+
+.legal-content h3 {
+  font-size: 1.2rem;
+  margin-top: 34px;
+  margin-bottom: 10px;
+  color: #020617;
+}
+
+
+/* =====================================================
+   LEGAL TEXT
+   ===================================================== */
+.legal-content p {
+  font-size: 0.96rem;
+  line-height: 1.8;
+  color: #334155;
+  margin-bottom: 14px;
+}
+
+.legal-content ul {
+  margin: 14px 0 22px 22px;
+}
+
+.legal-content li {
+  margin-bottom: 10px;
+  line-height: 1.7;
+  color: #334155;
+}
+
+
+/* =====================================================
+   HIGHLIGHTED LISTS (CONTACT / IMPORTANT)
+   ===================================================== */
+.legal-content ul li strong {
+  color: #020617;
+}
+
+
+/* =====================================================
+   LINKS
+   ===================================================== */
+.legal-content a {
+  color: #1e3a8a;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.legal-content a:hover {
+  text-decoration: underline;
+}
+
+
+/* =====================================================
+   SEPARATORS (OPTIONAL)
+   ===================================================== */
+.legal-divider {
+  margin: 40px 0;
+  height: 1px;
+  background: linear-gradient(to right, transparent, #e2e8f0, transparent);
+}
+
+
+/* =====================================================
+   RESPONSIVE – TABLETS
+   ===================================================== */
+@media (max-width: 900px) {
+  .legal-content {
+    padding: 38px 34px;
+  }
+
+  .legal-content h2 {
+    font-size: 1.9rem;
+  }
+}
+
+
+/* =====================================================
+   RESPONSIVE – MOBILE
+   ===================================================== */
+@media (max-width: 520px) {
+  .legal-wrapper {
+    margin-bottom: 60px;
+  }
+
+  .legal-content {
+    padding: 28px 22px;
+    border-radius: 22px;
+  }
+
+  .legal-content h2 {
+    font-size: 1.6rem;
+  }
+
+  .legal-content h3 {
+    font-size: 1.05rem;
+  }
+
+  .legal-content p,
+  .legal-content li {
+    font-size: 0.9rem;
+  }
+}
